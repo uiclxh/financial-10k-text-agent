@@ -1,0 +1,87 @@
+run:
+  run_id: "tflab_10k_mvp_v0_001"
+  run_type: "formal_run"
+  random_seed: 42
+  output_dir: "runs/text_factor_lab/tflab_10k_mvp_v0_001"
+
+universe:
+  name: "us_large_cap_fixed"
+  selection_date: "2010-01-01"
+  tickers_file: "configs/universe/us_large_cap_2010.csv"
+  survivorship_bias_control: true
+  allow_delisted_firms: true
+  historical_ticker_mapping: true
+
+sample:
+  start_date: "2010-01-01"
+  end_date: "2024-12-31"
+  timezone: "America/New_York"
+
+text_source:
+  document_type: "10-K"
+  source: "SEC_EDGAR"
+  sections:
+    - "Risk Factors"
+    - "MD&A"
+    - "Business"
+    - "Legal Proceedings"
+  require_available_time: true
+  require_license_note: true
+
+labels:
+  targets:
+    - "realized_volatility_1_20"
+    - "CAR_1_20"
+  return_type: "log"
+  portfolio_return_type: "simple"
+  price_field: "adj_close"
+  market_benchmark: "SPY"
+  annualization_days: 252
+
+split:
+  method: "rolling_year"
+  train_years_min: 5
+  validation_years: 1
+  test_years: 1
+  embargo_days: 20
+
+features:
+  methods:
+    - "dictionary_tone"
+    - "tfidf"
+  dictionary_tone:
+    dictionaries:
+      - "loughran_mcdonald"
+      - "risk_uncertainty"
+  tfidf:
+    max_features: 50000
+    ngram_range: [1, 2]
+    min_df: 5
+    max_df: 0.95
+    fit_scope: "train_window_only"
+
+models:
+  enabled:
+    - "historical_mean"
+    - "industry_mean"
+    - "ridge"
+    - "xgboost"
+  tuning:
+    selection_metric: "validation_rank_ic"
+    save_tuning_log: true
+
+backtest:
+  rebalance_frequency: "event_based"
+  portfolio_method: "top_bottom_quintile"
+  weighting: "equal_weight"
+  holding_window_days: 20
+  transaction_cost_bps_one_way: 10
+  sector_neutral: true
+  newey_west_lag: 19
+
+audit:
+  coverage_threshold: 0.8
+  require_license_note: true
+  require_available_time: true
+  reject_on_lookahead: true
+  reject_on_train_test_leakage: true
