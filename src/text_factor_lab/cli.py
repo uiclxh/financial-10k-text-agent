@@ -38,6 +38,29 @@ def build_parser() -> argparse.ArgumentParser:
     parse_parser.add_argument("--document", required=True, help="Path to raw SEC filing HTML/text.")
     parse_parser.add_argument("--output-dir", required=True, help="Directory for parsed artifacts.")
 
+    labels_parser = subparsers.add_parser(
+        "build-labels",
+        help="Build event-study labels from a document manifest and price CSV.",
+    )
+    labels_parser.add_argument("--document-manifest", required=True, help="Path to JSONL manifest.")
+    labels_parser.add_argument("--prices", required=True, help="Path to price CSV.")
+    labels_parser.add_argument("--labels-output", required=True, help="Output JSONL labels path.")
+    labels_parser.add_argument(
+        "--failures-output",
+        required=True,
+        help="Output JSONL label failures path.",
+    )
+    labels_parser.add_argument(
+        "--target",
+        action="append",
+        required=True,
+        help="Target name, repeatable. Example: CAR_1_20",
+    )
+    labels_parser.add_argument("--benchmark", default="SPY", help="Market benchmark ticker.")
+    labels_parser.add_argument("--return-type", choices=["log", "simple"], default="log")
+    labels_parser.add_argument("--price-field", default="adj_close")
+    labels_parser.add_argument("--annualization-days", type=int, default=252)
+
     return parser
 
 
@@ -74,6 +97,37 @@ def main(argv: list[str] | None = None) -> int:
             "Parsed SEC 10-K sections. "
             f"document_id={manifest_record.document_id} parsed={parsed_count} "
             f"failed_or_missing={failed_count} output_dir={args.output_dir}"
+        )
+        return 0
+
+    if args.command == "build-labels":
+        from text_factor_lab.data import load_price_panel_csv
+        from text_factor_lab.labels import (
+            build_labels_for_documents,
+            read_document_manifest_jsonl,
+            write_label_artifacts,
+        )
+
+        documents = read_document_manifest_jsonl(args.document_manifest)
+        price_panel = load_price_panel_csv(args.prices, price_field=args.price_field)
+        result = build_labels_for_documents(
+            documents=documents,
+            price_panel=price_panel,
+            target_names=args.target,
+            benchmark_ticker=args.benchmark,
+            return_type=args.return_type,
+            adjustment_method=args.price_field,
+            annualization_days=args.annualization_days,
+        )
+        write_label_artifacts(
+            result,
+            labels_path=args.labels_output,
+            failures_path=args.failures_output,
+        )
+        print(
+            "Built labels. "
+            f"documents={len(documents)} labels={len(result.labels)} "
+            f"failures={len(result.failures)} labels_output={args.labels_output}"
         )
         return 0
 
