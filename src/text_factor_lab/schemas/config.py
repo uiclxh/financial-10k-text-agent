@@ -9,7 +9,6 @@ from pydantic import Field, field_validator, model_validator
 
 from text_factor_lab.schemas.base import StrictBaseModel
 
-
 RunType = Literal["exploratory_run", "formal_run"]
 SplitMethod = Literal["rolling_year"]
 DocumentType = Literal["10-K", "10-Q", "earnings_call"]
@@ -53,6 +52,7 @@ class TextSourceConfig(StrictBaseModel):
     sections: list[str] = Field(min_length=1)
     require_available_time: bool
     require_license_note: bool
+    sec_user_agent: str | None = None
 
 
 class LabelsConfig(StrictBaseModel):
@@ -173,6 +173,8 @@ class ExperimentConfig(StrictBaseModel):
                 raise ValueError("formal_run requires audit.require_available_time=true")
             if not self.audit.require_license_note:
                 raise ValueError("formal_run requires audit.require_license_note=true")
+            if self.text_source.source == "SEC_EDGAR" and not self.text_source.sec_user_agent:
+                raise ValueError("formal_run with SEC_EDGAR requires text_source.sec_user_agent")
         return self
 
 
