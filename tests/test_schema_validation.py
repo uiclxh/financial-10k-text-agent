@@ -9,6 +9,7 @@ from text_factor_lab.schemas import (
     DocumentManifestRecord,
     FeatureRecord,
     LabelRecord,
+    ParsedSectionRecord,
     PredictionRecord,
     RunStatusRecord,
 )
@@ -109,4 +110,29 @@ def test_run_status_coverage_bounds() -> None:
             failure_reason=None,
             audit_status="not_run",
             coverage=1.5,
+        )
+
+
+def test_parsed_section_requires_failure_reason_when_missing() -> None:
+    with pytest.raises(ValidationError, match="failure_reason"):
+        ParsedSectionRecord(
+            section_id="doc-1:item_3",
+            document_id="doc-1",
+            entity_id="CIK0000320193",
+            ticker="AAPL",
+            cik="0000320193",
+            document_type="10-K",
+            fiscal_year=2020,
+            section_key="item_3",
+            section_name="Legal Proceedings",
+            parser_status="missing",
+            char_start=None,
+            char_end=None,
+            text_length=0,
+            text_hash_sha256=None,
+            source_hash_sha256="a" * 64,
+            artifact_path=None,
+            parser_version="parser-v0",
+            failure_reason=None,
+            created_at_utc=utc(2020, 1, 2),
         )
