@@ -8,6 +8,7 @@ from text_factor_lab.schemas.model_manifest import ModelManifestRecord
 from text_factor_lab.schemas.parsed_sections import ParsedSectionRecord
 from text_factor_lab.schemas.predictions import PredictionRecord
 from text_factor_lab.schemas.run_status import RunStatusRecord
+from text_factor_lab.schemas.splits import SplitAssignmentRecord, SplitLeakageRecord
 from text_factor_lab.schemas.universe import UniverseQualityReport, UniverseRecord
 
 __all__ = [
@@ -19,6 +20,8 @@ __all__ = [
     "ParsedSectionRecord",
     "PredictionRecord",
     "RunStatusRecord",
+    "SplitAssignmentRecord",
+    "SplitLeakageRecord",
     "UniverseQualityReport",
     "UniverseRecord",
     "load_experiment_config",
