@@ -1,0 +1,68 @@
+{
+  "cik": "0000320193",
+  "entityType": "operating",
+  "sic": "3571",
+  "sicDescription": "Electronic Computers",
+  "name": "Apple Inc.",
+  "tickers": ["AAPL"],
+  "filings": {
+    "recent": {
+      "accessionNumber": [
+        "0000320193-23-000106",
+        "0000320193-23-000077"
+      ],
+      "filingDate": [
+        "2023-11-03",
+        "2023-08-04"
+      ],
+      "reportDate": [
+        "2023-09-30",
+        "2023-07-01"
+      ],
+      "acceptanceDateTime": [
+        "20231102183012",
+        "20230803183122"
+      ],
+      "act": [
+        "34",
+        "34"
+      ],
+      "form": [
+        "10-K",
+        "10-Q"
+      ],
+      "fileNumber": [
+        "001-36743",
+        "001-36743"
+      ],
+      "filmNumber": [
+        "231373899",
+        "231139908"
+      ],
+      "items": [
+        "",
+        ""
+      ],
+      "size": [
+        9568123,
+        5442120
+      ],
+      "isXBRL": [
+        1,
+        1
+      ],
+      "isInlineXBRL": [
+        1,
+        1
+      ],
+      "primaryDocument": [
+        "aapl-20230930.htm",
+        "aapl-20230701.htm"
+      ],
+      "primaryDocDescription": [
+        "10-K",
+        "10-Q"
+      ]
+    }
+  }
+}
