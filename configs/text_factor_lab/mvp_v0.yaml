@@ -27,6 +27,7 @@ text_source:
     - "Legal Proceedings"
   require_available_time: true
   require_license_note: true
+  sec_user_agent: "financial-10k-text-agent/0.1 contact: linxihang0810@gmail.com"
 
 labels:
   targets:
