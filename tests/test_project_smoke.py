@@ -14,6 +14,7 @@ def test_cli_parser_has_expected_commands() -> None:
     assert "audit" in help_text
     assert "report" in help_text
     assert "parse-10k" in help_text
+    assert "build-labels" in help_text
 
 
 def test_run_command_validates_config(capsys) -> None:
