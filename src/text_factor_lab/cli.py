@@ -61,6 +61,28 @@ def build_parser() -> argparse.ArgumentParser:
     labels_parser.add_argument("--price-field", default="adj_close")
     labels_parser.add_argument("--annualization-days", type=int, default=252)
 
+    split_parser = subparsers.add_parser(
+        "build-splits",
+        help="Build rolling year train/validation/test split assignments from labels.",
+    )
+    split_parser.add_argument("--labels", required=True, help="Path to labels JSONL.")
+    split_parser.add_argument(
+        "--assignments-output",
+        required=True,
+        help="Output JSONL split assignments path.",
+    )
+    split_parser.add_argument(
+        "--leakage-output",
+        required=True,
+        help="Output JSONL split leakage report path.",
+    )
+    split_parser.add_argument("--sample-start", required=True, help="YYYY-MM-DD sample start.")
+    split_parser.add_argument("--sample-end", required=True, help="YYYY-MM-DD sample end.")
+    split_parser.add_argument("--train-years-min", type=int, required=True)
+    split_parser.add_argument("--validation-years", type=int, default=1)
+    split_parser.add_argument("--test-years", type=int, default=1)
+    split_parser.add_argument("--embargo-days", type=int, default=20)
+
     return parser
 
 
@@ -128,6 +150,38 @@ def main(argv: list[str] | None = None) -> int:
             "Built labels. "
             f"documents={len(documents)} labels={len(result.labels)} "
             f"failures={len(result.failures)} labels_output={args.labels_output}"
+        )
+        return 0
+
+    if args.command == "build-splits":
+        from datetime import date
+
+        from text_factor_lab.splits import (
+            build_rolling_year_splits,
+            read_labels_jsonl,
+            write_split_artifacts,
+        )
+
+        labels = read_labels_jsonl(args.labels)
+        result = build_rolling_year_splits(
+            labels=labels,
+            sample_start=date.fromisoformat(args.sample_start),
+            sample_end=date.fromisoformat(args.sample_end),
+            train_years_min=args.train_years_min,
+            validation_years=args.validation_years,
+            test_years=args.test_years,
+            embargo_days=args.embargo_days,
+        )
+        write_split_artifacts(
+            result,
+            assignments_path=args.assignments_output,
+            leakage_path=args.leakage_output,
+        )
+        print(
+            "Built rolling splits. "
+            f"labels={len(labels)} windows={len(result.windows)} "
+            f"assignments={len(result.assignments)} "
+            f"leakage_records={len(result.leakage_records)}"
         )
         return 0
 
