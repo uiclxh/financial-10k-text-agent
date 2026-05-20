@@ -34,10 +34,14 @@ def test_initialize_run_creates_status_and_config_snapshot(temp_config: Path) ->
     assert status.coverage == 0
     assert manager.status_path.exists()
     assert manager.config_snapshot_path.exists()
+    assert manager.pipeline_contract_path.exists()
 
     saved_payload = json.loads(manager.status_path.read_text(encoding="utf-8"))
     assert saved_payload["run_id"] == "test_run_001"
     assert saved_payload["status"] == "created"
+
+    pipeline_payload = json.loads(manager.pipeline_contract_path.read_text(encoding="utf-8"))
+    assert pipeline_payload["current_scope"] == "run_manager_plus_independent_cli_tools"
 
 
 def test_update_status_persists_state(temp_config: Path) -> None:
@@ -89,3 +93,23 @@ def test_fail_run_can_reject_run(temp_config: Path) -> None:
     )
 
     assert status.status == "rejected"
+
+
+def test_formal_run_rejects_demo_universe(tmp_path: Path) -> None:
+    payload = yaml.safe_load(
+        Path("configs/text_factor_lab/mvp_v0.yaml").read_text(encoding="utf-8")
+    )
+    payload["run"]["run_id"] = "formal_demo_universe"
+    payload["run"]["run_type"] = "formal_run"
+    payload["run"]["output_dir"] = str(tmp_path / "runs" / "formal_demo_universe")
+    config_path = tmp_path / "formal_config.yaml"
+    config_path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+
+    manager = RunManager.from_config_path(config_path)
+    status = manager.initialize_run()
+
+    assert status.status == "rejected"
+    assert status.audit_status == "fail"
+    assert "universe manifest is not research-grade" in (status.failure_reason or "")
+
+
