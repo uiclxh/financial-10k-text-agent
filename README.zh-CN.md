@@ -4,14 +4,14 @@
 
 ## 项目定位
 
-`Financial 10-K Text Agent` 是一个金融文本因子研究 agent 的 MVP 工程实现。
-它不是普通的 Financial RAG，而是面向 empirical finance 的可复现研究流水线：
-从 SEC 10-K 文本出发，构建文本特征、事件标签、滚动切分、模型预测、样本外评估、
-事件型 long-short 回测和审计报告。
+`Financial 10-K Text Agent` 是一个面向金融文本因子研究的 MVP 工程实现。
+它不是普通的 Financial RAG，而是围绕 SEC 10-K 文本构建可复现、可审计的
+empirical finance pipeline：文本解析、事件标签、滚动切分、特征构建、模型训练、
+样本外评估、事件型 long-short 回测、审计门槛和自动报告。
 
 ## 当前状态
 
-当前代码已经推进到 Step 12：
+当前代码已经推进到 Step 13：
 
 1. 项目脚手架
 2. Config 与 Pydantic schema
@@ -25,6 +25,7 @@
 10. 模型层：`historical_mean`、`industry_mean`、`ridge`、可选 `xgboost`
 11. 样本外评估：RMSE、MAE、R2、directional accuracy、Pearson IC、rank IC
 12. event-based long-short backtest 与 audit gate
+13. Report Agent：生成 `report.md`、`report_summary.json` 和结论等级
 
 ## 关键命令
 
@@ -34,6 +35,7 @@ python -m text_factor_lab build-features --help
 python -m text_factor_lab build-models --help
 python -m text_factor_lab evaluate-models --help
 python -m text_factor_lab audit --help
+python -m text_factor_lab report --help
 ```
 
 ## 主要产物
@@ -53,6 +55,8 @@ MVP pipeline 围绕以下 artifact 工作：
 - `evaluation_metrics.json`
 - `backtest_results.json`
 - `audit_report.json`
+- `report.md`
+- `report_summary.json`
 
 ## 验证方式
 
@@ -64,12 +68,13 @@ python -m ruff check .
 当前本地验收结果：
 
 ```text
-74+ tests pass
+79+ tests pass
 ruff passes
 ```
 
 ## 当前边界
 
 这仍然是 MVP，不是完整 production research system。后续还需要补：
-sector-neutral portfolio、完整组合时间序列、多重检验报告、最终 report agent、
-FinBERT / LLM embedding、earnings call transcript ingestion，以及 credit risk target。
+sector-neutral portfolio、完整组合时间序列、多重检验报告、dashboard/deployment
+packaging、FinBERT / LLM embedding、earnings call transcript ingestion，以及
+credit risk target。
