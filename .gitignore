@@ -21,7 +21,7 @@ env/
 data/raw/
 data/processed/
 runs/
-reports/
+/reports/
 model_cache/
 *.parquet
 *.pkl
