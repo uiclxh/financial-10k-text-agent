@@ -108,17 +108,24 @@ def test_build_evaluation_artifacts_computes_metrics_and_backtests() -> None:
         newey_west_lag=2,
     )
 
-    assert len(result.metrics) == 2
+    assert len(result.metrics) == 4
     assert len(result.backtests) == 1
-    test_metric = next(record for record in result.metrics if record.role == "test")
+    test_metric = next(
+        record
+        for record in result.metrics
+        if record.role == "test" and record.split_id != "ALL_SPLITS"
+    )
     assert test_metric.observation_count == 5
     assert test_metric.rank_ic > 0
+    assert test_metric.directional_accuracy >= 0
+    assert any(record.split_id == "ALL_SPLITS" for record in result.metrics)
     backtest = result.backtests[0]
     assert backtest.long_count == 1
     assert backtest.short_count == 1
     assert backtest.gross_long_short_return == 0.5
     assert backtest.net_long_short_return == 0.498
     assert backtest.turnover == 2.0
+    assert backtest.sharpe_ratio != 0.0
 
 
 def test_newey_west_t_stat_handles_small_samples() -> None:
@@ -159,8 +166,8 @@ def test_evaluate_models_cli_writes_artifacts(tmp_path: Path, capsys) -> None:
     captured = capsys.readouterr()
 
     assert exit_code == 0
-    assert "metrics=2" in captured.out
-    assert len(json.loads(metrics_path.read_text(encoding="utf-8"))) == 2
+    assert "metrics=4" in captured.out
+    assert len(json.loads(metrics_path.read_text(encoding="utf-8"))) == 4
     assert len(json.loads(backtest_path.read_text(encoding="utf-8"))) == 1
 
 
