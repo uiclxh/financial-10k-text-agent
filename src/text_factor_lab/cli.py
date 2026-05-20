@@ -83,6 +83,27 @@ def build_parser() -> argparse.ArgumentParser:
     split_parser.add_argument("--test-years", type=int, default=1)
     split_parser.add_argument("--embargo-days", type=int, default=20)
 
+    feature_parser = subparsers.add_parser(
+        "build-features",
+        help="Build dictionary tone and TF-IDF text features.",
+    )
+    feature_parser.add_argument("--document-manifest", required=True)
+    feature_parser.add_argument("--parsed-sections", required=True)
+    feature_parser.add_argument("--split-assignments", required=True)
+    feature_parser.add_argument("--features-output", required=True)
+    feature_parser.add_argument("--vocabulary-output", required=True)
+    feature_parser.add_argument(
+        "--method",
+        action="append",
+        choices=["dictionary_tone", "tfidf"],
+        required=True,
+    )
+    feature_parser.add_argument("--tfidf-max-features", type=int, default=50000)
+    feature_parser.add_argument("--tfidf-ngram-min", type=int, default=1)
+    feature_parser.add_argument("--tfidf-ngram-max", type=int, default=2)
+    feature_parser.add_argument("--tfidf-min-df", type=int, default=1)
+    feature_parser.add_argument("--tfidf-max-df", type=float, default=1.0)
+
     return parser
 
 
@@ -182,6 +203,49 @@ def main(argv: list[str] | None = None) -> int:
             f"labels={len(labels)} windows={len(result.windows)} "
             f"assignments={len(result.assignments)} "
             f"leakage_records={len(result.leakage_records)}"
+        )
+        return 0
+
+    if args.command == "build-features":
+        from text_factor_lab.features import (
+            build_dictionary_tone_features,
+            build_tfidf_features,
+            load_document_texts,
+            read_document_manifest_jsonl,
+            read_parsed_sections_jsonl,
+            read_split_assignments_jsonl,
+            write_features_jsonl,
+            write_vocabulary_json,
+        )
+
+        manifest_by_document_id = read_document_manifest_jsonl(args.document_manifest)
+        parsed_sections = read_parsed_sections_jsonl(args.parsed_sections)
+        split_assignments = read_split_assignments_jsonl(args.split_assignments)
+        document_texts = load_document_texts(
+            manifest_by_document_id=manifest_by_document_id,
+            parsed_sections=parsed_sections,
+        )
+        features = []
+        vocabulary_by_split = {}
+        if "dictionary_tone" in args.method:
+            features.extend(build_dictionary_tone_features(document_texts))
+        if "tfidf" in args.method:
+            tfidf_result = build_tfidf_features(
+                document_texts,
+                split_assignments,
+                max_features=args.tfidf_max_features,
+                ngram_range=(args.tfidf_ngram_min, args.tfidf_ngram_max),
+                min_df=args.tfidf_min_df,
+                max_df=args.tfidf_max_df,
+            )
+            features.extend(tfidf_result.features)
+            vocabulary_by_split = tfidf_result.vocabulary_by_split
+        write_features_jsonl(features, args.features_output)
+        write_vocabulary_json(vocabulary_by_split, args.vocabulary_output)
+        print(
+            "Built text features. "
+            f"documents={len(document_texts)} features={len(features)} "
+            f"vocabularies={len(vocabulary_by_split)}"
         )
         return 0
 
