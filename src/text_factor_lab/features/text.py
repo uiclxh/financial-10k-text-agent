@@ -1,21 +1,28 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from text_factor_lab.schemas.document_manifest import DocumentManifestRecord
-from text_factor_lab.schemas.features import FeatureRecord
+from text_factor_lab.schemas.features import FeatureManifestRecord, FeatureRecord
 from text_factor_lab.schemas.parsed_sections import ParsedSectionRecord
 from text_factor_lab.schemas.splits import SplitAssignmentRecord, SplitRole
 
 DICTIONARY_FEATURE_VERSION = "dictionary-tone-v0"
 TFIDF_FEATURE_VERSION = "tfidf-v0"
+DICTIONARY_SOURCE = "builtin_mvp_toy_financial_dictionary"
+DICTIONARY_VERSION = "mvp-toy-v0"
+DICTIONARY_LICENSE_NOTE = (
+    "Internal MVP toy dictionary for pipeline tests; not a substitute for "
+    "Loughran-McDonald in formal research."
+)
 TOKEN_PATTERN = re.compile(r"[A-Za-z][A-Za-z\-']*")
 DEFAULT_FINANCIAL_DICTIONARIES: dict[str, set[str]] = {
     "negative": {
@@ -84,7 +91,8 @@ class DocumentText:
 @dataclass(frozen=True)
 class FeatureBuildResult:
     features: list[FeatureRecord]
-    vocabulary_by_split: dict[str, dict[str, int]]
+    vocabulary_by_split: dict[str, dict[str, dict[str, int]]]
+    feature_manifests: list[FeatureManifestRecord]
 
 
 def tokenize(text: str) -> list[str]:
@@ -196,6 +204,53 @@ def build_dictionary_tone_features(
     return features
 
 
+def build_dictionary_feature_manifests(
+    document_texts: dict[str, DocumentText],
+    split_assignments: list[SplitAssignmentRecord],
+    *,
+    dictionaries: dict[str, set[str]] | None = None,
+    feature_version: str = DICTIONARY_FEATURE_VERSION,
+    input_hashes: dict[str, str] | None = None,
+) -> list[FeatureManifestRecord]:
+    dictionary_terms = dictionaries or DEFAULT_FINANCIAL_DICTIONARIES
+    dictionary_term_count = len(set().union(*dictionary_terms.values()))
+    manifests: list[FeatureManifestRecord] = []
+    assignments_by_split = _assignments_by_split_and_role(split_assignments)
+    created_at = datetime.now(UTC)
+
+    for split_id, role_map in assignments_by_split.items():
+        split_doc_ids = set().union(*role_map.values()) if role_map else set()
+        text_scopes = _text_scopes_for_documents(document_texts, split_doc_ids)
+        for text_scope in text_scopes:
+            manifests.append(
+                FeatureManifestRecord(
+                    feature_version=feature_version,
+                    feature_method="dictionary_tone",
+                    dictionary_source=DICTIONARY_SOURCE,
+                    dictionary_version=DICTIONARY_VERSION,
+                    dictionary_license_note=DICTIONARY_LICENSE_NOTE,
+                    dictionary_term_count=dictionary_term_count,
+                    tfidf_params=None,
+                    fit_scope="no_fit_dictionary_counts",
+                    split_id=split_id,
+                    text_scope=text_scope,
+                    train_doc_count=_count_docs_for_scope(
+                        document_texts, role_map.get("train", set()), text_scope
+                    ),
+                    validation_doc_count=_count_docs_for_scope(
+                        document_texts, role_map.get("validation", set()), text_scope
+                    ),
+                    test_doc_count=_count_docs_for_scope(
+                        document_texts, role_map.get("test", set()), text_scope
+                    ),
+                    vocabulary_size=dictionary_term_count,
+                    created_at_utc=created_at,
+                    input_hashes=input_hashes or {},
+                )
+            )
+    return manifests
+
+
 def build_tfidf_features(
     document_texts: dict[str, DocumentText],
     split_assignments: list[SplitAssignmentRecord],
@@ -205,54 +260,114 @@ def build_tfidf_features(
     min_df: int | float = 1,
     max_df: int | float = 1.0,
     feature_version: str = TFIDF_FEATURE_VERSION,
+    input_hashes: dict[str, str] | None = None,
 ) -> FeatureBuildResult:
     features: list[FeatureRecord] = []
-    vocabulary_by_split: dict[str, dict[str, int]] = {}
+    manifests: list[FeatureManifestRecord] = []
+    vocabulary_by_split: dict[str, dict[str, dict[str, int]]] = {}
     assignments_by_split = _assignments_by_split_and_role(split_assignments)
+    created_at = datetime.now(UTC)
 
     for split_id, role_map in assignments_by_split.items():
         train_doc_ids = sorted(role_map.get("train", set()))
         if not train_doc_ids:
             continue
-        train_texts = [document_texts[document_id].full_text for document_id in train_doc_ids]
-        vectorizer = TfidfVectorizer(
-            lowercase=True,
-            max_features=max_features,
-            ngram_range=ngram_range,
-            min_df=min_df,
-            max_df=max_df,
-            sublinear_tf=True,
-            token_pattern=r"(?u)\b[a-zA-Z][a-zA-Z\-']+\b",
-        )
-        vectorizer.fit(train_texts)
-        vocabulary_by_split[split_id] = {
-            term: int(index) for term, index in sorted(vectorizer.vocabulary_.items())
-        }
+        text_scopes = _text_scopes_for_documents(document_texts, set(train_doc_ids))
+        vocabulary_by_split[split_id] = {}
 
-        for role in ("train", "validation", "test"):
-            doc_ids = sorted(role_map.get(role, set()))
-            if not doc_ids:
+        for text_scope in text_scopes:
+            train_texts = [
+                _text_for_scope(document_texts[document_id], text_scope)
+                for document_id in train_doc_ids
+                if document_id in document_texts
+            ]
+            if not any(text.strip() for text in train_texts):
                 continue
-            matrix = vectorizer.transform(
-                [document_texts[document_id].full_text for document_id in doc_ids]
+            vectorizer = TfidfVectorizer(
+                lowercase=True,
+                max_features=max_features,
+                ngram_range=ngram_range,
+                min_df=min_df,
+                max_df=max_df,
+                sublinear_tf=True,
+                token_pattern=r"(?u)\b[a-zA-Z][a-zA-Z\-']+\b",
             )
-            terms = vectorizer.get_feature_names_out()
-            for row_index, document_id in enumerate(doc_ids):
-                document = document_texts[document_id]
-                row = matrix.getrow(row_index)
-                for term_index, value in zip(row.indices, row.data, strict=True):
-                    term = terms[term_index]
-                    features.append(
-                        _feature_record(
-                            document=document,
-                            feature_family="tfidf",
-                            feature_name=f"tfidf_full__{term}",
-                            feature_value=float(value),
-                            feature_version=f"{feature_version}:{split_id}:{role}",
-                            source_chunk_id=f"{document.document_id}:full",
+            vectorizer.fit(train_texts)
+            vocabulary_by_split[split_id][text_scope] = {
+                term: int(index) for term, index in sorted(vectorizer.vocabulary_.items())
+            }
+
+            manifests.append(
+                FeatureManifestRecord(
+                    feature_version=f"{feature_version}:{split_id}:{text_scope}",
+                    feature_method="tfidf",
+                    dictionary_source=None,
+                    dictionary_version=None,
+                    dictionary_license_note=None,
+                    dictionary_term_count=None,
+                    tfidf_params={
+                        "max_features": max_features,
+                        "ngram_range": list(ngram_range),
+                        "min_df": min_df,
+                        "max_df": max_df,
+                        "sublinear_tf": True,
+                        "token_pattern": r"(?u)\b[a-zA-Z][a-zA-Z\-']+\b",
+                    },
+                    fit_scope="train_window_only",
+                    split_id=split_id,
+                    text_scope=text_scope,
+                    train_doc_count=_count_docs_for_scope(
+                        document_texts, train_doc_ids, text_scope
+                    ),
+                    validation_doc_count=_count_docs_for_scope(
+                        document_texts, role_map.get("validation", set()), text_scope
+                    ),
+                    test_doc_count=_count_docs_for_scope(
+                        document_texts, role_map.get("test", set()), text_scope
+                    ),
+                    vocabulary_size=len(vectorizer.vocabulary_),
+                    created_at_utc=created_at,
+                    input_hashes=input_hashes or {},
+                )
+            )
+
+            for role in ("train", "validation", "test"):
+                doc_ids = [
+                    document_id
+                    for document_id in sorted(role_map.get(role, set()))
+                    if document_id in document_texts
+                ]
+                if not doc_ids:
+                    continue
+                matrix = vectorizer.transform(
+                    [
+                        _text_for_scope(document_texts[document_id], text_scope)
+                        for document_id in doc_ids
+                    ]
+                )
+                terms = vectorizer.get_feature_names_out()
+                for row_index, document_id in enumerate(doc_ids):
+                    document = document_texts[document_id]
+                    row = matrix.getrow(row_index)
+                    for term_index, value in zip(row.indices, row.data, strict=True):
+                        term = terms[term_index]
+                        features.append(
+                            _feature_record(
+                                document=document,
+                                feature_family="tfidf",
+                                feature_name=f"tfidf_{text_scope}__{term}",
+                                feature_value=float(value),
+                                feature_version=(
+                                    f"{feature_version}:{split_id}:{text_scope}:{role}"
+                                ),
+                                source_chunk_id=f"{document.document_id}:{text_scope}",
+                            )
                         )
-                    )
-    return FeatureBuildResult(features=features, vocabulary_by_split=vocabulary_by_split)
+    return FeatureBuildResult(
+        features=features,
+        vocabulary_by_split=vocabulary_by_split,
+        feature_manifests=manifests,
+    )
 
 
 def _assignments_by_split_and_role(
@@ -270,6 +385,40 @@ def document_id_from_label_id(label_id: str) -> str:
     if len(parts) != 3:
         raise ValueError(f"Cannot infer document_id from label_id={label_id}")
     return parts[0]
+
+
+def _text_scopes_for_documents(
+    document_texts: dict[str, DocumentText],
+    document_ids: set[str],
+) -> list[str]:
+    section_scopes: set[str] = set()
+    for document_id in document_ids:
+        document = document_texts.get(document_id)
+        if document is not None:
+            section_scopes.update(document.section_texts)
+    return ["full", *sorted(section_scopes)]
+
+
+def _text_for_scope(document: DocumentText, text_scope: str) -> str:
+    if text_scope == "full":
+        return document.full_text
+    return document.section_texts.get(text_scope, "")
+
+
+def _count_docs_for_scope(
+    document_texts: dict[str, DocumentText],
+    document_ids: set[str] | list[str],
+    text_scope: str,
+) -> int:
+    return sum(
+        1
+        for document_id in document_ids
+        if document_id in document_texts
+        and (
+            text_scope == "full"
+            or bool(document_texts[document_id].section_texts.get(text_scope))
+        )
+    )
 
 
 def _feature_record(
@@ -306,9 +455,45 @@ def write_features_jsonl(features: list[FeatureRecord], path: str | Path) -> Non
             file.write("\n")
 
 
-def write_vocabulary_json(vocabulary_by_split: dict[str, dict[str, int]], path: str | Path) -> None:
+def write_vocabulary_json(
+    vocabulary_by_split: dict[str, dict[str, dict[str, int]]],
+    path: str | Path,
+) -> None:
     output = Path(path)
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", encoding="utf-8") as file:
         json.dump(vocabulary_by_split, file, indent=2, sort_keys=True)
         file.write("\n")
+
+
+def write_feature_manifest_json(
+    manifests: list[FeatureManifestRecord],
+    path: str | Path,
+) -> None:
+    output = Path(path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", encoding="utf-8") as file:
+        json.dump(
+            [manifest.model_dump(mode="json") for manifest in manifests],
+            file,
+            indent=2,
+            sort_keys=True,
+        )
+        file.write("\n")
+
+
+def sha256_file(path: str | Path) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def build_feature_input_hashes(
+    *,
+    document_manifest_path: str | Path,
+    parsed_sections_path: str | Path,
+    split_assignments_path: str | Path,
+) -> dict[str, str]:
+    return {
+        "document_manifest": sha256_file(document_manifest_path),
+        "parsed_sections": sha256_file(parsed_sections_path),
+        "split_assignments": sha256_file(split_assignments_path),
+    }
