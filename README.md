@@ -2,7 +2,7 @@
 
 Language:
 
-- [中文](README.zh-CN.md)
+- [Chinese](README.zh-CN.md)
 - [English](README.en.md)
 
 ## Snapshot
@@ -16,9 +16,11 @@ config -> universe -> SEC metadata -> parsing -> labels -> rolling splits
        -> text features -> model training -> evaluation -> backtest -> audit
 ```
 
-Current release notes:
+Release notes:
 
-- [v0.1.0 MVP Workflow Release](docs/releases/v0.1.0.md)
+- [v0.1.0 Phase 1 - Foundation / Project Initialization](docs/releases/v0.1.0.md)
+- [v0.2.0 Phase 2 - Data, Parsing, Labels, Splits, Features](docs/releases/v0.2.0.md)
+- [v0.3.0 Phase 3 - Models, Evaluation, Backtest, Audit](docs/releases/v0.3.0.md)
 
 Quick validation:
 
