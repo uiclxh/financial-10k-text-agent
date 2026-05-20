@@ -11,6 +11,7 @@ from text_factor_lab.parsing import (
     find_item_heading_candidates,
     normalize_sec_document_text,
     parse_sec_10k_sections,
+    raw_document_diagnostics,
     read_parsed_sections_jsonl,
     should_parse_sec_filing,
     write_section_artifacts,
@@ -84,6 +85,10 @@ def test_parse_sec_10k_sections_ignores_toc_and_records_spans_hashes() -> None:
     assert "Risk Factors" not in result.section_text_by_key["item_1"]
     assert records_by_key["item_7"].text_hash_sha256 is not None
     assert len(records_by_key["item_7"].text_hash_sha256 or "") == 64
+    assert result.quality_report.parsed_coverage == 1.0
+    assert result.quality_report.inline_xbrl_detected is True
+    assert result.quality_report.table_tag_count == 1
+    assert result.quality_report.sample_review_required is True
 
 
 def test_missing_section_is_recorded_as_missing_not_silent_success() -> None:
@@ -105,16 +110,29 @@ def test_write_section_artifacts_round_trips_records(tmp_path: Path) -> None:
     records = write_section_artifacts(result, tmp_path)
     parsed_sections_path = tmp_path / "parsed_sections.jsonl"
     normalized_text_path = tmp_path / "normalized_document_text.txt"
+    quality_path = tmp_path / "parsing_quality_report.json"
     loaded = read_parsed_sections_jsonl(parsed_sections_path)
 
     assert parsed_sections_path.exists()
     assert normalized_text_path.exists()
+    assert quality_path.exists()
     assert len(loaded) == len(records)
     assert all(record.artifact_path for record in loaded if record.parser_status == "parsed")
     assert Path(records[0].artifact_path or "").read_text(encoding="utf-8")
 
     raw_json = json.loads(parsed_sections_path.read_text(encoding="utf-8").splitlines()[0])
     assert raw_json["source_hash_sha256"] == "a" * 64
+
+    quality_payload = json.loads(quality_path.read_text(encoding="utf-8"))
+    assert quality_payload["parsed_sections"] == 4
+    assert quality_payload["sample_review_required"] is True
+
+
+def test_raw_document_diagnostics_detects_inline_xbrl_and_tables() -> None:
+    inline_xbrl_detected, table_count = raw_document_diagnostics(load_sample_html())
+
+    assert inline_xbrl_detected is True
+    assert table_count == 1
 
 
 def test_parse_10k_cli_writes_artifacts(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
