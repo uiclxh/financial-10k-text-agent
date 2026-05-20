@@ -127,6 +127,7 @@ class RunManager:
                 "build-splits",
                 "build-features",
                 "build-models",
+                "evaluate-models",
             ],
             "full_orchestrator_sequence": [
                 "Data",
@@ -231,4 +232,3 @@ class RunManager:
 def initialize_run_from_config(config_path: str | Path) -> RunStatusRecord:
     manager = RunManager.from_config_path(config_path)
     return manager.initialize_run()
-
