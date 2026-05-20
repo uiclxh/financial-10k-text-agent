@@ -14,6 +14,7 @@ from text_factor_lab.data.sec_edgar import (
     filing_row_to_manifest_record,
     normalize_cik,
     parse_sec_acceptance_datetime,
+    sec_event_date_from_acceptance_time,
     write_manifest_jsonl,
 )
 from text_factor_lab.data.universe import (
@@ -34,6 +35,7 @@ __all__ = [
     "load_price_panel_csv",
     "load_universe_manifest",
     "normalize_cik",
+    "sec_event_date_from_acceptance_time",
     "parse_sec_acceptance_datetime",
     "PriceDataError",
     "PricePanel",
