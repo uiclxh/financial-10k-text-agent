@@ -1,20 +1,24 @@
 # Financial 10-K Text Agent
 
-Language / 语言:
+Language:
 
 - [中文](README.zh-CN.md)
 - [English](README.en.md)
 
 ## Snapshot
 
-Financial 10-K Text Agent is the MVP implementation of a financial text factor
-research agent. It is designed to build reproducible, auditable text factors from
-SEC filings, align them with event-time labels, and prepare leakage-safe rolling
-splits for out-of-sample empirical finance experiments.
+Financial 10-K Text Agent is an auditable empirical-finance pipeline for 10-K
+text factor research. It is not a generic Financial RAG app. The current codebase
+now covers Steps 1-12 of the MVP workflow:
 
-Current release:
+```text
+config -> universe -> SEC metadata -> parsing -> labels -> rolling splits
+       -> text features -> model training -> evaluation -> backtest -> audit
+```
 
-- [v0.1.0: Foundation Release](docs/releases/v0.1.0.md)
+Current release notes:
+
+- [v0.1.0 MVP Workflow Release](docs/releases/v0.1.0.md)
 
 Quick validation:
 
@@ -22,6 +26,18 @@ Quick validation:
 python -m pytest
 python -m ruff check .
 python -m text_factor_lab run --config configs/text_factor_lab/mvp_v0.yaml
+```
+
+Main implemented CLI commands:
+
+```bash
+python -m text_factor_lab parse-10k --help
+python -m text_factor_lab build-labels --help
+python -m text_factor_lab build-splits --help
+python -m text_factor_lab build-features --help
+python -m text_factor_lab build-models --help
+python -m text_factor_lab evaluate-models --help
+python -m text_factor_lab audit --help
 ```
 
 The governing workflow specification is:
