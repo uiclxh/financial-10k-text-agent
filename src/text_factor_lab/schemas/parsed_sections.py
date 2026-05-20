@@ -59,3 +59,19 @@ class ParsedSectionRecord(StrictBaseModel):
             if self.text_length != 0:
                 raise ValueError("missing or failed sections must have text_length=0")
         return self
+
+
+class ParsingQualityReport(StrictBaseModel):
+    document_id: str = Field(min_length=1)
+    parser_version: str = Field(min_length=1)
+    target_sections_total: int = Field(ge=0)
+    parsed_sections: int = Field(ge=0)
+    missing_sections: int = Field(ge=0)
+    failed_sections: int = Field(ge=0)
+    parsed_coverage: float = Field(ge=0, le=1)
+    heading_candidates_total: int = Field(ge=0)
+    duplicate_target_heading_items: list[str]
+    inline_xbrl_detected: bool
+    table_tag_count: int = Field(ge=0)
+    warnings: list[str]
+    sample_review_required: bool
