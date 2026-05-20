@@ -126,6 +126,7 @@ class RunManager:
                 "build-labels",
                 "build-splits",
                 "build-features",
+                "build-models",
             ],
             "full_orchestrator_sequence": [
                 "Data",
