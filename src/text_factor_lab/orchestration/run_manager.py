@@ -8,10 +8,10 @@ from typing import Literal
 
 from pydantic import Field
 
+from text_factor_lab.data import load_and_report_universe
 from text_factor_lab.schemas.base import StrictBaseModel
 from text_factor_lab.schemas.config import ExperimentConfig, load_experiment_config
 from text_factor_lab.schemas.run_status import AuditStatus, RunStatus, RunStatusRecord
-
 
 FailureType = Literal[
     "data_missing",
@@ -52,6 +52,8 @@ class RunManager:
         self.status_path = self.run_dir / "run_status.json"
         self.failure_log_path = self.run_dir / "failure_log.jsonl"
         self.config_snapshot_path = self.run_dir / "config_snapshot.yaml"
+        self.universe_quality_report_path = self.run_dir / "universe_quality_report.json"
+        self.pipeline_contract_path = self.run_dir / "pipeline_contract.json"
 
     @classmethod
     def from_config_path(cls, config_path: str | Path) -> RunManager:
@@ -76,7 +78,71 @@ class RunManager:
             coverage=0.0,
         )
         self.write_status(status)
-        return status
+        self.write_pipeline_contract()
+        try:
+            universe_report = self.write_universe_quality_report()
+            if self.config.run.run_type == "formal_run" and universe_report.formal_run_blockers:
+                self.fail_run(
+                    stage="universe",
+                    failure_type="coverage_below_threshold",
+                    failure_message=(
+                        "Formal run rejected because universe manifest is not research-grade: "
+                        + ", ".join(universe_report.formal_run_blockers)
+                    ),
+                    affected_artifacts=[str(self.config.universe.tickers_file)],
+                    recoverable=True,
+                    recommended_action=(
+                        "Replace demo universe with a dated, research-grade large-cap "
+                        "universe including market cap, mapping source, and delisted firms."
+                    ),
+                    rejected=True,
+                )
+        except Exception as exc:
+            self.fail_run(
+                stage="universe",
+                failure_type="schema_validation_failed",
+                failure_message=f"Universe validation failed: {exc}",
+                affected_artifacts=[str(self.config.universe.tickers_file)],
+                recoverable=True,
+                recommended_action="Fix universe manifest rows and rerun.",
+            )
+            raise
+        return self.read_status()
+
+    def write_universe_quality_report(self):
+        _, report = load_and_report_universe(self.config)
+        with self.universe_quality_report_path.open("w", encoding="utf-8") as file:
+            json.dump(report.model_dump(mode="json"), file, indent=2)
+            file.write("\n")
+        return report
+
+    def write_pipeline_contract(self) -> None:
+        payload = {
+            "run_id": self.config.run.run_id,
+            "current_scope": "run_manager_plus_independent_cli_tools",
+            "implemented_cli_stages": [
+                "run",
+                "parse-10k",
+                "build-labels",
+                "build-splits",
+                "build-features",
+            ],
+            "full_orchestrator_sequence": [
+                "Data",
+                "Parsing",
+                "Label",
+                "Split",
+                "Feature",
+                "Model",
+                "Backtest",
+                "Audit",
+                "Report",
+            ],
+            "orchestrator_status": "not_yet_full_pipeline_controller",
+        }
+        with self.pipeline_contract_path.open("w", encoding="utf-8") as file:
+            json.dump(payload, file, indent=2)
+            file.write("\n")
 
     def read_status(self) -> RunStatusRecord:
         with self.status_path.open("r", encoding="utf-8") as file:
@@ -164,3 +230,4 @@ class RunManager:
 def initialize_run_from_config(config_path: str | Path) -> RunStatusRecord:
     manager = RunManager.from_config_path(config_path)
     return manager.initialize_run()
+
