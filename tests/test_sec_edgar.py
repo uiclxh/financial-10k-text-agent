@@ -12,6 +12,7 @@ from text_factor_lab.data import (
     filing_row_to_manifest_record,
     normalize_cik,
     parse_sec_acceptance_datetime,
+    sec_event_date_from_acceptance_time,
     write_manifest_jsonl,
 )
 from text_factor_lab.data.sec_edgar import sha256_bytes
@@ -44,6 +45,18 @@ def test_parse_sec_acceptance_datetime_to_utc() -> None:
     assert parsed.isoformat() == "2023-11-02T22:30:12+00:00"
 
 
+def test_sec_event_date_uses_us_equity_trading_session_rules() -> None:
+    before_open = parse_sec_acceptance_datetime("20231103080000")
+    during_session = parse_sec_acceptance_datetime("20231103120000")
+    after_close_friday = parse_sec_acceptance_datetime("20231103160100")
+    saturday = parse_sec_acceptance_datetime("20231104120000")
+
+    assert sec_event_date_from_acceptance_time(before_open).isoformat() == "2023-11-03"
+    assert sec_event_date_from_acceptance_time(during_session).isoformat() == "2023-11-03"
+    assert sec_event_date_from_acceptance_time(after_close_friday).isoformat() == "2023-11-06"
+    assert sec_event_date_from_acceptance_time(saturday).isoformat() == "2023-11-06"
+
+
 def test_extract_annual_filings_filters_10k() -> None:
     filings = extract_annual_filings(load_fixture())
 
@@ -66,6 +79,7 @@ def test_filing_row_to_manifest_record(tmp_path: Path) -> None:
     assert record.document_type == "10-K"
     assert record.ticker == "AAPL"
     assert record.fiscal_year == 2023
+    assert record.event_date.isoformat() == "2023-11-03"
     assert record.available_time_utc.isoformat() == "2023-11-02T22:30:12+00:00"
     assert record.source_url_or_path.endswith("320193/000032019323000106/aapl-20230930.htm")
 
