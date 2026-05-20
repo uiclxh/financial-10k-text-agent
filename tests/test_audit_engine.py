@@ -14,6 +14,7 @@ from text_factor_lab.schemas import (
     PortfolioBacktestRecord,
     PredictionRecord,
     RunStatusRecord,
+    TuningLogRecord,
 )
 
 
@@ -92,6 +93,8 @@ def metric_record(label: LabelRecord) -> EvaluationMetricRecord:
         observation_count=1,
         rmse=0.01,
         mae=0.01,
+        r_squared=0.0,
+        directional_accuracy=1.0,
         pearson_ic=0.0,
         rank_ic=0.0,
         created_at_utc=utc(2020, 2, 1),
@@ -114,8 +117,25 @@ def backtest_record(label: LabelRecord) -> PortfolioBacktestRecord:
         turnover=2.0,
         transaction_cost_bps_one_way=10.0,
         net_long_short_return=0.018,
+        sharpe_ratio=0.5,
         newey_west_lag=19,
         newey_west_t_stat=0.0,
+        created_at_utc=utc(2020, 2, 1),
+    )
+
+
+def tuning_log_record(label: LabelRecord) -> TuningLogRecord:
+    return TuningLogRecord(
+        run_id="audit_test_run",
+        split_id="split",
+        target_name=label.target_name,
+        model_id="ridge::CAR_1_20::split",
+        parameter_grid={"alpha": [1.0]},
+        searched_parameters=[{"alpha": 1.0}],
+        validation_metric="validation_rank_ic",
+        validation_scores=[1.0],
+        selected_parameters={"alpha": 1.0},
+        selection_reason="Selected highest validation rank IC.",
         created_at_utc=utc(2020, 2, 1),
     )
 
@@ -175,6 +195,7 @@ def write_complete_audit_artifacts(run_dir: Path, *, bad_prediction_label: bool 
     write_json_array(run_dir / "feature_manifest.json", [])
     write_jsonl(run_dir / "predictions.jsonl", [prediction])
     write_json_array(run_dir / "model_manifest.json", [model_manifest_record(label)])
+    write_json_array(run_dir / "tuning_log.json", [tuning_log_record(label)])
     write_json_array(run_dir / "evaluation_metrics.json", [metric_record(label)])
     write_json_array(run_dir / "backtest_results.json", [backtest_record(label)])
 
