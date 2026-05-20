@@ -138,6 +138,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Ridge alpha grid value, repeatable.",
     )
 
+    eval_parser = subparsers.add_parser(
+        "evaluate-models",
+        help="Evaluate predictions and build event-based long-short backtest artifacts.",
+    )
+    eval_parser.add_argument("--run-id", required=True)
+    eval_parser.add_argument("--predictions", required=True)
+    eval_parser.add_argument("--labels", required=True)
+    eval_parser.add_argument("--metrics-output", required=True)
+    eval_parser.add_argument("--backtest-output", required=True)
+    eval_parser.add_argument("--transaction-cost-bps-one-way", type=float, default=10.0)
+    eval_parser.add_argument("--newey-west-lag", type=int, default=19)
+
     return parser
 
 
@@ -338,6 +350,30 @@ def main(argv: list[str] | None = None) -> int:
             f"predictions={len(result.predictions)} "
             f"models={len(result.model_manifests)} "
             f"tuning_logs={len(result.tuning_logs)}"
+        )
+        return 0
+
+    if args.command == "evaluate-models":
+        from text_factor_lab.backtest import (
+            build_evaluation_artifacts,
+            read_labels_jsonl,
+            read_predictions_jsonl,
+            write_backtest_results_json,
+            write_evaluation_metrics_json,
+        )
+
+        result = build_evaluation_artifacts(
+            run_id=args.run_id,
+            predictions=read_predictions_jsonl(args.predictions),
+            labels=read_labels_jsonl(args.labels),
+            transaction_cost_bps_one_way=args.transaction_cost_bps_one_way,
+            newey_west_lag=args.newey_west_lag,
+        )
+        write_evaluation_metrics_json(result.metrics, args.metrics_output)
+        write_backtest_results_json(result.backtests, args.backtest_output)
+        print(
+            "Built evaluation artifacts. "
+            f"metrics={len(result.metrics)} backtests={len(result.backtests)}"
         )
         return 0
 
