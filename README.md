@@ -9,11 +9,12 @@ Language:
 
 Financial 10-K Text Agent is an auditable empirical-finance pipeline for 10-K
 text factor research. It is not a generic Financial RAG app. The current codebase
-now covers Steps 1-12 of the MVP workflow:
+now covers Steps 1-13 of the MVP workflow:
 
 ```text
 config -> universe -> SEC metadata -> parsing -> labels -> rolling splits
        -> text features -> model training -> evaluation -> backtest -> audit
+       -> report
 ```
 
 Release notes:
@@ -21,6 +22,7 @@ Release notes:
 - [v0.1.0 Phase 1 - Foundation / Project Initialization](docs/releases/v0.1.0.md)
 - [v0.2.0 Phase 2 - Data, Parsing, Labels, Splits, Features](docs/releases/v0.2.0.md)
 - [v0.3.0 Phase 3 - Models, Evaluation, Backtest, Audit](docs/releases/v0.3.0.md)
+- [v0.4.0 Step 13 - Report Agent](docs/releases/v0.4.0.md)
 
 Quick validation:
 
@@ -40,6 +42,7 @@ python -m text_factor_lab build-features --help
 python -m text_factor_lab build-models --help
 python -m text_factor_lab evaluate-models --help
 python -m text_factor_lab audit --help
+python -m text_factor_lab report --help
 ```
 
 The governing workflow specification is:
