@@ -7,7 +7,6 @@ from pydantic import ValidationError
 
 from text_factor_lab.schemas import ExperimentConfig, load_experiment_config
 
-
 CONFIG_PATH = Path("configs/text_factor_lab/mvp_v0.yaml")
 
 
@@ -20,13 +19,14 @@ def test_mvp_v0_config_loads() -> None:
     config = load_experiment_config(CONFIG_PATH)
 
     assert config.run.run_id == "tflab_10k_mvp_v0_001"
-    assert config.run.run_type == "formal_run"
+    assert config.run.run_type == "exploratory_run"
     assert config.features.tfidf is not None
     assert config.features.tfidf.fit_scope == "train_window_only"
 
 
 def test_formal_run_requires_available_time_gate() -> None:
     payload = load_config_payload()
+    payload["run"]["run_type"] = "formal_run"
     payload["text_source"]["require_available_time"] = False
 
     with pytest.raises(ValidationError, match="require_available_time"):
@@ -35,6 +35,7 @@ def test_formal_run_requires_available_time_gate() -> None:
 
 def test_formal_run_requires_license_gate() -> None:
     payload = load_config_payload()
+    payload["run"]["run_type"] = "formal_run"
     payload["audit"]["require_license_note"] = False
 
     with pytest.raises(ValidationError, match="require_license_note"):
@@ -63,3 +64,4 @@ def test_config_payload_can_be_copied_without_mutating_fixture() -> None:
     clone["run"]["run_id"] = "other"
 
     assert payload["run"]["run_id"] == "tflab_10k_mvp_v0_001"
+
