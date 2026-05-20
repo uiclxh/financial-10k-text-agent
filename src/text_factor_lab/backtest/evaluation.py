@@ -92,6 +92,7 @@ def build_evaluation_artifacts(
             if backtest is not None:
                 backtests.append(backtest)
 
+    metrics.extend(_aggregate_metrics(run_id=run_id, scored=scored))
     return EvaluationBuildResult(metrics=metrics, backtests=backtests)
 
 
@@ -126,6 +127,8 @@ def _evaluation_metric(
     errors = y_pred - y_true
     rmse = float(np.sqrt(np.mean(errors**2))) if len(rows) else 0.0
     mae = float(np.mean(np.abs(errors))) if len(rows) else 0.0
+    r_squared = _r_squared(y_true, y_pred)
+    directional_accuracy = _directional_accuracy(y_true, y_pred)
     pearson = pearson_ic(y_true, y_pred)
     rank = rank_ic(y_true, y_pred)
     return EvaluationMetricRecord(
@@ -137,10 +140,50 @@ def _evaluation_metric(
         observation_count=len(rows),
         rmse=rmse,
         mae=mae,
+        r_squared=r_squared,
+        directional_accuracy=directional_accuracy,
         pearson_ic=pearson,
         rank_ic=rank,
         created_at_utc=datetime.now(UTC),
     )
+
+
+def _aggregate_metrics(
+    *,
+    run_id: str,
+    scored: list[ScoredPrediction],
+) -> list[EvaluationMetricRecord]:
+    grouped: dict[tuple[str, str, str], list[ScoredPrediction]] = defaultdict(list)
+    for row in scored:
+        role = row.prediction.role or "test"
+        grouped[(row.prediction.model_id, row.prediction.target_name, role)].append(row)
+    return [
+        _evaluation_metric(
+            run_id=run_id,
+            model_id=model_id,
+            split_id="ALL_SPLITS",
+            target_name=target_name,
+            role=role,
+            rows=rows,
+        )
+        for (model_id, target_name, role), rows in sorted(grouped.items())
+    ]
+
+
+def _r_squared(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    if len(y_true) < 2:
+        return 0.0
+    total_sum_squares = float(np.sum((y_true - y_true.mean()) ** 2))
+    if total_sum_squares == 0.0:
+        return 0.0
+    residual_sum_squares = float(np.sum((y_true - y_pred) ** 2))
+    return 1.0 - residual_sum_squares / total_sum_squares
+
+
+def _directional_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    if len(y_true) == 0:
+        return 0.0
+    return float(np.mean(np.sign(y_true) == np.sign(y_pred)))
 
 
 def pearson_ic(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -178,6 +221,8 @@ def _portfolio_backtest(
         + [-row.label.target_value for row in short_rows],
         dtype=float,
     )
+    event_std = float(np.std(event_returns, ddof=1)) if len(event_returns) > 1 else 0.0
+    sharpe_ratio = float(event_returns.mean() / event_std * sqrt(252)) if event_std else 0.0
     return PortfolioBacktestRecord(
         run_id=run_id,
         model_id=model_id,
@@ -193,6 +238,7 @@ def _portfolio_backtest(
         turnover=turnover,
         transaction_cost_bps_one_way=transaction_cost_bps_one_way,
         net_long_short_return=net_return,
+        sharpe_ratio=sharpe_ratio,
         newey_west_lag=newey_west_lag,
         newey_west_t_stat=newey_west_t_stat(event_returns, newey_west_lag),
         created_at_utc=datetime.now(UTC),
