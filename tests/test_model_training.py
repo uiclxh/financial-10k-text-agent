@@ -4,6 +4,8 @@ import json
 from datetime import UTC, date, datetime
 from pathlib import Path
 
+import pytest
+
 from text_factor_lab.models import (
     build_model_artifacts,
     read_features_jsonl,
@@ -85,6 +87,23 @@ def feature(
     )
 
 
+def industry_feature(document_id: str, ticker: str, year: int, industry: str) -> FeatureRecord:
+    return FeatureRecord(
+        feature_id=f"{document_id}:metadata:industry",
+        entity_id=f"CIK{ticker}",
+        ticker=ticker,
+        event_time_utc=utc(year, 3, 1),
+        prediction_time_utc=utc(year, 3, 1),
+        feature_time_utc=utc(year, 3, 1),
+        feature_family="metadata",
+        feature_name="industry",
+        feature_value=industry,
+        feature_version="metadata-v0",
+        source_document_id=document_id,
+        source_chunk_id=None,
+    )
+
+
 def fixture_records() -> tuple[list[LabelRecord], list[FeatureRecord], list[SplitAssignmentRecord]]:
     rows = [
         ("sec:train:a", "AAA", 2014, "train", 0.0, 0.0),
@@ -105,6 +124,8 @@ def fixture_records() -> tuple[list[LabelRecord], list[FeatureRecord], list[Spli
     ]
     features: list[FeatureRecord] = []
     for document_id, ticker, year, role, _, signal in rows:
+        industry = "Software" if ticker in {"AAA", "CCC", "EEE"} else "Hardware"
+        features.append(industry_feature(document_id, ticker, year, industry))
         features.append(
             feature(
                 document_id=document_id,
@@ -233,5 +254,40 @@ def test_model_artifact_readers_round_trip_jsonl(tmp_path: Path) -> None:
     write_jsonl(assignments, assignments_path)
 
     assert len(read_labels_jsonl(labels_path)) == 6
-    assert len(read_features_jsonl(features_path)) == 13
+    assert len(read_features_jsonl(features_path)) == 19
     assert len(read_split_assignments_jsonl(assignments_path)) == 6
+
+
+def test_industry_mean_outputs_baseline_predictions() -> None:
+    labels, features, assignments = fixture_records()
+
+    result = build_model_artifacts(
+        run_id="model_test_run",
+        labels=labels,
+        features=features,
+        split_assignments=assignments,
+        models=["industry_mean"],
+        random_seed=42,
+    )
+
+    assert len(result.model_manifests) == 1
+    assert result.model_manifests[0].model_name == "industry_mean"
+    assert len(result.predictions) == 4
+
+
+def test_xgboost_outputs_optional_model_predictions() -> None:
+    pytest.importorskip("xgboost")
+    labels, features, assignments = fixture_records()
+
+    result = build_model_artifacts(
+        run_id="model_test_run",
+        labels=labels,
+        features=features,
+        split_assignments=assignments,
+        models=["xgboost"],
+        random_seed=42,
+    )
+
+    assert len(result.model_manifests) == 1
+    assert result.model_manifests[0].model_name == "xgboost"
+    assert len(result.predictions) == 4
