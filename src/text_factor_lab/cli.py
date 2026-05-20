@@ -111,6 +111,33 @@ def build_parser() -> argparse.ArgumentParser:
     feature_parser.add_argument("--tfidf-min-df", type=int, default=1)
     feature_parser.add_argument("--tfidf-max-df", type=float, default=1.0)
 
+    model_parser = subparsers.add_parser(
+        "build-models",
+        help="Train baseline and Ridge models from labels, features, and split assignments.",
+    )
+    model_parser.add_argument("--run-id", required=True)
+    model_parser.add_argument("--labels", required=True)
+    model_parser.add_argument("--features", required=True)
+    model_parser.add_argument("--split-assignments", required=True)
+    model_parser.add_argument("--predictions-output", required=True)
+    model_parser.add_argument("--model-manifest-output", required=True)
+    model_parser.add_argument("--tuning-log-output", required=True)
+    model_parser.add_argument(
+        "--model",
+        action="append",
+        choices=["historical_mean", "ridge"],
+        default=None,
+        help="Model to train, repeatable. Defaults to historical_mean and ridge.",
+    )
+    model_parser.add_argument("--random-seed", type=int, default=42)
+    model_parser.add_argument(
+        "--ridge-alpha",
+        action="append",
+        type=float,
+        default=None,
+        help="Ridge alpha grid value, repeatable.",
+    )
+
     return parser
 
 
@@ -280,6 +307,37 @@ def main(argv: list[str] | None = None) -> int:
             f"documents={len(document_texts)} features={len(features)} "
             f"vocabularies={len(vocabulary_by_split)} "
             f"feature_manifest={manifest_output}"
+        )
+        return 0
+
+    if args.command == "build-models":
+        from text_factor_lab.models import (
+            build_model_artifacts,
+            read_features_jsonl,
+            read_labels_jsonl,
+            read_split_assignments_jsonl,
+            write_model_manifest_json,
+            write_predictions_jsonl,
+            write_tuning_log_json,
+        )
+
+        result = build_model_artifacts(
+            run_id=args.run_id,
+            labels=read_labels_jsonl(args.labels),
+            features=read_features_jsonl(args.features),
+            split_assignments=read_split_assignments_jsonl(args.split_assignments),
+            models=args.model or ["historical_mean", "ridge"],
+            random_seed=args.random_seed,
+            ridge_alpha_grid=args.ridge_alpha,
+        )
+        write_predictions_jsonl(result.predictions, args.predictions_output)
+        write_model_manifest_json(result.model_manifests, args.model_manifest_output)
+        write_tuning_log_json(result.tuning_logs, args.tuning_log_output)
+        print(
+            "Built model artifacts. "
+            f"predictions={len(result.predictions)} "
+            f"models={len(result.model_manifests)} "
+            f"tuning_logs={len(result.tuning_logs)}"
         )
         return 0
 
