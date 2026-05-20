@@ -128,6 +128,7 @@ class RunManager:
                 "build-features",
                 "build-models",
                 "evaluate-models",
+                "audit",
             ],
             "full_orchestrator_sequence": [
                 "Data",
