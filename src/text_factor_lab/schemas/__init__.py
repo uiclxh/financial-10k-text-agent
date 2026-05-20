@@ -5,7 +5,7 @@ from text_factor_lab.schemas.document_manifest import DocumentManifestRecord
 from text_factor_lab.schemas.features import FeatureRecord
 from text_factor_lab.schemas.labels import LabelRecord
 from text_factor_lab.schemas.model_manifest import ModelManifestRecord
-from text_factor_lab.schemas.parsed_sections import ParsedSectionRecord
+from text_factor_lab.schemas.parsed_sections import ParsedSectionRecord, ParsingQualityReport
 from text_factor_lab.schemas.predictions import PredictionRecord
 from text_factor_lab.schemas.run_status import RunStatusRecord
 from text_factor_lab.schemas.splits import SplitAssignmentRecord, SplitLeakageRecord
@@ -18,6 +18,7 @@ __all__ = [
     "LabelRecord",
     "ModelManifestRecord",
     "ParsedSectionRecord",
+    "ParsingQualityReport",
     "PredictionRecord",
     "RunStatusRecord",
     "SplitAssignmentRecord",
