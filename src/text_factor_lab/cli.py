@@ -34,6 +34,23 @@ def build_parser() -> argparse.ArgumentParser:
 
     report_parser = subparsers.add_parser("report", help="Generate reports for a run.")
     report_parser.add_argument("--run-id", required=True, help="Run identifier.")
+    report_parser.add_argument(
+        "--run-dir",
+        help="Run artifact directory. Defaults to runs/text_factor_lab/<run-id>.",
+    )
+    report_parser.add_argument(
+        "--config",
+        help="Config path. Defaults to run_dir/config_snapshot.yaml.",
+    )
+    report_parser.add_argument(
+        "--output-dir",
+        help="Output directory. Defaults to the run artifact directory.",
+    )
+    report_parser.add_argument(
+        "--allow-failed-audit",
+        action="store_true",
+        help="Generate a diagnostic report even when audit_status=fail.",
+    )
 
     parse_parser = subparsers.add_parser(
         "parse-10k",
@@ -196,6 +213,25 @@ def main(argv: list[str] | None = None) -> int:
             f"run_id={report.run_id} status={report.audit_status} "
             f"coverage={report.coverage:.3f} failures={report.fail_count} "
             f"warnings={report.warn_count} formal_allowed={report.formal_result_allowed}"
+        )
+        return 0
+
+    if args.command == "report":
+        from text_factor_lab.reports import generate_run_report
+
+        result = generate_run_report(
+            run_id=args.run_id,
+            run_dir=args.run_dir,
+            config_path=args.config,
+            output_dir=args.output_dir,
+            allow_failed_audit=args.allow_failed_audit,
+        )
+        print(
+            "Report generated. "
+            f"run_id={result.run_id} conclusion={result.conclusion_level} "
+            f"formal_allowed={result.formal_result_allowed} "
+            f"markdown={result.report_markdown_path} "
+            f"summary={result.report_summary_path}"
         )
         return 0
 
