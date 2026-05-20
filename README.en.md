@@ -12,7 +12,7 @@ formal results that fail audit gates.
 
 ## Current Status
 
-Implemented through Step 12:
+Implemented through Step 13:
 
 1. Project scaffold
 2. Config and Pydantic schemas
@@ -26,6 +26,7 @@ Implemented through Step 12:
 10. Model layer: `historical_mean`, `industry_mean`, `ridge`, optional `xgboost`
 11. Evaluation metrics: RMSE, MAE, R2, directional accuracy, Pearson IC, rank IC
 12. Event-based long-short backtest and audit gate
+13. Report Agent: Markdown report, JSON summary, and formal/exploratory conclusion
 
 ## Key Commands
 
@@ -35,6 +36,7 @@ python -m text_factor_lab build-features --help
 python -m text_factor_lab build-models --help
 python -m text_factor_lab evaluate-models --help
 python -m text_factor_lab audit --help
+python -m text_factor_lab report --help
 ```
 
 ## Artifacts
@@ -54,6 +56,8 @@ The MVP pipeline works with these research artifacts:
 - `evaluation_metrics.json`
 - `backtest_results.json`
 - `audit_report.json`
+- `report.md`
+- `report_summary.json`
 
 ## Validation
 
@@ -65,7 +69,7 @@ python -m ruff check .
 Current local acceptance result:
 
 ```text
-74+ tests pass
+79+ tests pass
 ruff passes
 ```
 
@@ -73,6 +77,6 @@ ruff passes
 
 This is still an MVP, not a full research-grade production system. Remaining
 work includes full sector-neutral portfolio construction, richer portfolio time
-series, multiple-testing adjustment reports, final report generation, FinBERT /
-LLM embedding modules, earnings-call transcript ingestion, and credit-risk
-targets.
+series, multiple-testing adjustment reports, dashboard/deployment packaging,
+FinBERT / LLM embedding modules, earnings-call transcript ingestion, and
+credit-risk targets.
