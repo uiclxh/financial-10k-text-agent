@@ -1,24 +1,31 @@
 # Financial 10-K Text Agent
 
-This project implements the MVP v0 of the Financial Text Factor Lab Agent:
+Language / 语言:
 
-- 10-K only
-- US large-cap fixed universe
-- dictionary tone and TF-IDF features
-- realized volatility and CAR labels
-- rolling year split
-- baseline, Ridge, and XGBoost model comparison
-- audit report, factor cards, and reproducible run outputs
+- [中文](README.zh-CN.md)
+- [English](README.en.md)
 
-The governing specification is:
+## Snapshot
 
-```text
-FINANCIAL_TEXT_FACTOR_LAB_GLOBAL_WORKFLOW.md
-```
+Financial 10-K Text Agent is the MVP implementation of a financial text factor
+research agent. It is designed to build reproducible, auditable text factors from
+SEC filings, align them with event-time labels, and prepare leakage-safe rolling
+splits for out-of-sample empirical finance experiments.
 
-Initial local commands:
+Current release:
+
+- [v0.1.0: Foundation Release](docs/releases/v0.1.0.md)
+
+Quick validation:
 
 ```bash
 python -m pytest
-python -m text_factor_lab --help
+python -m ruff check .
+python -m text_factor_lab run --config configs/text_factor_lab/mvp_v0.yaml
+```
+
+The governing workflow specification is:
+
+```text
+FINANCIAL_TEXT_FACTOR_LAB_GLOBAL_WORKFLOW.md
 ```
