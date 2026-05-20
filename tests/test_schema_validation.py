@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from text_factor_lab.schemas import (
     DocumentManifestRecord,
+    FeatureManifestRecord,
     FeatureRecord,
     LabelRecord,
     ParsedSectionRecord,
@@ -110,6 +111,28 @@ def test_run_status_coverage_bounds() -> None:
             failure_reason=None,
             audit_status="not_run",
             coverage=1.5,
+        )
+
+
+def test_feature_manifest_requires_method_metadata() -> None:
+    with pytest.raises(ValidationError, match="dictionary"):
+        FeatureManifestRecord(
+            feature_version="dictionary-tone-v0",
+            feature_method="dictionary_tone",
+            dictionary_source=None,
+            dictionary_version=None,
+            dictionary_license_note=None,
+            dictionary_term_count=None,
+            tfidf_params=None,
+            fit_scope="no_fit_dictionary_counts",
+            split_id="split-1",
+            text_scope="full",
+            train_doc_count=10,
+            validation_doc_count=2,
+            test_doc_count=2,
+            vocabulary_size=0,
+            created_at_utc=utc(2020, 1, 1),
+            input_hashes={"document_manifest": "a" * 64},
         )
 
 
