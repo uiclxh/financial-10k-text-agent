@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.4.0] - 2026-05-20
+
+Step 13 release for the Report Agent.
+
+- Added `text_factor_lab.reports` with Markdown and JSON report generation.
+- Added `python -m text_factor_lab report` CLI support.
+- Added formal/exploratory/diagnostic conclusion levels.
+- Added report gating so failed audits do not produce formal reports by default.
+- Added run status update from `audited` to `reported`.
+- Added report generator tests and CLI coverage.
+
+Release notes: [docs/releases/v0.4.0.md](docs/releases/v0.4.0.md)
+
 ## [v0.3.0] - 2026-05-20
 
 Phase 3 release for Steps 9-12: models, evaluation, event-based backtest, and
@@ -46,5 +59,5 @@ Release notes: [docs/releases/v0.1.0.md](docs/releases/v0.1.0.md)
 
 ## Planned
 
-Step 13-14 will be released later after report generation, CLI polish,
-dashboard/deployment packaging, and reproducibility hardening are implemented.
+Step 14 will be released later after dashboard/deployment packaging and
+reproducibility hardening are implemented.
