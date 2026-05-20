@@ -134,7 +134,7 @@ def build_parser() -> argparse.ArgumentParser:
     model_parser.add_argument(
         "--model",
         action="append",
-        choices=["historical_mean", "ridge"],
+        choices=["historical_mean", "industry_mean", "ridge", "xgboost"],
         default=None,
         help="Model to train, repeatable. Defaults to historical_mean and ridge.",
     )
