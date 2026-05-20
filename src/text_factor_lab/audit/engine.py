@@ -21,6 +21,7 @@ from text_factor_lab.schemas import (
     PredictionRecord,
     RunStatusRecord,
     SplitLeakageRecord,
+    TuningLogRecord,
     load_experiment_config,
 )
 from text_factor_lab.schemas.base import StrictBaseModel
@@ -37,8 +38,10 @@ class AuditArtifactPaths:
     split_leakage: Path
     features: Path
     feature_manifest: Path
+    vocabulary: Path
     predictions: Path
     model_manifest: Path
+    tuning_log: Path
     evaluation_metrics: Path
     backtest_results: Path
     audit_report: Path
@@ -53,8 +56,10 @@ class AuditArtifactPaths:
             split_leakage=base / "split_leakage.jsonl",
             features=base / "features.jsonl",
             feature_manifest=base / "feature_manifest.json",
+            vocabulary=base / "vocabulary.json",
             predictions=base / "predictions.jsonl",
             model_manifest=base / "model_manifest.json",
+            tuning_log=base / "tuning_log.json",
             evaluation_metrics=base / "evaluation_metrics.json",
             backtest_results=base / "backtest_results.json",
             audit_report=base / "audit_report.json",
@@ -68,8 +73,10 @@ class LoadedAuditArtifacts:
     split_leakage: list[SplitLeakageRecord]
     features: list[FeatureRecord]
     feature_manifest: list[FeatureManifestRecord]
+    vocabulary: dict[str, dict[str, dict[str, int]]] | None
     predictions: list[PredictionRecord]
     model_manifest: list[ModelManifestRecord]
+    tuning_log: list[TuningLogRecord]
     evaluation_metrics: list[EvaluationMetricRecord]
     backtest_results: list[PortfolioBacktestRecord]
 
@@ -105,8 +112,20 @@ def audit_run(
             _prediction_alignment_check(run_id, artifacts.labels, artifacts.predictions),
             _split_leakage_check(run_id, artifacts.split_leakage),
             _feature_lookahead_check(run_id, artifacts.features),
+            _feature_manifest_fit_scope_check(run_id, artifacts.feature_manifest),
+            _feature_manifest_vocabulary_check(
+                run_id,
+                artifacts.feature_manifest,
+                artifacts.vocabulary,
+            ),
             _model_manifest_check(run_id, artifacts.model_manifest),
+            _model_selection_leakage_check(run_id, artifacts.tuning_log),
             _evaluation_check(run_id, artifacts.evaluation_metrics, artifacts.backtest_results),
+            _tested_specifications_check(
+                run_id,
+                artifacts.model_manifest,
+                artifacts.evaluation_metrics,
+            ),
             _formal_metadata_check(
                 run_id=run_id,
                 documents=artifacts.document_manifest,
@@ -182,6 +201,7 @@ def _load_artifacts(
         checks,
         required=formal == "formal_run",
     )
+    vocabulary = _load_vocabulary_json(paths.vocabulary)
     predictions = _load_jsonl_artifact(
         run_id, paths.predictions, PredictionRecord, checks, required=True
     )
@@ -190,6 +210,9 @@ def _load_artifacts(
     )
     evaluation_metrics = _load_json_array_artifact(
         run_id, paths.evaluation_metrics, EvaluationMetricRecord, checks, required=True
+    )
+    tuning_log = _load_json_array_artifact(
+        run_id, paths.tuning_log, TuningLogRecord, checks, required=True
     )
     backtest_results = _load_json_array_artifact(
         run_id, paths.backtest_results, PortfolioBacktestRecord, checks, required=True
@@ -200,8 +223,10 @@ def _load_artifacts(
         split_leakage=split_leakage,
         features=features,
         feature_manifest=feature_manifest,
+        vocabulary=vocabulary,
         predictions=predictions,
         model_manifest=model_manifest,
+        tuning_log=tuning_log,
         evaluation_metrics=evaluation_metrics,
         backtest_results=backtest_results,
     )
@@ -312,6 +337,18 @@ def _load_json_array_artifact(
     return records
 
 
+def _load_vocabulary_json(path: Path) -> dict[str, dict[str, dict[str, int]]] | None:
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    return payload
+
+
 def _coverage_check(
     run_id: str,
     labels: list[LabelRecord],
@@ -400,6 +437,120 @@ def _model_manifest_check(
         ["model_manifest.json"],
         observed_value=invalid,
         threshold=0,
+    )
+
+
+def _feature_manifest_fit_scope_check(
+    run_id: str,
+    feature_manifest: list[FeatureManifestRecord],
+) -> AuditCheckRecord:
+    invalid = [
+        record.feature_version
+        for record in feature_manifest
+        if record.feature_method == "tfidf" and record.fit_scope != "train_window_only"
+    ]
+    return _check(
+        run_id,
+        "tfidf_train_window_fit_scope",
+        "feature",
+        "fail" if invalid else "pass",
+        f"{len(invalid)} TF-IDF feature manifests are not train-window-only",
+        ["feature_manifest.json"],
+        observed_value=len(invalid),
+        threshold=0,
+    )
+
+
+def _feature_manifest_vocabulary_check(
+    run_id: str,
+    feature_manifest: list[FeatureManifestRecord],
+    vocabulary: dict[str, dict[str, dict[str, int]]] | None,
+) -> AuditCheckRecord:
+    tfidf_manifests = [record for record in feature_manifest if record.feature_method == "tfidf"]
+    if not tfidf_manifests:
+        return _check(
+            run_id,
+            "feature_manifest_vocabulary_alignment",
+            "feature",
+            "pass",
+            "No TF-IDF feature manifests require vocabulary alignment",
+            ["feature_manifest.json", "vocabulary.json"],
+            observed_value=0,
+        )
+    if vocabulary is None:
+        return _check(
+            run_id,
+            "feature_manifest_vocabulary_alignment",
+            "feature",
+            "fail",
+            "TF-IDF feature manifests exist but vocabulary.json is missing or invalid",
+            ["feature_manifest.json", "vocabulary.json"],
+            observed_value=len(tfidf_manifests),
+        )
+    mismatches = 0
+    for record in tfidf_manifests:
+        terms = vocabulary.get(record.split_id, {}).get(record.text_scope, {})
+        if len(terms) != record.vocabulary_size:
+            mismatches += 1
+    return _check(
+        run_id,
+        "feature_manifest_vocabulary_alignment",
+        "feature",
+        "fail" if mismatches else "pass",
+        f"{mismatches} TF-IDF feature manifests disagree with vocabulary.json",
+        ["feature_manifest.json", "vocabulary.json"],
+        observed_value=mismatches,
+        threshold=0,
+    )
+
+
+def _model_selection_leakage_check(
+    run_id: str,
+    tuning_logs: list[TuningLogRecord],
+) -> AuditCheckRecord:
+    leaked = [
+        record.model_id
+        for record in tuning_logs
+        if record.validation_metric not in {"not_applicable", "validation_rank_ic"}
+        or "test" in record.validation_metric.lower()
+    ]
+    return _check(
+        run_id,
+        "model_selection_validation_only",
+        "model",
+        "fail" if leaked else "pass",
+        f"{len(leaked)} tuning logs use a non-validation model-selection metric",
+        ["tuning_log.json"],
+        observed_value=len(leaked),
+        threshold=0,
+    )
+
+
+def _tested_specifications_check(
+    run_id: str,
+    model_manifest: list[ModelManifestRecord],
+    metrics: list[EvaluationMetricRecord],
+) -> AuditCheckRecord:
+    model_count = len({record.model_id for record in model_manifest})
+    target_count = len({record.target_name for record in metrics})
+    spec_count = len(
+        {
+            (record.model_id, record.target_name, record.split_id, record.role)
+            for record in metrics
+        }
+    )
+    status = "pass" if spec_count else "fail"
+    return _check(
+        run_id,
+        "tested_specifications_disclosure",
+        "audit",
+        status,
+        (
+            "Tested specifications are disclosed through model_manifest and "
+            "evaluation_metrics artifacts"
+        ),
+        ["model_manifest.json", "evaluation_metrics.json"],
+        observed_value=f"models={model_count}, targets={target_count}, specs={spec_count}",
     )
 
 
