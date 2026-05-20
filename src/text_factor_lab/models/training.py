@@ -23,7 +23,12 @@ from text_factor_lab.schemas import (
 
 MODEL_TRAINING_VERSION = "model-training-v0"
 DEFAULT_RIDGE_ALPHA_GRID = [0.01, 0.1, 1.0, 10.0, 100.0]
-ModelName = Literal["historical_mean", "ridge"]
+DEFAULT_XGBOOST_GRID = [
+    {"n_estimators": 50, "max_depth": 2, "learning_rate": 0.05},
+    {"n_estimators": 50, "max_depth": 3, "learning_rate": 0.05},
+    {"n_estimators": 100, "max_depth": 2, "learning_rate": 0.03},
+]
+ModelName = Literal["historical_mean", "industry_mean", "ridge", "xgboost"]
 
 
 @dataclass(frozen=True)
@@ -39,6 +44,7 @@ class ModelRow:
     assignment: SplitAssignmentRecord
     document_id: str
     features: dict[str, float]
+    industry: str
 
 
 def read_features_jsonl(path: str | Path) -> list[FeatureRecord]:
@@ -123,6 +129,23 @@ def build_model_artifacts(
             manifests.append(manifest)
             tuning_logs.append(tuning_log)
 
+        if "industry_mean" in models:
+            model_predictions, manifest, tuning_log = _fit_industry_mean(
+                run_id=run_id,
+                split_id=split_id,
+                target_name=target_name,
+                train_rows=train_rows,
+                validation_rows=validation_rows,
+                test_rows=test_rows,
+                feature_count=len(feature_names),
+                feature_version=_feature_version(split_id),
+                random_seed=random_seed,
+                window_payload=window_payload,
+            )
+            predictions.extend(model_predictions)
+            manifests.append(manifest)
+            tuning_logs.append(tuning_log)
+
         if "ridge" in models and feature_names:
             model_predictions, manifest, tuning_log = _fit_ridge(
                 run_id=run_id,
@@ -133,6 +156,22 @@ def build_model_artifacts(
                 test_rows=test_rows,
                 feature_names=feature_names,
                 alpha_grid=alpha_grid,
+                random_seed=random_seed,
+                window_payload=window_payload,
+            )
+            predictions.extend(model_predictions)
+            manifests.append(manifest)
+            tuning_logs.append(tuning_log)
+
+        if "xgboost" in models and feature_names:
+            model_predictions, manifest, tuning_log = _fit_xgboost(
+                run_id=run_id,
+                split_id=split_id,
+                target_name=target_name,
+                train_rows=train_rows,
+                validation_rows=validation_rows,
+                test_rows=test_rows,
+                feature_names=feature_names,
                 random_seed=random_seed,
                 window_payload=window_payload,
             )
@@ -154,6 +193,7 @@ def _build_rows_by_split_target_role(
     split_assignments: list[SplitAssignmentRecord],
 ) -> dict[str, dict[str, dict[str, list[ModelRow]]]]:
     features_by_document = _features_by_document_split_role(features)
+    industry_by_document = _industry_by_document(features)
     grouped: dict[str, dict[str, dict[str, list[ModelRow]]]] = defaultdict(
         lambda: defaultdict(lambda: defaultdict(list))
     )
@@ -174,9 +214,24 @@ def _build_rows_by_split_target_role(
                 assignment=assignment,
                 document_id=document_id,
                 features=row_features,
+                industry=industry_by_document.get(document_id, "__GLOBAL__"),
             )
         )
     return grouped
+
+
+def _industry_by_document(features: list[FeatureRecord]) -> dict[str, str]:
+    industries: dict[str, str] = {}
+    for feature in features:
+        if not isinstance(feature.feature_value, str):
+            continue
+        normalized_name = feature.feature_name.lower()
+        if feature.feature_family == "metadata" and normalized_name in {
+            "industry",
+            "metadata__industry",
+        }:
+            industries[feature.source_document_id] = feature.feature_value
+    return industries
 
 
 def _features_by_document_split_role(
@@ -295,6 +350,79 @@ def _fit_historical_mean(
     return predictions, manifest, tuning_log
 
 
+def _fit_industry_mean(
+    *,
+    run_id: str,
+    split_id: str,
+    target_name: str,
+    train_rows: list[ModelRow],
+    validation_rows: list[ModelRow],
+    test_rows: list[ModelRow],
+    feature_count: int,
+    feature_version: str,
+    random_seed: int,
+    window_payload: dict[str, str],
+) -> tuple[list[PredictionRecord], ModelManifestRecord, TuningLogRecord]:
+    global_mean = float(_targets(train_rows).mean())
+    industry_means = _industry_means(train_rows)
+    scored_rows = [*validation_rows, *test_rows]
+    industry_predictions = np.array(
+        [industry_means.get(row.industry, global_mean) for row in scored_rows],
+        dtype=float,
+    )
+    predictions = _array_predictions(
+        run_id=run_id,
+        model_id=f"industry_mean::{target_name}::{split_id}",
+        split_id=split_id,
+        target_name=target_name,
+        rows=scored_rows,
+        predictions=industry_predictions,
+        feature_version=feature_version,
+        window_payload=window_payload,
+    )
+    manifest = _model_manifest(
+        model_id=f"industry_mean::{target_name}::{split_id}",
+        model_name="industry_mean",
+        model_family="baseline",
+        model_level=0,
+        hyperparameters={
+            "statistic": "train_industry_mean",
+            "fallback": "train_global_mean",
+            "industry_source": "metadata feature if available",
+        },
+        random_seed=random_seed,
+        target_rows=(train_rows, validation_rows, test_rows),
+        feature_count=feature_count,
+        feature_version=feature_version,
+        label_version=train_rows[0].label.label_version,
+        window_payload=window_payload,
+    )
+    tuning_log = TuningLogRecord(
+        run_id=run_id,
+        split_id=split_id,
+        target_name=target_name,
+        model_id=manifest.model_id,
+        parameter_grid={},
+        searched_parameters=[],
+        validation_metric="not_applicable",
+        validation_scores=[],
+        selected_parameters={"statistic": "train_industry_mean"},
+        selection_reason=(
+            "Baseline uses training-window industry means and falls back to the "
+            "training global mean for unseen industries."
+        ),
+        created_at_utc=datetime.now(UTC),
+    )
+    return predictions, manifest, tuning_log
+
+
+def _industry_means(train_rows: list[ModelRow]) -> dict[str, float]:
+    grouped: dict[str, list[float]] = defaultdict(list)
+    for row in train_rows:
+        grouped[row.industry].append(row.label.target_value)
+    return {industry: float(np.mean(values)) for industry, values in grouped.items()}
+
+
 def _fit_ridge(
     *,
     run_id: str,
@@ -320,6 +448,7 @@ def _fit_ridge(
     validation_scores: list[float] = []
     best_alpha = float(alpha_grid[0])
     best_score = float("-inf")
+    best_validation_prediction = np.array([], dtype=float)
 
     for alpha in alpha_grid:
         model = Ridge(alpha=float(alpha), random_state=random_seed)
@@ -334,6 +463,7 @@ def _fit_ridge(
         if score > best_score:
             best_score = float(score)
             best_alpha = float(alpha)
+            best_validation_prediction = np.asarray(validation_prediction, dtype=float)
 
     x_fit_rows = [*train_rows, *validation_rows] if validation_rows else train_rows
     x_fit = _matrix(x_fit_rows, feature_names)
@@ -343,19 +473,31 @@ def _fit_ridge(
     final_model = Ridge(alpha=best_alpha, random_state=random_seed)
     final_model.fit(final_x, y_fit)
 
-    scored_rows = [*validation_rows, *test_rows]
-    x_score = _matrix(scored_rows, feature_names)
-    predictions_array = final_model.predict(final_scaler.transform(x_score)) if scored_rows else []
     predictions = _array_predictions(
         run_id=run_id,
         model_id=f"ridge::{target_name}::{split_id}",
         split_id=split_id,
         target_name=target_name,
-        rows=scored_rows,
-        predictions=predictions_array,
+        rows=validation_rows,
+        predictions=best_validation_prediction if validation_rows else np.array([], dtype=float),
         feature_version=_feature_version(split_id),
         window_payload=window_payload,
     )
+    if test_rows:
+        x_test = _matrix(test_rows, feature_names)
+        test_predictions = final_model.predict(final_scaler.transform(x_test))
+        predictions.extend(
+            _array_predictions(
+                run_id=run_id,
+                model_id=f"ridge::{target_name}::{split_id}",
+                split_id=split_id,
+                target_name=target_name,
+                rows=test_rows,
+                predictions=test_predictions,
+                feature_version=_feature_version(split_id),
+                window_payload=window_payload,
+            )
+        )
     manifest = _model_manifest(
         model_id=f"ridge::{target_name}::{split_id}",
         model_name="ridge",
@@ -379,6 +521,120 @@ def _fit_ridge(
         validation_metric="validation_rank_ic",
         validation_scores=validation_scores,
         selected_parameters={"alpha": best_alpha},
+        selection_reason="Selected highest validation rank IC; ties keep first grid value.",
+        created_at_utc=datetime.now(UTC),
+    )
+    return predictions, manifest, tuning_log
+
+
+def _fit_xgboost(
+    *,
+    run_id: str,
+    split_id: str,
+    target_name: str,
+    train_rows: list[ModelRow],
+    validation_rows: list[ModelRow],
+    test_rows: list[ModelRow],
+    feature_names: list[str],
+    random_seed: int,
+    window_payload: dict[str, str],
+) -> tuple[list[PredictionRecord], ModelManifestRecord, TuningLogRecord]:
+    try:
+        from xgboost import XGBRegressor
+    except ImportError as exc:  # pragma: no cover - depends on optional extra
+        raise RuntimeError(
+            "xgboost model requested but xgboost is not installed. "
+            "Install the ml optional dependencies first."
+        ) from exc
+
+    x_train = _matrix(train_rows, feature_names)
+    y_train = _targets(train_rows)
+    x_validation = _matrix(validation_rows, feature_names)
+    y_validation = _targets(validation_rows)
+    searched_parameters: list[dict[str, float | int | str]] = []
+    validation_scores: list[float] = []
+    best_params = DEFAULT_XGBOOST_GRID[0]
+    best_score = float("-inf")
+    best_validation_prediction = np.array([], dtype=float)
+
+    for params in DEFAULT_XGBOOST_GRID:
+        model = XGBRegressor(
+            objective="reg:squarederror",
+            random_state=random_seed,
+            n_jobs=1,
+            **params,
+        )
+        model.fit(x_train, y_train)
+        validation_prediction = (
+            model.predict(x_validation) if validation_rows else model.predict(x_train)
+        )
+        validation_target = y_validation if validation_rows else y_train
+        score = rank_ic(validation_target, validation_prediction)
+        searched_parameters.append(dict(params))
+        validation_scores.append(float(score))
+        if score > best_score:
+            best_score = float(score)
+            best_params = params
+            best_validation_prediction = np.asarray(validation_prediction, dtype=float)
+
+    x_fit_rows = [*train_rows, *validation_rows] if validation_rows else train_rows
+    final_model = XGBRegressor(
+        objective="reg:squarederror",
+        random_state=random_seed,
+        n_jobs=1,
+        **best_params,
+    )
+    final_model.fit(_matrix(x_fit_rows, feature_names), _targets(x_fit_rows))
+    predictions = _array_predictions(
+        run_id=run_id,
+        model_id=f"xgboost::{target_name}::{split_id}",
+        split_id=split_id,
+        target_name=target_name,
+        rows=validation_rows,
+        predictions=best_validation_prediction if validation_rows else np.array([], dtype=float),
+        feature_version=_feature_version(split_id),
+        window_payload=window_payload,
+    )
+    if test_rows:
+        predictions.extend(
+            _array_predictions(
+                run_id=run_id,
+                model_id=f"xgboost::{target_name}::{split_id}",
+                split_id=split_id,
+                target_name=target_name,
+                rows=test_rows,
+                predictions=final_model.predict(_matrix(test_rows, feature_names)),
+                feature_version=_feature_version(split_id),
+                window_payload=window_payload,
+            )
+        )
+    manifest = _model_manifest(
+        model_id=f"xgboost::{target_name}::{split_id}",
+        model_name="xgboost",
+        model_family="tree_boosting",
+        model_level=4,
+        hyperparameters=best_params,
+        random_seed=random_seed,
+        target_rows=(train_rows, validation_rows, test_rows),
+        feature_count=len(feature_names),
+        feature_version=_feature_version(split_id),
+        label_version=train_rows[0].label.label_version,
+        window_payload=window_payload,
+    )
+    tuning_log = TuningLogRecord(
+        run_id=run_id,
+        split_id=split_id,
+        target_name=target_name,
+        model_id=manifest.model_id,
+        parameter_grid={
+            "n_estimators": sorted({row["n_estimators"] for row in DEFAULT_XGBOOST_GRID}),
+            "max_depth": sorted({row["max_depth"] for row in DEFAULT_XGBOOST_GRID}),
+            "learning_rate": sorted({row["learning_rate"] for row in DEFAULT_XGBOOST_GRID}),
+        },
+        searched_parameters=searched_parameters,
+        validation_metric="validation_rank_ic",
+        validation_scores=validation_scores,
+        selected_parameters=best_params,
         selection_reason="Selected highest validation rank IC; ties keep first grid value.",
         created_at_utc=datetime.now(UTC),
     )
