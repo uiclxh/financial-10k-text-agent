@@ -11,7 +11,11 @@ from pathlib import Path
 from typing import Literal
 
 from text_factor_lab.schemas.document_manifest import DocumentManifestRecord
-from text_factor_lab.schemas.parsed_sections import ParsedSectionRecord, SectionKey
+from text_factor_lab.schemas.parsed_sections import (
+    ParsedSectionRecord,
+    ParsingQualityReport,
+    SectionKey,
+)
 
 SEC_10K_SECTION_PARSER_VERSION = "sec-10k-section-parser-v0"
 AmendmentPolicy = Literal["exclude", "include"]
@@ -107,6 +111,7 @@ class SectionExtractionResult:
     records: list[ParsedSectionRecord]
     section_text_by_key: dict[SectionKey, str]
     normalized_text: str
+    quality_report: ParsingQualityReport
 
 
 class SecHtmlTextExtractor(HTMLParser):
@@ -180,6 +185,19 @@ def normalize_sec_document_text(raw_document: str | bytes) -> str:
         normalized_lines.append(line)
         previous_blank = False
     return "\n".join(normalized_lines).strip()
+
+
+def _decode_raw_document(raw_document: str | bytes) -> str:
+    if isinstance(raw_document, bytes):
+        return raw_document.decode("utf-8", errors="replace")
+    return raw_document
+
+
+def raw_document_diagnostics(raw_document: str | bytes) -> tuple[bool, int]:
+    decoded = _decode_raw_document(raw_document)
+    inline_xbrl_detected = bool(re.search(r"<\s*ix:|xmlns:ix=", decoded, re.IGNORECASE))
+    table_tag_count = len(re.findall(r"<\s*table\b", decoded, flags=re.IGNORECASE))
+    return inline_xbrl_detected, table_tag_count
 
 
 def _line_offsets(text: str) -> list[tuple[int, str]]:
@@ -302,6 +320,7 @@ def parse_sec_10k_sections(
     if not should_parse_sec_filing(manifest_record.document_type):
         raise ValueError(f"Unsupported SEC filing type: {manifest_record.document_type}")
 
+    inline_xbrl_detected, table_tag_count = raw_document_diagnostics(raw_document)
     normalized_text = normalize_sec_document_text(raw_document)
     candidates = find_item_heading_candidates(normalized_text)
     selected_sections = target_sections or ["item_1", "item_1a", "item_3", "item_7"]
@@ -363,10 +382,75 @@ def parse_sec_10k_sections(
             )
         )
 
+    quality_report = build_parsing_quality_report(
+        manifest_record=manifest_record,
+        records=records,
+        candidates=candidates,
+        target_sections=selected_sections,
+        inline_xbrl_detected=inline_xbrl_detected,
+        table_tag_count=table_tag_count,
+        parser_version=parser_version,
+    )
+
     return SectionExtractionResult(
         records=records,
         section_text_by_key=section_text_by_key,
         normalized_text=normalized_text,
+        quality_report=quality_report,
+    )
+
+
+def build_parsing_quality_report(
+    *,
+    manifest_record: DocumentManifestRecord,
+    records: list[ParsedSectionRecord],
+    candidates: list[HeadingCandidate],
+    target_sections: list[SectionKey],
+    inline_xbrl_detected: bool,
+    table_tag_count: int,
+    parser_version: str,
+) -> ParsingQualityReport:
+    target_items = {SECTION_TO_TARGET_ITEM[section] for section in target_sections}
+    body_target_candidates = [
+        candidate
+        for candidate in candidates
+        if candidate.item in target_items and not candidate.is_toc_like
+    ]
+    duplicate_items = sorted(
+        item
+        for item in target_items
+        if sum(1 for candidate in body_target_candidates if candidate.item == item) > 1
+    )
+    parsed_count = sum(1 for record in records if record.parser_status == "parsed")
+    missing_count = sum(1 for record in records if record.parser_status == "missing")
+    failed_count = sum(1 for record in records if record.parser_status == "failed")
+    coverage = 0.0 if not target_sections else parsed_count / len(target_sections)
+    warnings: list[str] = []
+    if duplicate_items:
+        warnings.append(
+            "Duplicate target Item headings detected; parser chose the longest body span."
+        )
+    if inline_xbrl_detected:
+        warnings.append("Inline XBRL markup detected; section extraction should be spot-checked.")
+    if table_tag_count:
+        warnings.append("HTML table tags detected; table text order may require manual review.")
+    if missing_count or failed_count:
+        warnings.append("One or more target sections were missing or failed extraction.")
+
+    return ParsingQualityReport(
+        document_id=manifest_record.document_id,
+        parser_version=parser_version,
+        target_sections_total=len(target_sections),
+        parsed_sections=parsed_count,
+        missing_sections=missing_count,
+        failed_sections=failed_count,
+        parsed_coverage=coverage,
+        heading_candidates_total=len(candidates),
+        duplicate_target_heading_items=duplicate_items,
+        inline_xbrl_detected=inline_xbrl_detected,
+        table_tag_count=table_tag_count,
+        warnings=warnings,
+        sample_review_required=bool(warnings),
     )
 
 
@@ -402,6 +486,10 @@ def write_section_artifacts(
 
     normalized_path = root / "normalized_document_text.txt"
     normalized_path.write_text(result.normalized_text, encoding="utf-8")
+    quality_path = root / "parsing_quality_report.json"
+    with quality_path.open("w", encoding="utf-8") as file:
+        json.dump(result.quality_report.model_dump(mode="json"), file, indent=2)
+        file.write("\n")
     return records_with_paths
 
 
