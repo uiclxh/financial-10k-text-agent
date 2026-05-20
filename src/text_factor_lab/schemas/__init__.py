@@ -1,5 +1,6 @@
 """Schema definitions for configs, manifests, labels, features, and run status."""
 
+from text_factor_lab.schemas.audit import AuditCheckRecord, AuditReportRecord
 from text_factor_lab.schemas.config import ExperimentConfig, load_experiment_config
 from text_factor_lab.schemas.document_manifest import DocumentManifestRecord
 from text_factor_lab.schemas.evaluation import EvaluationMetricRecord, PortfolioBacktestRecord
@@ -15,6 +16,8 @@ from text_factor_lab.schemas.universe import UniverseQualityReport, UniverseReco
 __all__ = [
     "DocumentManifestRecord",
     "ExperimentConfig",
+    "AuditCheckRecord",
+    "AuditReportRecord",
     "EvaluationMetricRecord",
     "FeatureManifestRecord",
     "FeatureRecord",
