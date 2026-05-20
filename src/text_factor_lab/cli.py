@@ -22,6 +22,15 @@ def build_parser() -> argparse.ArgumentParser:
 
     audit_parser = subparsers.add_parser("audit", help="Audit a completed run.")
     audit_parser.add_argument("--run-id", required=True, help="Run identifier.")
+    audit_parser.add_argument(
+        "--run-dir",
+        help="Run artifact directory. Defaults to runs/text_factor_lab/<run-id>.",
+    )
+    audit_parser.add_argument(
+        "--config",
+        help="Config path. Defaults to run_dir/config_snapshot.yaml.",
+    )
+    audit_parser.add_argument("--coverage-threshold", type=float)
 
     report_parser = subparsers.add_parser("report", help="Generate reports for a run.")
     report_parser.add_argument("--run-id", required=True, help="Run identifier.")
@@ -170,6 +179,23 @@ def main(argv: list[str] | None = None) -> int:
             "Audit -> Report orchestration is not enabled yet. "
             f"run_id={status.run_id} status={manager.read_status().status} "
             f"run_dir={manager.run_dir}"
+        )
+        return 0
+
+    if args.command == "audit":
+        from text_factor_lab.audit import audit_run
+
+        report = audit_run(
+            run_id=args.run_id,
+            run_dir=args.run_dir,
+            config_path=args.config,
+            coverage_threshold=args.coverage_threshold,
+        )
+        print(
+            "Audit completed. "
+            f"run_id={report.run_id} status={report.audit_status} "
+            f"coverage={report.coverage:.3f} failures={report.fail_count} "
+            f"warnings={report.warn_count} formal_allowed={report.formal_result_allowed}"
         )
         return 0
 
