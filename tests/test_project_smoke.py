@@ -27,3 +27,4 @@ def test_run_command_validates_config(capsys) -> None:
 
     assert exit_code == 0
     assert "Run initialized" in captured.out
+    assert "independent CLI stages" in captured.out
