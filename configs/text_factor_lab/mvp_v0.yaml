@@ -1,6 +1,6 @@
 run:
   run_id: "tflab_10k_mvp_v0_001"
-  run_type: "formal_run"
+  run_type: "exploratory_run"
   random_seed: 42
   output_dir: "runs/text_factor_lab/tflab_10k_mvp_v0_001"
 
@@ -86,3 +86,4 @@ audit:
   require_available_time: true
   reject_on_lookahead: true
   reject_on_train_test_leakage: true
+
