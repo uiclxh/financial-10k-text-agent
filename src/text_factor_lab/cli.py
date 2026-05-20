@@ -93,6 +93,13 @@ def build_parser() -> argparse.ArgumentParser:
     feature_parser.add_argument("--features-output", required=True)
     feature_parser.add_argument("--vocabulary-output", required=True)
     feature_parser.add_argument(
+        "--feature-manifest-output",
+        help=(
+            "Output feature manifest JSON path. Defaults to feature_manifest.json "
+            "beside features."
+        ),
+    )
+    feature_parser.add_argument(
         "--method",
         action="append",
         choices=["dictionary_tone", "tfidf"],
@@ -210,12 +217,15 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "build-features":
         from text_factor_lab.features import (
+            build_dictionary_feature_manifests,
             build_dictionary_tone_features,
+            build_feature_input_hashes,
             build_tfidf_features,
             load_document_texts,
             read_document_manifest_jsonl,
             read_parsed_sections_jsonl,
             read_split_assignments_jsonl,
+            write_feature_manifest_json,
             write_features_jsonl,
             write_vocabulary_json,
         )
@@ -227,10 +237,23 @@ def main(argv: list[str] | None = None) -> int:
             manifest_by_document_id=manifest_by_document_id,
             parsed_sections=parsed_sections,
         )
+        input_hashes = build_feature_input_hashes(
+            document_manifest_path=args.document_manifest,
+            parsed_sections_path=args.parsed_sections,
+            split_assignments_path=args.split_assignments,
+        )
         features = []
+        feature_manifests = []
         vocabulary_by_split = {}
         if "dictionary_tone" in args.method:
             features.extend(build_dictionary_tone_features(document_texts))
+            feature_manifests.extend(
+                build_dictionary_feature_manifests(
+                    document_texts,
+                    split_assignments,
+                    input_hashes=input_hashes,
+                )
+            )
         if "tfidf" in args.method:
             tfidf_result = build_tfidf_features(
                 document_texts,
@@ -239,15 +262,24 @@ def main(argv: list[str] | None = None) -> int:
                 ngram_range=(args.tfidf_ngram_min, args.tfidf_ngram_max),
                 min_df=args.tfidf_min_df,
                 max_df=args.tfidf_max_df,
+                input_hashes=input_hashes,
             )
             features.extend(tfidf_result.features)
+            feature_manifests.extend(tfidf_result.feature_manifests)
             vocabulary_by_split = tfidf_result.vocabulary_by_split
+        manifest_output = (
+            Path(args.feature_manifest_output)
+            if args.feature_manifest_output
+            else Path(args.features_output).with_name("feature_manifest.json")
+        )
         write_features_jsonl(features, args.features_output)
         write_vocabulary_json(vocabulary_by_split, args.vocabulary_output)
+        write_feature_manifest_json(feature_manifests, manifest_output)
         print(
             "Built text features. "
             f"documents={len(document_texts)} features={len(features)} "
-            f"vocabularies={len(vocabulary_by_split)}"
+            f"vocabularies={len(vocabulary_by_split)} "
+            f"feature_manifest={manifest_output}"
         )
         return 0
 
