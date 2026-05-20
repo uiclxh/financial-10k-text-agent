@@ -20,11 +20,13 @@ class EvaluationMetricRecord(StrictBaseModel):
     observation_count: int = Field(ge=0)
     rmse: float
     mae: float
+    r_squared: float
+    directional_accuracy: float = Field(ge=0, le=1)
     pearson_ic: float
     rank_ic: float
     created_at_utc: datetime
 
-    @field_validator("rmse", "mae", "pearson_ic", "rank_ic")
+    @field_validator("rmse", "mae", "r_squared", "pearson_ic", "rank_ic")
     @classmethod
     def validate_finite_metric(cls, value: float) -> float:
         if not isfinite(value):
@@ -54,6 +56,7 @@ class PortfolioBacktestRecord(StrictBaseModel):
     turnover: float = Field(ge=0)
     transaction_cost_bps_one_way: float = Field(ge=0)
     net_long_short_return: float
+    sharpe_ratio: float
     newey_west_lag: int = Field(ge=0)
     newey_west_t_stat: float
     created_at_utc: datetime
@@ -61,6 +64,7 @@ class PortfolioBacktestRecord(StrictBaseModel):
     @field_validator(
         "gross_long_short_return",
         "net_long_short_return",
+        "sharpe_ratio",
         "newey_west_t_stat",
     )
     @classmethod
