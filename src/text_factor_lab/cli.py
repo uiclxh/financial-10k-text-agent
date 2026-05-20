@@ -119,8 +119,10 @@ def main(argv: list[str] | None = None) -> int:
         manager = RunManager.from_config_path(args.config)
         status = manager.initialize_run()
         print(
-            "Run initialized. Pipeline stages after initialization will be implemented "
-            f"in later steps. run_id={status.run_id} status={status.status} "
+            "Run initialized as a run manager workspace with independent CLI stages. "
+            "Full Data -> Parsing -> Label -> Split -> Feature -> Model -> Backtest -> "
+            "Audit -> Report orchestration is not enabled yet. "
+            f"run_id={status.run_id} status={manager.read_status().status} "
             f"run_dir={manager.run_dir}"
         )
         return 0
