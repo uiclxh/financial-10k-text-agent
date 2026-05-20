@@ -5,7 +5,9 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 
 from text_factor_lab.features import (
+    build_dictionary_feature_manifests,
     build_dictionary_tone_features,
+    build_feature_input_hashes,
     build_tfidf_features,
     document_id_from_label_id,
     load_document_texts,
@@ -13,6 +15,7 @@ from text_factor_lab.features import (
     read_parsed_sections_jsonl,
     read_split_assignments_jsonl,
     tokenize,
+    write_feature_manifest_json,
     write_features_jsonl,
     write_vocabulary_json,
 )
@@ -195,12 +198,20 @@ def test_tfidf_vocabulary_is_fit_on_train_documents_only(tmp_path: Path) -> None
         min_df=1,
         max_df=1.0,
     )
-    vocabulary = result.vocabulary_by_split["train_2010_2014__val_2015_2015__test_2016_2016"]
+    vocabulary = result.vocabulary_by_split[
+        "train_2010_2014__val_2015_2015__test_2016_2016"
+    ]["full"]
     feature_names = {feature.feature_name for feature in result.features}
 
     assert "risk" in vocabulary
     assert "moonshot" not in vocabulary
     assert "tfidf_full__moonshot" not in feature_names
+    assert "tfidf_item_1a__moonshot" not in feature_names
+    assert "tfidf_item_1a__risk" in feature_names
+    assert any(
+        manifest.text_scope == "item_1a" and manifest.vocabulary_size > 0
+        for manifest in result.feature_manifests
+    )
     assert any(":test" in feature.feature_version for feature in result.features)
 
 
@@ -221,15 +232,36 @@ def test_write_feature_and_vocabulary_artifacts(tmp_path: Path) -> None:
         read_split_assignments_jsonl(split_path),
         ngram_range=(1, 1),
     )
+    dictionary_manifests = build_dictionary_feature_manifests(
+        document_texts,
+        read_split_assignments_jsonl(split_path),
+        input_hashes=build_feature_input_hashes(
+            document_manifest_path=manifest_path,
+            parsed_sections_path=parsed_path,
+            split_assignments_path=split_path,
+        ),
+    )
     features_path = tmp_path / "features.jsonl"
     vocabulary_path = tmp_path / "vocabulary.json"
+    feature_manifest_path = tmp_path / "feature_manifest.json"
 
     write_features_jsonl(result.features, features_path)
     write_vocabulary_json(result.vocabulary_by_split, vocabulary_path)
+    write_feature_manifest_json(
+        [*dictionary_manifests, *result.feature_manifests],
+        feature_manifest_path,
+    )
 
     assert features_path.read_text(encoding="utf-8").count("\n") > 0
     vocabulary_payload = json.loads(vocabulary_path.read_text(encoding="utf-8"))
     assert "train_2010_2014__val_2015_2015__test_2016_2016" in vocabulary_payload
+    assert "item_1a" in vocabulary_payload["train_2010_2014__val_2015_2015__test_2016_2016"]
+    manifest_payload = json.loads(feature_manifest_path.read_text(encoding="utf-8"))
+    assert {record["feature_method"] for record in manifest_payload} == {
+        "dictionary_tone",
+        "tfidf",
+    }
+    assert all("input_hashes" in record for record in manifest_payload)
 
 
 def test_build_features_cli_writes_dictionary_and_tfidf_outputs(tmp_path: Path, capsys) -> None:
@@ -238,6 +270,7 @@ def test_build_features_cli_writes_dictionary_and_tfidf_outputs(tmp_path: Path, 
     manifest_path, parsed_path, split_path = build_text_fixture(tmp_path)
     features_path = tmp_path / "features.jsonl"
     vocabulary_path = tmp_path / "vocabulary.json"
+    feature_manifest_path = tmp_path / "feature_manifest.json"
 
     exit_code = main(
         [
@@ -252,6 +285,8 @@ def test_build_features_cli_writes_dictionary_and_tfidf_outputs(tmp_path: Path, 
             str(features_path),
             "--vocabulary-output",
             str(vocabulary_path),
+            "--feature-manifest-output",
+            str(feature_manifest_path),
             "--method",
             "dictionary_tone",
             "--method",
@@ -268,3 +303,6 @@ def test_build_features_cli_writes_dictionary_and_tfidf_outputs(tmp_path: Path, 
     assert "documents=3" in captured.out
     assert features_path.exists()
     assert vocabulary_path.exists()
+    assert feature_manifest_path.exists()
+    manifest_payload = json.loads(feature_manifest_path.read_text(encoding="utf-8"))
+    assert any(record["text_scope"] == "item_1a" for record in manifest_payload)
