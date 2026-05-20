@@ -16,6 +16,7 @@ def test_cli_parser_has_expected_commands() -> None:
     assert "parse-10k" in help_text
     assert "build-labels" in help_text
     assert "build-splits" in help_text
+    assert "build-features" in help_text
 
 
 def test_run_command_validates_config(capsys) -> None:
