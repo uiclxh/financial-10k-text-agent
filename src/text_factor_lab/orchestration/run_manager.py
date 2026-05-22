@@ -71,6 +71,9 @@ class RunManager:
         self.tuning_log_path = self.run_dir / "tuning_log.json"
         self.evaluation_metrics_path = self.run_dir / "evaluation_metrics.json"
         self.backtest_results_path = self.run_dir / "backtest_results.json"
+        self.portfolio_weights_path = self.run_dir / "portfolio_weights.jsonl"
+        self.portfolio_returns_path = self.run_dir / "portfolio_returns.jsonl"
+        self.portfolio_metrics_path = self.run_dir / "portfolio_metrics.json"
         self.audit_report_path = self.run_dir / "audit_report.json"
         self.parsing_quality_report_path = self.run_dir / "parsing_quality_report.json"
 
@@ -639,7 +642,13 @@ class RunManager:
         return True
 
     def _run_evaluation_stage(self, records: list[dict[str, Any]]) -> bool:
-        if self.evaluation_metrics_path.exists() and self.backtest_results_path.exists():
+        if (
+            self.evaluation_metrics_path.exists()
+            and self.backtest_results_path.exists()
+            and self.portfolio_weights_path.exists()
+            and self.portfolio_returns_path.exists()
+            and self.portfolio_metrics_path.exists()
+        ):
             self.update_status("evaluated")
             self._append_stage(records, stage="evaluation", status="skipped_existing")
             return True
@@ -658,6 +667,9 @@ class RunManager:
             read_predictions_jsonl,
             write_backtest_results_json,
             write_evaluation_metrics_json,
+            write_portfolio_metrics_json,
+            write_portfolio_returns_jsonl,
+            write_portfolio_weights_jsonl,
         )
 
         result = build_evaluation_artifacts(
@@ -669,13 +681,28 @@ class RunManager:
         )
         write_evaluation_metrics_json(result.metrics, self.evaluation_metrics_path)
         write_backtest_results_json(result.backtests, self.backtest_results_path)
+        write_portfolio_weights_jsonl(result.portfolio_weights, self.portfolio_weights_path)
+        write_portfolio_returns_jsonl(result.portfolio_returns, self.portfolio_returns_path)
+        write_portfolio_metrics_json(result.portfolio_metrics, self.portfolio_metrics_path)
         self.update_status("evaluated")
         self._append_stage(
             records,
             stage="evaluation",
             status="completed",
-            outputs=[self.evaluation_metrics_path, self.backtest_results_path],
-            metrics={"metrics": len(result.metrics), "backtests": len(result.backtests)},
+            outputs=[
+                self.evaluation_metrics_path,
+                self.backtest_results_path,
+                self.portfolio_weights_path,
+                self.portfolio_returns_path,
+                self.portfolio_metrics_path,
+            ],
+            metrics={
+                "metrics": len(result.metrics),
+                "backtests": len(result.backtests),
+                "portfolio_weights": len(result.portfolio_weights),
+                "portfolio_returns": len(result.portfolio_returns),
+                "portfolio_metrics": len(result.portfolio_metrics),
+            },
         )
         return True
 

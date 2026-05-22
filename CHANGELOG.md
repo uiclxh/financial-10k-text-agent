@@ -1,5 +1,26 @@
 # Changelog
 
+## [v0.8.0] - 2026-05-22
+
+Portfolio time-series backtest release.
+
+- Added portfolio weight, return, and metric schemas.
+- Added `portfolio_weights.jsonl`, `portfolio_returns.jsonl`, and
+  `portfolio_metrics.json` artifacts.
+- Added equal-weight dollar-neutral top/bottom portfolio construction from test
+  factor scores.
+- Added rebalance-level normalized weights, previous weights, trade weights, and
+  realized turnover.
+- Added portfolio return series with gross return, transaction cost, net return,
+  exposure diagnostics, active position counts, and turnover.
+- Added portfolio-level cumulative return, annualized return, annualized
+  volatility, Sharpe ratio, max drawdown, hit rate, and average exposure metrics.
+- Extended the local orchestrator and `evaluate-models` CLI to write the new
+  portfolio artifacts.
+- Added tests for portfolio time-series turnover and end-to-end artifact output.
+
+Release notes: [docs/releases/v0.8.0.md](docs/releases/v0.8.0.md)
+
 ## [v0.7.0] - 2026-05-22
 
 Research-grade event calendar release.

@@ -89,7 +89,7 @@ python -m ruff check .
 Current local acceptance result:
 
 ```text
-91 tests pass
+92 tests pass
 ruff passes
 ```
 

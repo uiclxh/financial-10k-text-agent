@@ -110,6 +110,9 @@ def test_build_evaluation_artifacts_computes_metrics_and_backtests() -> None:
 
     assert len(result.metrics) == 4
     assert len(result.backtests) == 1
+    assert len(result.portfolio_weights) == 2
+    assert len(result.portfolio_returns) == 1
+    assert len(result.portfolio_metrics) == 1
     test_metric = next(
         record
         for record in result.metrics
@@ -126,6 +129,58 @@ def test_build_evaluation_artifacts_computes_metrics_and_backtests() -> None:
     assert backtest.net_long_short_return == 0.498
     assert backtest.turnover == 2.0
     assert backtest.sharpe_ratio != 0.0
+    portfolio_return = result.portfolio_returns[0]
+    assert portfolio_return.gross_exposure == 2.0
+    assert portfolio_return.net_exposure == 0.0
+    assert portfolio_return.turnover == 1.0
+    assert portfolio_return.active_position_count == 2
+    assert result.portfolio_metrics[0].observation_count == 1
+
+
+def test_portfolio_time_series_tracks_rebalance_turnover() -> None:
+    labels = [
+        label("sec:test:a", "AAA", 2016, -0.2),
+        label("sec:test:b", "BBB", 2016, 0.4),
+        label("sec:test:c", "AAA", 2016, 0.1).model_copy(
+            update={
+                "label_id": "sec:test:c:CAR_1_20:labels-v0",
+                "event_time_utc": utc(2016, 4, 1),
+                "prediction_time_utc": utc(2016, 4, 1),
+                "label_start_date": date(2016, 4, 2),
+                "label_end_date": date(2016, 4, 30),
+            }
+        ),
+        label("sec:test:d", "CCC", 2016, 0.3).model_copy(
+            update={
+                "label_id": "sec:test:d:CAR_1_20:labels-v0",
+                "event_time_utc": utc(2016, 4, 1),
+                "prediction_time_utc": utc(2016, 4, 1),
+                "label_start_date": date(2016, 4, 2),
+                "label_end_date": date(2016, 4, 30),
+            }
+        ),
+    ]
+    predictions = [
+        prediction(labels[0], model_id="ridge::CAR_1_20::split", role="test", value=0.1),
+        prediction(labels[1], model_id="ridge::CAR_1_20::split", role="test", value=0.9),
+        prediction(labels[2], model_id="ridge::CAR_1_20::split", role="test", value=0.8),
+        prediction(labels[3], model_id="ridge::CAR_1_20::split", role="test", value=0.2),
+    ]
+    predictions[2] = predictions[2].model_copy(update={"event_date": date(2016, 4, 1)})
+    predictions[3] = predictions[3].model_copy(update={"event_date": date(2016, 4, 1)})
+
+    result = build_evaluation_artifacts(
+        run_id="eval_test_run",
+        predictions=predictions,
+        labels=labels,
+        transaction_cost_bps_one_way=10.0,
+        newey_west_lag=1,
+    )
+
+    assert len(result.portfolio_returns) == 2
+    assert [record.turnover for record in result.portfolio_returns] == [1.0, 2.0]
+    assert result.portfolio_metrics[0].observation_count == 2
+    assert result.portfolio_metrics[0].average_gross_exposure == 2.0
 
 
 def test_newey_west_t_stat_handles_small_samples() -> None:
@@ -141,6 +196,9 @@ def test_evaluate_models_cli_writes_artifacts(tmp_path: Path, capsys) -> None:
     predictions_path = tmp_path / "predictions.jsonl"
     metrics_path = tmp_path / "evaluation_metrics.json"
     backtest_path = tmp_path / "backtest_results.json"
+    weights_path = tmp_path / "portfolio_weights.jsonl"
+    returns_path = tmp_path / "portfolio_returns.jsonl"
+    portfolio_metrics_path = tmp_path / "portfolio_metrics.json"
     write_jsonl(labels, labels_path)
     write_jsonl(predictions, predictions_path)
 
@@ -157,6 +215,12 @@ def test_evaluate_models_cli_writes_artifacts(tmp_path: Path, capsys) -> None:
             str(metrics_path),
             "--backtest-output",
             str(backtest_path),
+            "--portfolio-weights-output",
+            str(weights_path),
+            "--portfolio-returns-output",
+            str(returns_path),
+            "--portfolio-metrics-output",
+            str(portfolio_metrics_path),
             "--transaction-cost-bps-one-way",
             "10",
             "--newey-west-lag",
@@ -167,8 +231,11 @@ def test_evaluate_models_cli_writes_artifacts(tmp_path: Path, capsys) -> None:
 
     assert exit_code == 0
     assert "metrics=4" in captured.out
+    assert "portfolio_returns=1" in captured.out
     assert len(json.loads(metrics_path.read_text(encoding="utf-8"))) == 4
     assert len(json.loads(backtest_path.read_text(encoding="utf-8"))) == 1
+    assert len(returns_path.read_text(encoding="utf-8").splitlines()) == 1
+    assert len(json.loads(portfolio_metrics_path.read_text(encoding="utf-8"))) == 1
 
 
 def test_backtest_readers_round_trip_jsonl(tmp_path: Path) -> None:

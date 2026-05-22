@@ -11,6 +11,9 @@ from text_factor_lab.backtest.evaluation import (
     read_predictions_jsonl,
     write_backtest_results_json,
     write_evaluation_metrics_json,
+    write_portfolio_metrics_json,
+    write_portfolio_returns_jsonl,
+    write_portfolio_weights_jsonl,
 )
 
 __all__ = [
@@ -24,5 +27,8 @@ __all__ = [
     "read_predictions_jsonl",
     "write_backtest_results_json",
     "write_evaluation_metrics_json",
+    "write_portfolio_metrics_json",
+    "write_portfolio_returns_jsonl",
+    "write_portfolio_weights_jsonl",
 ]
 

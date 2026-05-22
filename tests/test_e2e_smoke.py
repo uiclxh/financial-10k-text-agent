@@ -23,5 +23,8 @@ def test_e2e_smoke_config_runs_full_pipeline(tmp_path: Path) -> None:
     assert (run_dir / "parsed_sections.jsonl").exists()
     assert (run_dir / "features.jsonl").exists()
     assert (run_dir / "predictions.jsonl").exists()
+    assert (run_dir / "portfolio_weights.jsonl").exists()
+    assert (run_dir / "portfolio_returns.jsonl").exists()
+    assert (run_dir / "portfolio_metrics.json").exists()
     assert (run_dir / "audit_report.json").exists()
     assert (run_dir / "report.md").exists()

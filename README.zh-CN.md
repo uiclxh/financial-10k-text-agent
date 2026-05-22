@@ -86,7 +86,7 @@ python -m ruff check .
 当前本地验收结果：
 
 ```text
-91 tests pass
+92 tests pass
 ruff passes
 ```
 

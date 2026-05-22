@@ -183,6 +183,9 @@ def build_parser() -> argparse.ArgumentParser:
     eval_parser.add_argument("--labels", required=True)
     eval_parser.add_argument("--metrics-output", required=True)
     eval_parser.add_argument("--backtest-output", required=True)
+    eval_parser.add_argument("--portfolio-weights-output")
+    eval_parser.add_argument("--portfolio-returns-output")
+    eval_parser.add_argument("--portfolio-metrics-output")
     eval_parser.add_argument("--transaction-cost-bps-one-way", type=float, default=10.0)
     eval_parser.add_argument("--newey-west-lag", type=int, default=19)
 
@@ -443,6 +446,9 @@ def main(argv: list[str] | None = None) -> int:
             read_predictions_jsonl,
             write_backtest_results_json,
             write_evaluation_metrics_json,
+            write_portfolio_metrics_json,
+            write_portfolio_returns_jsonl,
+            write_portfolio_weights_jsonl,
         )
 
         result = build_evaluation_artifacts(
@@ -454,9 +460,16 @@ def main(argv: list[str] | None = None) -> int:
         )
         write_evaluation_metrics_json(result.metrics, args.metrics_output)
         write_backtest_results_json(result.backtests, args.backtest_output)
+        if args.portfolio_weights_output:
+            write_portfolio_weights_jsonl(result.portfolio_weights, args.portfolio_weights_output)
+        if args.portfolio_returns_output:
+            write_portfolio_returns_jsonl(result.portfolio_returns, args.portfolio_returns_output)
+        if args.portfolio_metrics_output:
+            write_portfolio_metrics_json(result.portfolio_metrics, args.portfolio_metrics_output)
         print(
             "Built evaluation artifacts. "
-            f"metrics={len(result.metrics)} backtests={len(result.backtests)}"
+            f"metrics={len(result.metrics)} backtests={len(result.backtests)} "
+            f"portfolio_returns={len(result.portfolio_returns)}"
         )
         return 0
 
