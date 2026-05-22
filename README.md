@@ -58,7 +58,7 @@ rolling split -> models -> predictions -> evaluation/backtest
 本地验收：
 
 ```text
-84 tests passed
+91 tests passed
 ruff passed
 ```
 
@@ -103,6 +103,7 @@ python -m text_factor_lab report --help
 
 ```text
 src/text_factor_lab/
+  calendar/        market-calendar event-date resolver
   data/            SEC metadata, prices, universe
   parsing/         SEC 10-K section parser
   labels/          event labels and target construction
@@ -122,7 +123,7 @@ examples/e2e_smoke/
   demo manifest and tiny price panel for CI/local validation
 
 docs/releases/
-  v0.1.0 ... v0.6.0 release notes
+  v0.1.0 ... v0.7.0 release notes
 ```
 
 ## Release 路线
@@ -135,6 +136,7 @@ docs/releases/
 | [v0.4.0](docs/releases/v0.4.0.md) | Report Agent | Markdown report, JSON summary, audit-gated conclusion |
 | [v0.5.0](docs/releases/v0.5.0.md) | Orchestrator | artifact-aware `run --execute` controller |
 | [v0.6.0](docs/releases/v0.6.0.md) | Deployment MVP | CI, Dockerfile, Makefile, e2e smoke run |
+| [v0.7.0](docs/releases/v0.7.0.md) | Event Calendar | NYSE trading calendar, early close, event-date audit fields |
 
 ## 重要边界
 

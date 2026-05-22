@@ -27,6 +27,7 @@ empirical finance pipeline：文本解析、事件标签、滚动切分、特征
 12. event-based long-short backtest 与 audit gate
 13. Report Agent：生成 `report.md`、`report_summary.json` 与结论等级
 14. 本地 MVP 部署：配置化输入路径、本地 raw 10-K 解析编排、复现文档、GitHub Actions CI
+15. 研究级事件日对齐：NYSE 交易日历、节假日、提前收盘和 manifest 审计字段
 
 ## 关键命令
 
@@ -85,7 +86,7 @@ python -m ruff check .
 当前本地验收结果：
 
 ```text
-84 tests pass
+91 tests pass
 ruff passes
 ```
 

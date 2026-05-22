@@ -25,14 +25,32 @@ class DocumentManifestRecord(StrictBaseModel):
     available_time_utc: datetime
     event_time_utc: datetime
     event_date: date
+    raw_filing_date: date | None = None
+    acceptance_time_utc: datetime | None = None
+    market_open_utc: datetime | None = None
+    market_close_utc: datetime | None = None
+    is_trading_day: bool | None = None
+    is_early_close: bool | None = None
+    event_date_policy: str | None = None
+    resolved_event_date: date | None = None
+    resolved_event_time_version: str | None = None
     timezone: str = Field(min_length=1)
     hash_sha256: str = Field(min_length=64, max_length=64)
     license_note: str = Field(min_length=1)
     parser_version: str = Field(min_length=1)
 
-    @field_validator("retrieval_time_utc", "available_time_utc", "event_time_utc")
+    @field_validator(
+        "retrieval_time_utc",
+        "available_time_utc",
+        "event_time_utc",
+        "acceptance_time_utc",
+        "market_open_utc",
+        "market_close_utc",
+    )
     @classmethod
-    def validate_aware_datetime(cls, value: datetime) -> datetime:
+    def validate_aware_datetime(cls, value: datetime | None) -> datetime | None:
+        if value is None:
+            return value
         if not is_timezone_aware(value):
             raise ValueError("datetime fields must be timezone-aware")
         return value

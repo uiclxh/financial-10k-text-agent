@@ -3,13 +3,13 @@ from __future__ import annotations
 import hashlib
 import json
 import time
-from datetime import UTC, date, datetime, timedelta
-from datetime import time as dt_time
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
+from text_factor_lab.calendar import EventDateResolution, resolve_event_date
 from text_factor_lab.schemas.document_manifest import DocumentManifestRecord
 from text_factor_lab.schemas.universe import UniverseRecord
 
@@ -17,8 +17,6 @@ SEC_SUBMISSIONS_BASE_URL = "https://data.sec.gov/submissions"
 SEC_ARCHIVES_BASE_URL = "https://www.sec.gov/Archives/edgar/data"
 SEC_LICENSE_NOTE = "Public SEC EDGAR filing; comply with SEC fair-access policy."
 SEC_ACCEPTANCE_TIMEZONE = ZoneInfo("America/New_York")
-US_EQUITY_MARKET_OPEN = dt_time(9, 30)
-US_EQUITY_MARKET_CLOSE = dt_time(16, 0)
 
 
 def normalize_cik(cik: str) -> str:
@@ -85,16 +83,16 @@ def parse_sec_acceptance_datetime(value: str) -> datetime:
     return local_dt.astimezone(UTC)
 
 
-def is_us_equity_trading_day(day: date, holidays: set[date] | None = None) -> bool:
-    holiday_set = holidays or set()
-    return day.weekday() < 5 and day not in holiday_set
-
-
-def next_us_equity_trading_day(day: date, holidays: set[date] | None = None) -> date:
-    candidate = day
-    while not is_us_equity_trading_day(candidate, holidays):
-        candidate += timedelta(days=1)
-    return candidate
+def sec_event_date_resolution_from_acceptance_time(
+    acceptance_time_utc: datetime,
+    *,
+    exchange: str = "NYSE",
+) -> EventDateResolution:
+    return resolve_event_date(
+        acceptance_time_utc,
+        exchange=exchange,
+        timezone="America/New_York",
+    )
 
 
 def sec_event_date_from_acceptance_time(
@@ -102,13 +100,10 @@ def sec_event_date_from_acceptance_time(
     *,
     holidays: set[date] | None = None,
 ) -> date:
-    local_time = acceptance_time_utc.astimezone(SEC_ACCEPTANCE_TIMEZONE)
-    local_date = local_time.date()
-    if not is_us_equity_trading_day(local_date, holidays):
-        return next_us_equity_trading_day(local_date, holidays)
-    if local_time.time() > US_EQUITY_MARKET_CLOSE:
-        return next_us_equity_trading_day(local_date + timedelta(days=1), holidays)
-    return local_date
+    del holidays
+    return sec_event_date_resolution_from_acceptance_time(
+        acceptance_time_utc,
+    ).resolved_event_date
 
 
 def zip_recent_filings(recent: dict[str, list[Any]]) -> list[dict[str, Any]]:
@@ -146,7 +141,7 @@ def filing_row_to_manifest_record(
     primary_document = str(filing_row["primaryDocument"])
     acceptance_utc = parse_sec_acceptance_datetime(str(filing_row["acceptanceDateTime"]))
     filing_date = date.fromisoformat(str(filing_row["filingDate"]))
-    event_date = sec_event_date_from_acceptance_time(acceptance_utc)
+    event_resolution = sec_event_date_resolution_from_acceptance_time(acceptance_utc)
     fiscal_year = int(str(filing_row.get("reportDate") or filing_date)[:4])
 
     return DocumentManifestRecord(
@@ -171,7 +166,16 @@ def filing_row_to_manifest_record(
         retrieval_time_utc=datetime.now(UTC),
         available_time_utc=acceptance_utc,
         event_time_utc=acceptance_utc,
-        event_date=event_date,
+        event_date=event_resolution.resolved_event_date,
+        raw_filing_date=filing_date,
+        acceptance_time_utc=acceptance_utc,
+        market_open_utc=event_resolution.market_open_utc,
+        market_close_utc=event_resolution.market_close_utc,
+        is_trading_day=event_resolution.is_trading_day,
+        is_early_close=event_resolution.is_early_close,
+        event_date_policy=event_resolution.event_date_policy,
+        resolved_event_date=event_resolution.resolved_event_date,
+        resolved_event_time_version=event_resolution.resolver_version,
         timezone="America/New_York",
         hash_sha256=document_hash_sha256,
         license_note=SEC_LICENSE_NOTE,

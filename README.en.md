@@ -29,6 +29,8 @@ Implemented through Step 14:
 13. Report Agent: Markdown report, JSON summary, and formal/exploratory conclusion
 14. Complete local MVP deployment: configured input paths, local raw 10-K
     parsing orchestration, reproducibility docs, and GitHub Actions CI
+15. Research-grade event-date alignment: NYSE calendar, holidays, early closes,
+    and manifest audit fields
 
 ## Key Commands
 
@@ -87,7 +89,7 @@ python -m ruff check .
 Current local acceptance result:
 
 ```text
-84 tests pass
+91 tests pass
 ruff passes
 ```
 

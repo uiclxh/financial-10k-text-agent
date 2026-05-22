@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "financial-10k-text-agent"
-version = "0.6.0"
+version = "0.7.0"
 description = "Financial Text Factor Lab Agent MVP v0"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "numpy>=1.26",
   "pandas>=2.2",
+  "pandas-market-calendars>=4.0",
   "pydantic>=2.7",
   "pyyaml>=6.0",
   "scikit-learn>=1.4",

@@ -1,5 +1,22 @@
 # Changelog
 
+## [v0.7.0] - 2026-05-22
+
+Research-grade event calendar release.
+
+- Added `text_factor_lab.calendar` with NYSE market-session resolution powered
+  by `pandas-market-calendars`.
+- Replaced fixed 16:00 SEC event-date logic with market-calendar open/close
+  schedule handling.
+- Added event-date audit metadata to `DocumentManifestRecord`, including raw
+  filing date, acceptance time, market open/close, early-close flag, event-date
+  policy, resolved event date, and resolver version.
+- Added tests for pre-open, intraday, after-close, weekend, holiday, and
+  early-close filings.
+- Added SEC manifest tests for event-date audit fields.
+
+Release notes: [docs/releases/v0.7.0.md](docs/releases/v0.7.0.md)
+
 ## [v0.6.0] - 2026-05-21
 
 Step 14 release for complete local MVP deployment packaging.

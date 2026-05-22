@@ -13,6 +13,7 @@ from text_factor_lab.data import (
     normalize_cik,
     parse_sec_acceptance_datetime,
     sec_event_date_from_acceptance_time,
+    sec_event_date_resolution_from_acceptance_time,
     write_manifest_jsonl,
 )
 from text_factor_lab.data.sec_edgar import sha256_bytes
@@ -57,6 +58,18 @@ def test_sec_event_date_uses_us_equity_trading_session_rules() -> None:
     assert sec_event_date_from_acceptance_time(saturday).isoformat() == "2023-11-06"
 
 
+def test_sec_event_date_resolution_exposes_market_calendar_audit_fields() -> None:
+    after_close_friday = parse_sec_acceptance_datetime("20231103160100")
+
+    resolution = sec_event_date_resolution_from_acceptance_time(after_close_friday)
+
+    assert resolution.raw_event_date.isoformat() == "2023-11-03"
+    assert resolution.resolved_event_date.isoformat() == "2023-11-06"
+    assert resolution.event_date_policy == "after_close"
+    assert resolution.market_open_utc.isoformat() == "2023-11-06T14:30:00+00:00"
+    assert resolution.market_close_utc.isoformat() == "2023-11-06T21:00:00+00:00"
+
+
 def test_extract_annual_filings_filters_10k() -> None:
     filings = extract_annual_filings(load_fixture())
 
@@ -80,7 +93,14 @@ def test_filing_row_to_manifest_record(tmp_path: Path) -> None:
     assert record.ticker == "AAPL"
     assert record.fiscal_year == 2023
     assert record.event_date.isoformat() == "2023-11-03"
+    assert record.raw_filing_date.isoformat() == "2023-11-03"
     assert record.available_time_utc.isoformat() == "2023-11-02T22:30:12+00:00"
+    assert record.acceptance_time_utc is not None
+    assert record.acceptance_time_utc.isoformat() == "2023-11-02T22:30:12+00:00"
+    assert record.event_date_policy == "after_close"
+    assert record.resolved_event_date is not None
+    assert record.resolved_event_date.isoformat() == "2023-11-03"
+    assert record.resolved_event_time_version == "market-calendar-event-date-v1"
     assert record.source_url_or_path.endswith("320193/000032019323000106/aapl-20230930.htm")
 
     output_path = tmp_path / "document_manifest.jsonl"
