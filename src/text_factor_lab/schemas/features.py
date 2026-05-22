@@ -71,3 +71,4 @@ class FeatureManifestRecord(StrictBaseModel):
         if self.feature_method == "tfidf" and not self.tfidf_params:
             raise ValueError("tfidf manifest requires tfidf_params")
         return self
+

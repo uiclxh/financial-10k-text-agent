@@ -1,5 +1,40 @@
 # Changelog
 
+## [v0.6.0] - 2026-05-21
+
+Step 14 release for complete local MVP deployment packaging.
+
+- Added config-level input paths for `document_manifest.jsonl`, `prices.csv`,
+  `parsed_sections.jsonl`, and local `raw_filings_dir`.
+- Extended `run --execute` so it can copy configured inputs into the run
+  directory, parse local raw 10-K filings when parsed sections are absent, and
+  continue through features, models, evaluation, audit, and report.
+- Upgraded `pipeline_contract.json` and `orchestrator_report.json` to describe
+  the complete local MVP controller.
+- Added GitHub Actions CI for lint and test on pushes and pull requests.
+- Added `Dockerfile`, `Makefile`, and a committed `e2e_smoke` fixture run
+  config for one-command local validation.
+- Added Step 14 deployment and reproducibility documentation.
+- Added tests for configured input paths, raw filing parsing orchestration, and
+  the full `e2e_smoke` CLI pipeline.
+
+Release notes: [docs/releases/v0.6.0.md](docs/releases/v0.6.0.md)
+
+## [v0.5.0] - 2026-05-21
+
+Step 14.1 release for the artifact-aware orchestrator.
+
+- Added `python -m text_factor_lab run --config <path> --execute`.
+- Added resumable run-dir orchestration for labels, splits, features, models,
+  evaluation, audit, and report.
+- Added `orchestrator_report.json` with completed, skipped, blocked, and failed
+  stage records.
+- Added standard run-dir artifact conventions to `pipeline_contract.json`.
+- Preserved initialization-only behavior when `--execute` is not provided.
+- Added tests for successful midstream orchestration and missing-input blocking.
+
+Release notes: [docs/releases/v0.5.0.md](docs/releases/v0.5.0.md)
+
 ## [v0.4.0] - 2026-05-20
 
 Step 13 release for the Report Agent.
@@ -59,5 +94,7 @@ Release notes: [docs/releases/v0.1.0.md](docs/releases/v0.1.0.md)
 
 ## Planned
 
-Step 14 will be released later after dashboard/deployment packaging and
-reproducibility hardening are implemented.
+Future research-grade work includes formal universe construction, SEC download
+scheduling, richer portfolio time-series backtests, cloud dashboard packaging,
+FinBERT / LLM embedding modules, earnings-call ingestion, and credit-risk
+targets.

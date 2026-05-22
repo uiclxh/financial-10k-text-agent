@@ -8,7 +8,6 @@ from pydantic import Field, field_validator, model_validator
 
 from text_factor_lab.schemas.base import StrictBaseModel, is_timezone_aware
 
-
 ReturnType = Literal["log", "simple"]
 
 
@@ -48,3 +47,4 @@ class LabelRecord(StrictBaseModel):
         if self.prediction_time_utc.date() >= self.label_start_date:
             raise ValueError("prediction_time_utc must be before label_start_date")
         return self
+

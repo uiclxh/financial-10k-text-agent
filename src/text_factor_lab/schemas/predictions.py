@@ -34,3 +34,4 @@ class PredictionRecord(StrictBaseModel):
         if not isfinite(value):
             raise ValueError("prediction_value and factor_score must be finite")
         return value
+

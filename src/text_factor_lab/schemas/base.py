@@ -13,3 +13,4 @@ class StrictBaseModel(BaseModel):
 
 def is_timezone_aware(value: datetime) -> bool:
     return value.tzinfo is not None and value.utcoffset() is not None
+

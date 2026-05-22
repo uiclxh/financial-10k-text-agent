@@ -19,6 +19,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     run_parser = subparsers.add_parser("run", help="Run an experiment from a YAML config.")
     run_parser.add_argument("--config", required=True, help="Path to experiment config YAML.")
+    run_parser.add_argument(
+        "--execute",
+        action="store_true",
+        help="Run the artifact-aware pipeline controller after initialization.",
+    )
+    run_parser.add_argument(
+        "--allow-failed-audit-report",
+        action="store_true",
+        help="Allow diagnostic report generation when audit fails during --execute.",
+    )
 
     audit_parser = subparsers.add_parser("audit", help="Audit a completed run.")
     audit_parser.add_argument("--run-id", required=True, help="Run identifier.")
@@ -190,10 +200,21 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "run":
         manager = RunManager.from_config_path(args.config)
         status = manager.initialize_run()
+        if args.execute:
+            report = manager.run_pipeline(
+                allow_failed_audit_report=args.allow_failed_audit_report
+            )
+            print(
+                "Run pipeline executed. "
+                f"run_id={status.run_id} status={manager.read_status().status} "
+                f"stages={report['stage_count']} blocked_reason={report['blocked_reason']} "
+                f"orchestrator_report={manager.orchestrator_report_path}"
+            )
+            return 0
         print(
             "Run initialized as a run manager workspace with independent CLI stages. "
-            "Full Data -> Parsing -> Label -> Split -> Feature -> Model -> Backtest -> "
-            "Audit -> Report orchestration is not enabled yet. "
+            "Use --execute to run the artifact-aware Label -> Split -> Feature -> "
+            "Model -> Evaluation -> Audit -> Report controller. "
             f"run_id={status.run_id} status={manager.read_status().status} "
             f"run_dir={manager.run_dir}"
         )

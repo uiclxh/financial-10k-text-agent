@@ -12,7 +12,7 @@ formal results that fail audit gates.
 
 ## Current Status
 
-Implemented through Step 13:
+Implemented through Step 14:
 
 1. Project scaffold
 2. Config and Pydantic schemas
@@ -27,11 +27,18 @@ Implemented through Step 13:
 11. Evaluation metrics: RMSE, MAE, R2, directional accuracy, Pearson IC, rank IC
 12. Event-based long-short backtest and audit gate
 13. Report Agent: Markdown report, JSON summary, and formal/exploratory conclusion
+14. Complete local MVP deployment: configured input paths, local raw 10-K
+    parsing orchestration, reproducibility docs, and GitHub Actions CI
 
 ## Key Commands
 
 ```bash
 python -m text_factor_lab run --config configs/text_factor_lab/mvp_v0.yaml
+python -m text_factor_lab run --config configs/text_factor_lab/mvp_v0.yaml --execute
+python -m text_factor_lab run --config configs/text_factor_lab/e2e_smoke.yaml --execute
+make smoke-run
+python -m pytest
+python -m ruff check .
 python -m text_factor_lab build-features --help
 python -m text_factor_lab build-models --help
 python -m text_factor_lab evaluate-models --help
@@ -58,6 +65,17 @@ The MVP pipeline works with these research artifacts:
 - `audit_report.json`
 - `report.md`
 - `report_summary.json`
+- `orchestrator_report.json`
+- `.github/workflows/tests.yml`
+- `configs/text_factor_lab/e2e_smoke.yaml`
+- `examples/e2e_smoke/*`
+- `Dockerfile`
+- `Makefile`
+
+## Deployment
+
+See [docs/deployment.md](docs/deployment.md) for local setup, configured input
+paths, artifact policy, and GitHub CI behavior.
 
 ## Validation
 
@@ -69,14 +87,14 @@ python -m ruff check .
 Current local acceptance result:
 
 ```text
-79+ tests pass
+84 tests pass
 ruff passes
 ```
 
 ## Boundaries
 
 This is still an MVP, not a full research-grade production system. Remaining
-work includes full sector-neutral portfolio construction, richer portfolio time
-series, multiple-testing adjustment reports, dashboard/deployment packaging,
-FinBERT / LLM embedding modules, earnings-call transcript ingestion, and
-credit-risk targets.
+work includes SEC download scheduling, full sector-neutral portfolio
+construction, richer portfolio time series, multiple-testing adjustment reports,
+cloud dashboard packaging, FinBERT / LLM embedding modules, earnings-call
+transcript ingestion, and credit-risk targets.

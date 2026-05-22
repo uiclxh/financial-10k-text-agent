@@ -25,6 +25,14 @@ class RunConfig(StrictBaseModel):
     output_dir: Path
 
 
+class InputsConfig(StrictBaseModel):
+    document_manifest_path: Path | None = None
+    prices_path: Path | None = None
+    parsed_sections_path: Path | None = None
+    raw_filings_dir: Path | None = None
+    copy_inputs_to_run_dir: bool = True
+
+
 class UniverseConfig(StrictBaseModel):
     name: str = Field(min_length=1)
     selection_date: date
@@ -147,6 +155,7 @@ class AuditConfig(StrictBaseModel):
 
 class ExperimentConfig(StrictBaseModel):
     run: RunConfig
+    inputs: InputsConfig = Field(default_factory=InputsConfig)
     universe: UniverseConfig
     sample: SampleConfig
     text_source: TextSourceConfig
@@ -183,3 +192,4 @@ def load_experiment_config(path: str | Path) -> ExperimentConfig:
     with config_path.open("r", encoding="utf-8") as file:
         payload = yaml.safe_load(file)
     return ExperimentConfig.model_validate(payload)
+

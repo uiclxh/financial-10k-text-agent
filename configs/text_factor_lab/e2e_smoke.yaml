@@ -1,32 +1,32 @@
 run:
-  run_id: "tflab_10k_mvp_v0_001"
+  run_id: "tflab_e2e_smoke_001"
   run_type: "exploratory_run"
   random_seed: 42
-  output_dir: "runs/text_factor_lab/tflab_10k_mvp_v0_001"
+  output_dir: "runs/text_factor_lab/tflab_e2e_smoke_001"
 
 inputs:
-  document_manifest_path: null
-  prices_path: null
+  document_manifest_path: "examples/e2e_smoke/document_manifest.jsonl"
+  prices_path: "examples/e2e_smoke/prices.csv"
   parsed_sections_path: null
-  raw_filings_dir: null
+  raw_filings_dir: "tests/fixtures"
   copy_inputs_to_run_dir: true
 
 universe:
-  name: "us_large_cap_fixed"
-  selection_date: "2010-01-01"
+  name: "demo_e2e_smoke"
+  selection_date: "2014-01-01"
   tickers_file: "configs/universe/us_large_cap_2010.csv"
   survivorship_bias_control: true
   allow_delisted_firms: true
   historical_ticker_mapping: true
 
 sample:
-  start_date: "2010-01-01"
-  end_date: "2024-12-31"
+  start_date: "2014-01-01"
+  end_date: "2016-12-31"
   timezone: "America/New_York"
 
 text_source:
   document_type: "10-K"
-  source: "SEC_EDGAR"
+  source: "LOCAL_DEMO_SEC_FIXTURE"
   sections:
     - "Risk Factors"
     - "MD&A"
@@ -34,12 +34,11 @@ text_source:
     - "Legal Proceedings"
   require_available_time: true
   require_license_note: true
-  sec_user_agent: "financial-10k-text-agent/0.1 contact: linxihang0810@gmail.com"
+  sec_user_agent: null
 
 labels:
   targets:
-    - "realized_volatility_1_20"
-    - "CAR_1_20"
+    - "CAR_1_3"
   return_type: "log"
   portfolio_return_type: "simple"
   price_field: "adj_close"
@@ -48,10 +47,10 @@ labels:
 
 split:
   method: "rolling_year"
-  train_years_min: 5
+  train_years_min: 1
   validation_years: 1
   test_years: 1
-  embargo_days: 20
+  embargo_days: 0
 
 features:
   methods:
@@ -62,16 +61,15 @@ features:
       - "loughran_mcdonald"
       - "risk_uncertainty"
   tfidf:
-    max_features: 50000
+    max_features: 100
     ngram_range: [1, 2]
-    min_df: 5
-    max_df: 0.95
+    min_df: 1
+    max_df: 1.0
     fit_scope: "train_window_only"
 
 models:
   enabled:
     - "historical_mean"
-    - "industry_mean"
     - "ridge"
   tuning:
     selection_metric: "validation_rank_ic"
@@ -81,15 +79,14 @@ backtest:
   rebalance_frequency: "event_based"
   portfolio_method: "top_bottom_quintile"
   weighting: "equal_weight"
-  holding_window_days: 20
+  holding_window_days: 3
   transaction_cost_bps_one_way: 10
-  sector_neutral: true
-  newey_west_lag: 19
+  sector_neutral: false
+  newey_west_lag: 2
 
 audit:
-  coverage_threshold: 0.8
+  coverage_threshold: 0.6
   require_license_note: true
   require_available_time: true
   reject_on_lookahead: true
   reject_on_train_test_leakage: true
-

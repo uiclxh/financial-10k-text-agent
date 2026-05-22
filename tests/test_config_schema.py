@@ -20,8 +20,22 @@ def test_mvp_v0_config_loads() -> None:
 
     assert config.run.run_id == "tflab_10k_mvp_v0_001"
     assert config.run.run_type == "exploratory_run"
+    assert config.inputs.copy_inputs_to_run_dir is True
     assert config.features.tfidf is not None
     assert config.features.tfidf.fit_scope == "train_window_only"
+
+
+def test_inputs_config_accepts_local_artifact_paths(tmp_path: Path) -> None:
+    payload = load_config_payload()
+    payload["inputs"]["document_manifest_path"] = str(tmp_path / "document_manifest.jsonl")
+    payload["inputs"]["prices_path"] = str(tmp_path / "prices.csv")
+    payload["inputs"]["raw_filings_dir"] = str(tmp_path / "raw_filings")
+
+    config = ExperimentConfig.model_validate(payload)
+
+    assert config.inputs.document_manifest_path == tmp_path / "document_manifest.jsonl"
+    assert config.inputs.prices_path == tmp_path / "prices.csv"
+    assert config.inputs.raw_filings_dir == tmp_path / "raw_filings"
 
 
 def test_formal_run_requires_available_time_gate() -> None:

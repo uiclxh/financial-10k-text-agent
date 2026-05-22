@@ -5,13 +5,13 @@
 ## 项目定位
 
 `Financial 10-K Text Agent` 是一个面向金融文本因子研究的 MVP 工程实现。
-它不是普通的 Financial RAG，而是围绕 SEC 10-K 文本构建可复现、可审计的
-empirical finance pipeline：文本解析、事件标签、滚动切分、特征构建、模型训练、
-样本外评估、事件型 long-short 回测、审计门槛和自动报告。
+它不是通用 Financial RAG，而是围绕 SEC 10-K 文本构建可复现、可审计的
+empirical finance pipeline：文本解析、事件标签、滚动切分、特征构建、模型
+训练、样本外评估、事件型 long-short 回测、审计门槛和自动报告。
 
 ## 当前状态
 
-当前代码已经推进到 Step 13：
+当前代码已经完成 Step 1-14：
 
 1. 项目脚手架
 2. Config 与 Pydantic schema
@@ -25,12 +25,18 @@ empirical finance pipeline：文本解析、事件标签、滚动切分、特征
 10. 模型层：`historical_mean`、`industry_mean`、`ridge`、可选 `xgboost`
 11. 样本外评估：RMSE、MAE、R2、directional accuracy、Pearson IC、rank IC
 12. event-based long-short backtest 与 audit gate
-13. Report Agent：生成 `report.md`、`report_summary.json` 和结论等级
+13. Report Agent：生成 `report.md`、`report_summary.json` 与结论等级
+14. 本地 MVP 部署：配置化输入路径、本地 raw 10-K 解析编排、复现文档、GitHub Actions CI
 
 ## 关键命令
 
 ```bash
 python -m text_factor_lab run --config configs/text_factor_lab/mvp_v0.yaml
+python -m text_factor_lab run --config configs/text_factor_lab/mvp_v0.yaml --execute
+python -m text_factor_lab run --config configs/text_factor_lab/e2e_smoke.yaml --execute
+make smoke-run
+python -m pytest
+python -m ruff check .
 python -m text_factor_lab build-features --help
 python -m text_factor_lab build-models --help
 python -m text_factor_lab evaluate-models --help
@@ -57,6 +63,17 @@ MVP pipeline 围绕以下 artifact 工作：
 - `audit_report.json`
 - `report.md`
 - `report_summary.json`
+- `orchestrator_report.json`
+- `.github/workflows/tests.yml`
+- `configs/text_factor_lab/e2e_smoke.yaml`
+- `examples/e2e_smoke/*`
+- `Dockerfile`
+- `Makefile`
+
+## 部署与复现
+
+部署说明见 [docs/deployment.md](docs/deployment.md)。该文档说明本地环境、
+配置化输入路径、artifact 保留策略，以及 GitHub CI 的职责边界。
 
 ## 验证方式
 
@@ -68,13 +85,12 @@ python -m ruff check .
 当前本地验收结果：
 
 ```text
-79+ tests pass
+84 tests pass
 ruff passes
 ```
 
 ## 当前边界
 
-这仍然是 MVP，不是完整 production research system。后续还需要补：
-sector-neutral portfolio、完整组合时间序列、多重检验报告、dashboard/deployment
-packaging、FinBERT / LLM embedding、earnings call transcript ingestion，以及
-credit risk target。
+这仍然是 MVP，不是完整 production research system。后续还需要补 SEC 下载调度、
+sector-neutral portfolio、完整组合时间序列、多重检验报告、云端 dashboard、
+FinBERT / LLM embedding、earnings call transcript ingestion，以及 credit risk target。

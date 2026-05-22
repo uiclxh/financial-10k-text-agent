@@ -1,4 +1,4 @@
 entity_id,ticker,historical_ticker,cik,company_name,sector,industry,selection_date,market_cap_at_selection,entry_date,exit_date,delisting_date,mapping_source,mapping_available_time_utc
-CIK0000320193,AAPL,AAPL,0000320193,Apple Inc.,Information Technology,Technology Hardware Storage & Peripherals,2010-01-01,,1980-12-12,,,,placeholder,2010-01-01T00:00:00Z
-CIK0000789019,MSFT,MSFT,0000789019,Microsoft Corp.,Information Technology,Software,2010-01-01,,1986-03-13,,,,placeholder,2010-01-01T00:00:00Z
+CIK0000320193,AAPL,AAPL,0000320193,Apple Inc.,Information Technology,Technology Hardware Storage & Peripherals,2010-01-01,,1980-12-12,,,placeholder,2010-01-01T00:00:00Z
+CIK0000789019,MSFT,MSFT,0000789019,Microsoft Corp.,Information Technology,Software,2010-01-01,,1986-03-13,,,placeholder,2010-01-01T00:00:00Z
 CIK0000051143,IBM,IBM,0000051143,International Business Machines Corp.,Information Technology,IT Services,2010-01-01,,,,,placeholder,2010-01-01T00:00:00Z

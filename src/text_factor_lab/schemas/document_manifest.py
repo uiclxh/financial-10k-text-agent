@@ -7,7 +7,6 @@ from pydantic import Field, field_validator, model_validator
 
 from text_factor_lab.schemas.base import StrictBaseModel, is_timezone_aware
 
-
 DocumentType = Literal["10-K", "10-Q", "earnings_call"]
 
 
@@ -43,3 +42,4 @@ class DocumentManifestRecord(StrictBaseModel):
         if self.available_time_utc < self.event_time_utc:
             raise ValueError("available_time_utc must be after or equal to event_time_utc")
         return self
+

@@ -159,3 +159,4 @@ def test_parsed_section_requires_failure_reason_when_missing() -> None:
             failure_reason=None,
             created_at_utc=utc(2020, 1, 2),
         )
+

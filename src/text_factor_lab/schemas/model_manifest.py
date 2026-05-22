@@ -54,3 +54,4 @@ class TuningLogRecord(StrictBaseModel):
         if not is_timezone_aware(value):
             raise ValueError("created_at_utc must be timezone-aware")
         return value
+
