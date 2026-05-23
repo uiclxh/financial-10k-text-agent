@@ -38,6 +38,13 @@ class EvaluationBuildResult:
     portfolio_metrics: list[PortfolioMetricRecord]
 
 
+@dataclass(frozen=True)
+class PortfolioVariant:
+    name: str
+    weighting: str
+    sector_neutral: bool
+
+
 def read_predictions_jsonl(path: str | Path) -> list[PredictionRecord]:
     records: list[PredictionRecord] = []
     with Path(path).open("r", encoding="utf-8") as file:
@@ -110,8 +117,7 @@ def build_evaluation_artifacts(
             )
             portfolio_weights.extend(portfolio_result[0])
             portfolio_returns.extend(portfolio_result[1])
-            if portfolio_result[2] is not None:
-                portfolio_metrics.append(portfolio_result[2])
+            portfolio_metrics.extend(portfolio_result[2])
 
     metrics.extend(_aggregate_metrics(run_id=run_id, scored=scored))
     return EvaluationBuildResult(
@@ -280,10 +286,55 @@ def _portfolio_time_series(
     target_name: str,
     rows: list[ScoredPrediction],
     transaction_cost_bps_one_way: float,
-) -> tuple[list[PortfolioWeightRecord], list[PortfolioReturnRecord], PortfolioMetricRecord | None]:
+) -> tuple[list[PortfolioWeightRecord], list[PortfolioReturnRecord], list[PortfolioMetricRecord]]:
     if len(rows) < 2:
-        return [], [], None
+        return [], [], []
 
+    all_weights: list[PortfolioWeightRecord] = []
+    all_returns: list[PortfolioReturnRecord] = []
+    metric_rows: list[PortfolioMetricRecord] = []
+    for variant in _available_portfolio_variants(rows):
+        weights, returns, metric = _portfolio_time_series_for_variant(
+            run_id=run_id,
+            model_id=model_id,
+            split_id=split_id,
+            target_name=target_name,
+            rows=rows,
+            transaction_cost_bps_one_way=transaction_cost_bps_one_way,
+            variant=variant,
+        )
+        all_weights.extend(weights)
+        all_returns.extend(returns)
+        if metric is not None:
+            metric_rows.append(metric)
+    return all_weights, all_returns, metric_rows
+
+
+def _available_portfolio_variants(rows: list[ScoredPrediction]) -> list[PortfolioVariant]:
+    variants = [PortfolioVariant("equal_weight", "equal_weight", False)]
+    if all(row.prediction.market_cap is not None for row in rows):
+        variants.append(PortfolioVariant("value_weight", "value_weight", False))
+    if all(row.prediction.sector for row in rows):
+        variants.append(
+            PortfolioVariant("sector_neutral_equal_weight", "equal_weight", True)
+        )
+    if all(row.prediction.sector and row.prediction.market_cap is not None for row in rows):
+        variants.append(
+            PortfolioVariant("sector_neutral_value_weight", "value_weight", True)
+        )
+    return variants
+
+
+def _portfolio_time_series_for_variant(
+    *,
+    run_id: str,
+    model_id: str,
+    split_id: str,
+    target_name: str,
+    rows: list[ScoredPrediction],
+    transaction_cost_bps_one_way: float,
+    variant: PortfolioVariant,
+) -> tuple[list[PortfolioWeightRecord], list[PortfolioReturnRecord], PortfolioMetricRecord | None]:
     rows_by_rebalance: dict[date, list[ScoredPrediction]] = defaultdict(list)
     for row in rows:
         rows_by_rebalance[row.prediction.event_date].append(row)
@@ -301,6 +352,7 @@ def _portfolio_time_series(
             model_id=model_id,
             split_id=split_id,
             target_name=target_name,
+            variant=variant,
             created_at_utc=now,
         )
         if not selected:
@@ -331,6 +383,7 @@ def _portfolio_time_series(
                 rebalance_date=rebalance_date,
                 rows=rebalance_rows,
                 weights=current_weights,
+                variant=variant,
                 turnover=turnover,
                 transaction_cost_bps_one_way=transaction_cost_bps_one_way,
                 created_at_utc=now,
@@ -346,6 +399,7 @@ def _portfolio_time_series(
         split_id=split_id,
         target_name=target_name,
         returns=returns,
+        variant=variant,
         created_at_utc=now,
     )
 
@@ -358,21 +412,36 @@ def _portfolio_weights_for_rebalance(
     model_id: str,
     split_id: str,
     target_name: str,
+    variant: PortfolioVariant,
     created_at_utc: datetime,
 ) -> list[PortfolioWeightRecord]:
     del previous_weights
+    if variant.sector_neutral:
+        return _sector_neutral_weights_for_rebalance(
+            rows=rows,
+            run_id=run_id,
+            model_id=model_id,
+            split_id=split_id,
+            target_name=target_name,
+            variant=variant,
+            created_at_utc=created_at_utc,
+        )
     sorted_rows = sorted(rows, key=lambda row: row.prediction.factor_score)
     leg_size = max(1, int(len(sorted_rows) * 0.2))
     short_rows = sorted_rows[:leg_size]
     long_rows = sorted_rows[-leg_size:]
-    selected_ids = {id(row): "short" for row in short_rows}
-    selected_ids.update({id(row): "long" for row in long_rows})
+    selected_weights = _leg_weights(
+        long_rows=long_rows,
+        short_rows=short_rows,
+        weighting=variant.weighting,
+        gross_allocation=2.0,
+    )
     records: list[PortfolioWeightRecord] = []
     for rank_index, row in enumerate(sorted_rows, start=1):
-        side = selected_ids.get(id(row), "neutral")
-        if side == "neutral":
+        if id(row) not in selected_weights:
             continue
-        raw_weight = (1.0 / leg_size) if side == "long" else (-1.0 / leg_size)
+        raw_weight = selected_weights[id(row)]
+        side = "long" if raw_weight > 0 else "short"
         quantile = 5 if side == "long" else 1
         records.append(
             PortfolioWeightRecord(
@@ -380,11 +449,17 @@ def _portfolio_weights_for_rebalance(
                 model_id=model_id,
                 split_id=split_id,
                 target_name=target_name,
+                portfolio_variant=variant.name,
+                weighting=variant.weighting,
+                sector_neutral=variant.sector_neutral,
                 rebalance_date=row.prediction.event_date,
                 holding_start_date=row.label.label_start_date,
                 holding_end_date=row.label.label_end_date,
                 ticker=row.prediction.ticker,
                 entity_id=row.label.entity_id,
+                sector=row.prediction.sector,
+                industry=row.prediction.industry,
+                market_cap=row.prediction.market_cap,
                 factor_score=row.prediction.factor_score,
                 rank=rank_index,
                 quantile=quantile,
@@ -399,6 +474,119 @@ def _portfolio_weights_for_rebalance(
     return records
 
 
+def _sector_neutral_weights_for_rebalance(
+    *,
+    rows: list[ScoredPrediction],
+    run_id: str,
+    model_id: str,
+    split_id: str,
+    target_name: str,
+    variant: PortfolioVariant,
+    created_at_utc: datetime,
+) -> list[PortfolioWeightRecord]:
+    rows_by_sector: dict[str, list[ScoredPrediction]] = defaultdict(list)
+    for row in rows:
+        if row.prediction.sector:
+            rows_by_sector[row.prediction.sector].append(row)
+    eligible_sectors = {
+        sector: sector_rows
+        for sector, sector_rows in rows_by_sector.items()
+        if len(sector_rows) >= 2
+    }
+    if not eligible_sectors:
+        return []
+    gross_allocation = 2.0 / len(eligible_sectors)
+    selected_weights: dict[int, float] = {}
+    ranks_by_id = {
+        id(row): rank
+        for rank, row in enumerate(
+            sorted(rows, key=lambda item: item.prediction.factor_score),
+            start=1,
+        )
+    }
+    for sector_rows in eligible_sectors.values():
+        sorted_rows = sorted(sector_rows, key=lambda row: row.prediction.factor_score)
+        leg_size = max(1, int(len(sorted_rows) * 0.2))
+        sector_weights = _leg_weights(
+            long_rows=sorted_rows[-leg_size:],
+            short_rows=sorted_rows[:leg_size],
+            weighting=variant.weighting,
+            gross_allocation=gross_allocation,
+        )
+        selected_weights.update(sector_weights)
+
+    records: list[PortfolioWeightRecord] = []
+    for row in rows:
+        weight = selected_weights.get(id(row))
+        if weight is None:
+            continue
+        side = "long" if weight > 0 else "short"
+        records.append(
+            PortfolioWeightRecord(
+                run_id=run_id,
+                model_id=model_id,
+                split_id=split_id,
+                target_name=target_name,
+                portfolio_variant=variant.name,
+                weighting=variant.weighting,
+                sector_neutral=variant.sector_neutral,
+                rebalance_date=row.prediction.event_date,
+                holding_start_date=row.label.label_start_date,
+                holding_end_date=row.label.label_end_date,
+                ticker=row.prediction.ticker,
+                entity_id=row.label.entity_id,
+                sector=row.prediction.sector,
+                industry=row.prediction.industry,
+                market_cap=row.prediction.market_cap,
+                factor_score=row.prediction.factor_score,
+                rank=ranks_by_id[id(row)],
+                quantile=5 if side == "long" else 1,
+                side=side,
+                raw_weight=weight,
+                normalized_weight=weight,
+                previous_weight=0.0,
+                trade_weight=weight,
+                created_at_utc=created_at_utc,
+            )
+        )
+    return records
+
+
+def _leg_weights(
+    *,
+    long_rows: list[ScoredPrediction],
+    short_rows: list[ScoredPrediction],
+    weighting: str,
+    gross_allocation: float,
+) -> dict[int, float]:
+    long_allocation = gross_allocation / 2.0
+    short_allocation = gross_allocation / 2.0
+    weights: dict[int, float] = {}
+    for row, weight in _side_weights(long_rows, weighting=weighting, allocation=long_allocation):
+        weights[id(row)] = weight
+    for row, weight in _side_weights(short_rows, weighting=weighting, allocation=short_allocation):
+        weights[id(row)] = -weight
+    return weights
+
+
+def _side_weights(
+    rows: list[ScoredPrediction],
+    *,
+    weighting: str,
+    allocation: float,
+) -> list[tuple[ScoredPrediction, float]]:
+    if not rows:
+        return []
+    if weighting == "value_weight" and all(row.prediction.market_cap for row in rows):
+        denominator = sum(float(row.prediction.market_cap or 0.0) for row in rows)
+        if denominator > 0:
+            return [
+                (row, allocation * float(row.prediction.market_cap or 0.0) / denominator)
+                for row in rows
+            ]
+    return [(row, allocation / len(rows)) for row in rows]
+
+
 def _portfolio_return_for_rebalance(
     *,
     run_id: str,
@@ -408,6 +596,7 @@ def _portfolio_return_for_rebalance(
     rebalance_date,
     rows: list[ScoredPrediction],
     weights: dict[str, float],
+    variant: PortfolioVariant,
     turnover: float,
     transaction_cost_bps_one_way: float,
     created_at_utc: datetime,
@@ -430,6 +619,9 @@ def _portfolio_return_for_rebalance(
         model_id=model_id,
         split_id=split_id,
         target_name=target_name,
+        portfolio_variant=variant.name,
+        weighting=variant.weighting,
+        sector_neutral=variant.sector_neutral,
         date=max(label.label_end_date for label in label_by_ticker.values()),
         rebalance_date=rebalance_date,
         gross_long_return=float(long_return),
@@ -454,6 +646,7 @@ def _portfolio_metric(
     split_id: str,
     target_name: str,
     returns: list[PortfolioReturnRecord],
+    variant: PortfolioVariant,
     created_at_utc: datetime,
 ) -> PortfolioMetricRecord:
     values = np.array([record.net_long_short_return for record in returns], dtype=float)
@@ -476,8 +669,10 @@ def _portfolio_metric(
         model_id=model_id,
         split_id=split_id,
         target_name=target_name,
+        portfolio_variant=variant.name,
         portfolio_method="top_bottom_quintile_min_one_time_series",
-        weighting="equal_weight_dollar_neutral",
+        weighting=variant.weighting,
+        sector_neutral=variant.sector_neutral,
         observation_count=len(returns),
         cumulative_return=cumulative,
         annualized_return=annualized_return,

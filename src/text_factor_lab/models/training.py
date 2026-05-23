@@ -44,7 +44,9 @@ class ModelRow:
     assignment: SplitAssignmentRecord
     document_id: str
     features: dict[str, float]
+    sector: str | None
     industry: str
+    market_cap: float | None
 
 
 def read_features_jsonl(path: str | Path) -> list[FeatureRecord]:
@@ -193,7 +195,7 @@ def _build_rows_by_split_target_role(
     split_assignments: list[SplitAssignmentRecord],
 ) -> dict[str, dict[str, dict[str, list[ModelRow]]]]:
     features_by_document = _features_by_document_split_role(features)
-    industry_by_document = _industry_by_document(features)
+    metadata_by_document = _metadata_by_document(features)
     grouped: dict[str, dict[str, dict[str, list[ModelRow]]]] = defaultdict(
         lambda: defaultdict(lambda: defaultdict(list))
     )
@@ -214,24 +216,39 @@ def _build_rows_by_split_target_role(
                 assignment=assignment,
                 document_id=document_id,
                 features=row_features,
-                industry=industry_by_document.get(document_id, "__GLOBAL__"),
+                sector=metadata_by_document.get(document_id, {}).get("sector"),
+                industry=metadata_by_document.get(document_id, {}).get("industry", "__GLOBAL__"),
+                market_cap=_optional_float(
+                    metadata_by_document.get(document_id, {}).get("market_cap")
+                ),
             )
         )
     return grouped
 
 
-def _industry_by_document(features: list[FeatureRecord]) -> dict[str, str]:
-    industries: dict[str, str] = {}
+def _metadata_by_document(features: list[FeatureRecord]) -> dict[str, dict[str, str]]:
+    metadata: dict[str, dict[str, str]] = defaultdict(dict)
     for feature in features:
-        if not isinstance(feature.feature_value, str):
-            continue
         normalized_name = feature.feature_name.lower()
-        if feature.feature_family == "metadata" and normalized_name in {
-            "industry",
-            "metadata__industry",
-        }:
-            industries[feature.source_document_id] = feature.feature_value
-    return industries
+        if feature.feature_family != "metadata":
+            continue
+        if normalized_name in {"sector", "metadata__sector"}:
+            metadata[feature.source_document_id]["sector"] = str(feature.feature_value)
+        elif normalized_name in {"industry", "metadata__industry"}:
+            metadata[feature.source_document_id]["industry"] = str(feature.feature_value)
+        elif normalized_name in {"market_cap", "metadata__market_cap"}:
+            metadata[feature.source_document_id]["market_cap"] = str(feature.feature_value)
+    return metadata
+
+
+def _optional_float(value: str | None) -> float | None:
+    if value is None:
+        return None
+    try:
+        parsed = float(value)
+    except ValueError:
+        return None
+    return parsed if parsed > 0 else None
 
 
 def _features_by_document_split_role(
@@ -706,6 +723,9 @@ def _array_predictions(
                 target_name=target_name,
                 prediction_value=float(prediction),
                 factor_score=float(prediction),
+                sector=row.sector,
+                industry=row.industry,
+                market_cap=row.market_cap,
                 feature_version=feature_version,
                 label_version=row.label.label_version,
                 training_window=window_payload["training_window"],

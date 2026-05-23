@@ -22,15 +22,20 @@ class PredictionRecord(StrictBaseModel):
     target_name: str = Field(min_length=1)
     prediction_value: float
     factor_score: float
+    sector: str | None = None
+    industry: str | None = None
+    market_cap: float | None = Field(default=None, gt=0)
     feature_version: str = Field(min_length=1)
     label_version: str = Field(min_length=1)
     training_window: str = Field(min_length=1)
     validation_window: str = Field(min_length=1)
     test_window: str = Field(min_length=1)
 
-    @field_validator("prediction_value", "factor_score")
+    @field_validator("prediction_value", "factor_score", "market_cap")
     @classmethod
-    def validate_finite_float(cls, value: float) -> float:
+    def validate_finite_float(cls, value: float | None) -> float | None:
+        if value is None:
+            return value
         if not isfinite(value):
             raise ValueError("prediction_value and factor_score must be finite")
         return value

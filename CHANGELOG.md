@@ -1,5 +1,26 @@
 # Changelog
 
+## [v0.9.0] - 2026-05-23
+
+Portfolio variant release.
+
+- Added optional `sector`, `industry`, and `market_cap` metadata to prediction
+  records.
+- Propagated metadata features through the model layer into predictions.
+- Added portfolio variant fields to portfolio weight, return, and metric
+  schemas.
+- Added automatic portfolio construction variants:
+  - `equal_weight`
+  - `value_weight`
+  - `sector_neutral_equal_weight`
+  - `sector_neutral_value_weight`
+- Added value-weight leg sizing from market cap when available.
+- Added sector-neutral construction that ranks inside each sector and allocates
+  balanced long and short exposure across eligible sectors.
+- Added tests for value-weight and sector-neutral exposure behavior.
+
+Release notes: [docs/releases/v0.9.0.md](docs/releases/v0.9.0.md)
+
 ## [v0.8.0] - 2026-05-22
 
 Portfolio time-series backtest release.
@@ -133,6 +154,6 @@ Release notes: [docs/releases/v0.1.0.md](docs/releases/v0.1.0.md)
 ## Planned
 
 Future research-grade work includes formal universe construction, SEC download
-scheduling, richer portfolio time-series backtests, cloud dashboard packaging,
-FinBERT / LLM embedding modules, earnings-call ingestion, and credit-risk
-targets.
+scheduling, daily price-driven holdings, multiple-testing reports, cloud
+dashboard packaging, FinBERT / LLM embedding modules, earnings-call ingestion,
+and credit-risk targets.

@@ -43,6 +43,8 @@ def prediction(
     model_id: str,
     role: str,
     value: float,
+    sector: str | None = None,
+    market_cap: float | None = None,
 ) -> PredictionRecord:
     return PredictionRecord(
         run_id="eval_test_run",
@@ -55,6 +57,9 @@ def prediction(
         target_name=label_record.target_name,
         prediction_value=value,
         factor_score=value,
+        sector=sector,
+        industry=sector,
+        market_cap=market_cap,
         feature_version=f"features-v0:{SPLIT_ID}",
         label_version=label_record.label_version,
         training_window="2010-01-01..2014-12-31",
@@ -181,6 +186,55 @@ def test_portfolio_time_series_tracks_rebalance_turnover() -> None:
     assert [record.turnover for record in result.portfolio_returns] == [1.0, 2.0]
     assert result.portfolio_metrics[0].observation_count == 2
     assert result.portfolio_metrics[0].average_gross_exposure == 2.0
+
+
+def test_portfolio_variants_include_value_and_sector_neutral() -> None:
+    rows = [
+        ("sec:test:a", "AAA", -0.4, 0.1, "Tech", 100.0),
+        ("sec:test:b", "BBB", 0.2, 0.9, "Tech", 300.0),
+        ("sec:test:c", "CCC", -0.1, 0.2, "Finance", 200.0),
+        ("sec:test:d", "DDD", 0.5, 0.8, "Finance", 600.0),
+    ]
+    labels = [
+        label(document_id, ticker, 2016, target)
+        for document_id, ticker, target, _, _, _ in rows
+    ]
+    predictions = [
+        prediction(
+            label_record,
+            model_id="ridge::CAR_1_20::split",
+            role="test",
+            value=score,
+            sector=sector,
+            market_cap=market_cap,
+        )
+        for label_record, (_, _, _, score, sector, market_cap) in zip(labels, rows, strict=True)
+    ]
+
+    result = build_evaluation_artifacts(
+        run_id="eval_test_run",
+        predictions=predictions,
+        labels=labels,
+        transaction_cost_bps_one_way=10.0,
+        newey_west_lag=1,
+    )
+
+    variants = {record.portfolio_variant for record in result.portfolio_metrics}
+    assert variants == {
+        "equal_weight",
+        "value_weight",
+        "sector_neutral_equal_weight",
+        "sector_neutral_value_weight",
+    }
+    sector_neutral_returns = [
+        record for record in result.portfolio_returns if record.sector_neutral
+    ]
+    assert sector_neutral_returns
+    assert all(abs(record.net_exposure) < 1e-12 for record in sector_neutral_returns)
+    value_weights = [
+        record for record in result.portfolio_weights if record.portfolio_variant == "value_weight"
+    ]
+    assert any(abs(record.normalized_weight) != 0.5 for record in value_weights)
 
 
 def test_newey_west_t_stat_handles_small_samples() -> None:

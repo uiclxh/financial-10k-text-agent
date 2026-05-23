@@ -86,11 +86,17 @@ class PortfolioWeightRecord(StrictBaseModel):
     model_id: str = Field(min_length=1)
     split_id: str = Field(min_length=1)
     target_name: str = Field(min_length=1)
+    portfolio_variant: str = "equal_weight"
+    weighting: str = "equal_weight"
+    sector_neutral: bool = False
     rebalance_date: date
     holding_start_date: date
     holding_end_date: date
     ticker: str = Field(min_length=1)
     entity_id: str = Field(min_length=1)
+    sector: str | None = None
+    industry: str | None = None
+    market_cap: float | None = Field(default=None, gt=0)
     factor_score: float
     rank: int = Field(ge=1)
     quantile: int = Field(ge=1)
@@ -127,6 +133,9 @@ class PortfolioReturnRecord(StrictBaseModel):
     model_id: str = Field(min_length=1)
     split_id: str = Field(min_length=1)
     target_name: str = Field(min_length=1)
+    portfolio_variant: str = "equal_weight"
+    weighting: str = "equal_weight"
+    sector_neutral: bool = False
     date: date
     rebalance_date: date
     gross_long_return: float
@@ -172,8 +181,10 @@ class PortfolioMetricRecord(StrictBaseModel):
     model_id: str = Field(min_length=1)
     split_id: str = Field(min_length=1)
     target_name: str = Field(min_length=1)
+    portfolio_variant: str = "equal_weight"
     portfolio_method: str = Field(min_length=1)
     weighting: str = Field(min_length=1)
+    sector_neutral: bool = False
     observation_count: int = Field(ge=0)
     cumulative_return: float
     annualized_return: float

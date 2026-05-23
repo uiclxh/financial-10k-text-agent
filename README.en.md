@@ -12,7 +12,7 @@ formal results that fail audit gates.
 
 ## Current Status
 
-Implemented through Step 14:
+Implemented through the current research-grade upgrade path:
 
 1. Project scaffold
 2. Config and Pydantic schemas
@@ -31,6 +31,8 @@ Implemented through Step 14:
     parsing orchestration, reproducibility docs, and GitHub Actions CI
 15. Research-grade event-date alignment: NYSE calendar, holidays, early closes,
     and manifest audit fields
+16. Portfolio variants: equal-weight, value-weight, sector-neutral equal-weight,
+    and sector-neutral value-weight construction when metadata is available
 
 ## Key Commands
 
@@ -89,14 +91,14 @@ python -m ruff check .
 Current local acceptance result:
 
 ```text
-92 tests pass
+93 tests pass
 ruff passes
 ```
 
 ## Boundaries
 
 This is still an MVP, not a full research-grade production system. Remaining
-work includes SEC download scheduling, full sector-neutral portfolio
-construction, richer portfolio time series, multiple-testing adjustment reports,
-cloud dashboard packaging, FinBERT / LLM embedding modules, earnings-call
-transcript ingestion, and credit-risk targets.
+work includes SEC download scheduling, survivorship-free universe construction,
+daily price-driven holdings, multiple-testing adjustment reports, cloud
+dashboard packaging, FinBERT / LLM embedding modules, earnings-call transcript
+ingestion, and credit-risk targets.
