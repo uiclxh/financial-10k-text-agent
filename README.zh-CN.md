@@ -106,3 +106,15 @@ ruff passes
 delisting returns、overlapping sub-portfolios、borrow costs、capacity / slippage diagnostics、
 Deflated Sharpe、CPCV/PBO、云端 dashboard、FinBERT / LLM embedding、earnings-call
 transcript ingestion，以及 credit-risk targets。
+
+## 许可与声明
+
+本项目使用 [MIT License](LICENSE) 发布。
+
+本仓库仅用于研究、教学与可复现实验工程，不构成投资建议、交易建议、法律建议、
+会计建议或税务建议，也不构成买入或卖出任何证券的推荐。
+
+数据权限由使用者自行负责。使用 SEC filings、earnings-call transcripts、价格数据、
+基本面数据、评级数据、指数成分或商业 vendor 数据时，应遵守对应来源的许可、
+缓存、再分发和引用规则。本仓库不包含 CRSP、Compustat、WRDS、商业 transcript、
+rating agency 或 market-data vendor 的授权数据集。

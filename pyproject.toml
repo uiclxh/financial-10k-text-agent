@@ -8,6 +8,17 @@ version = "0.14.0"
 description = "Financial Text Factor Lab Agent MVP v0"
 readme = "README.md"
 requires-python = ">=3.11"
+license = {file = "LICENSE"}
+keywords = ["finance", "nlp", "sec-edgar", "10-k", "factor-research", "backtesting"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Office/Business :: Financial",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+]
 dependencies = [
   "numpy>=1.26",
   "pandas>=2.2",

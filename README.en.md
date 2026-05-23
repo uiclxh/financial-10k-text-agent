@@ -112,3 +112,14 @@ licensed CRSP/WRDS-style data population, overlapping sub-portfolios, Deflated
 Sharpe, CPCV/PBO, borrow costs, capacity and slippage diagnostics, cloud
 dashboard packaging, FinBERT / LLM embedding modules, earnings-call transcript
 ingestion, and credit-risk targets.
+
+## License And Notices
+
+Released under the [MIT License](LICENSE).
+
+This repository is for research, education, and reproducible engineering. It is
+not investment, trading, legal, accounting, or tax advice. Users are responsible
+for data-license compliance for any SEC filings, transcripts, prices,
+fundamentals, ratings, index constituents, or vendor datasets used with the
+pipeline. No licensed CRSP, Compustat, WRDS, transcript-vendor, rating-agency,
+or market-data vendor dataset is included.

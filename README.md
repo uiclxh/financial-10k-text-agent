@@ -144,3 +144,22 @@ or equivalent universe population, delisting returns, overlapping sub-portfolio
 handling, borrow costs, capacity and slippage diagnostics, Deflated Sharpe,
 CPCV/PBO, FinBERT / LLM embedding modules, earnings-call ingestion, and
 credit-risk targets.
+
+## License And Notices
+
+This project is released under the [MIT License](LICENSE).
+
+Research and risk notice: this repository is for empirical research,
+education, and reproducible engineering experiments. It is not investment
+advice, trading advice, legal advice, accounting advice, or a recommendation to
+buy or sell any security.
+
+Data rights notice: users are responsible for complying with the terms,
+licenses, and redistribution limits of any filings, transcripts, prices,
+fundamental data, ratings, index constituents, or vendor datasets they use with
+the pipeline. The repository does not include licensed CRSP, Compustat, WRDS,
+earnings-call transcript, rating-agency, or market-data vendor datasets.
+
+Warranty notice: the software is provided as-is, without warranty. Audit gates
+and statistical checks reduce common research errors, but they do not guarantee
+profitable, complete, or legally compliant results.
