@@ -17,10 +17,12 @@ from text_factor_lab.schemas import (
     FeatureRecord,
     LabelRecord,
     ModelManifestRecord,
+    MultipleTestingReportRecord,
     PortfolioBacktestRecord,
     PredictionRecord,
     RunStatusRecord,
     SplitLeakageRecord,
+    TestedSpecificationRecord,
     TuningLogRecord,
     load_experiment_config,
 )
@@ -44,6 +46,8 @@ class AuditArtifactPaths:
     tuning_log: Path
     evaluation_metrics: Path
     backtest_results: Path
+    tested_specifications: Path
+    multiple_testing_report: Path
     audit_report: Path
 
     @classmethod
@@ -62,6 +66,8 @@ class AuditArtifactPaths:
             tuning_log=base / "tuning_log.json",
             evaluation_metrics=base / "evaluation_metrics.json",
             backtest_results=base / "backtest_results.json",
+            tested_specifications=base / "tested_specifications.jsonl",
+            multiple_testing_report=base / "multiple_testing_report.json",
             audit_report=base / "audit_report.json",
         )
 
@@ -79,6 +85,8 @@ class LoadedAuditArtifacts:
     tuning_log: list[TuningLogRecord]
     evaluation_metrics: list[EvaluationMetricRecord]
     backtest_results: list[PortfolioBacktestRecord]
+    tested_specifications: list[TestedSpecificationRecord]
+    multiple_testing_report: MultipleTestingReportRecord | None
 
 
 def audit_run(
@@ -123,8 +131,10 @@ def audit_run(
             _evaluation_check(run_id, artifacts.evaluation_metrics, artifacts.backtest_results),
             _tested_specifications_check(
                 run_id,
-                artifacts.model_manifest,
+                artifacts.tested_specifications,
                 artifacts.evaluation_metrics,
+                artifacts.backtest_results,
+                artifacts.multiple_testing_report,
             ),
             _formal_metadata_check(
                 run_id=run_id,
@@ -217,6 +227,20 @@ def _load_artifacts(
     backtest_results = _load_json_array_artifact(
         run_id, paths.backtest_results, PortfolioBacktestRecord, checks, required=True
     )
+    tested_specifications = _load_jsonl_artifact(
+        run_id,
+        paths.tested_specifications,
+        TestedSpecificationRecord,
+        checks,
+        required=False,
+    )
+    multiple_testing_report = _load_json_object_artifact(
+        run_id,
+        paths.multiple_testing_report,
+        MultipleTestingReportRecord,
+        checks,
+        required=False,
+    )
     return LoadedAuditArtifacts(
         document_manifest=document_manifest,
         labels=labels,
@@ -229,6 +253,8 @@ def _load_artifacts(
         tuning_log=tuning_log,
         evaluation_metrics=evaluation_metrics,
         backtest_results=backtest_results,
+        tested_specifications=tested_specifications,
+        multiple_testing_report=multiple_testing_report,
     )
 
 
@@ -335,6 +361,57 @@ def _load_json_array_artifact(
         )
     )
     return records
+
+
+def _load_json_object_artifact(
+    run_id: str,
+    path: Path,
+    model: type[T],
+    checks: list[AuditCheckRecord],
+    *,
+    required: bool,
+) -> T | None:
+    if not path.exists():
+        checks.append(
+            _check(
+                run_id,
+                f"artifact_exists::{path.name}",
+                "artifact",
+                "fail" if required else "warn",
+                f"Missing {'required' if required else 'optional'} artifact: {path.name}",
+                [str(path)],
+            )
+        )
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError("artifact must contain a JSON object")
+        record = model.model_validate(payload)
+    except (json.JSONDecodeError, ValidationError, ValueError, OSError) as exc:
+        checks.append(
+            _check(
+                run_id,
+                f"schema_valid::{path.name}",
+                "schema",
+                "fail",
+                f"{path.name} failed schema validation: {exc}",
+                [str(path)],
+            )
+        )
+        return None
+    checks.append(
+        _check(
+            run_id,
+            f"schema_valid::{path.name}",
+            "schema",
+            "pass",
+            f"{path.name} parsed successfully",
+            [str(path)],
+            observed_value=1,
+        )
+    )
+    return record
 
 
 def _load_vocabulary_json(path: Path) -> dict[str, dict[str, dict[str, int]]] | None:
@@ -528,29 +605,34 @@ def _model_selection_leakage_check(
 
 def _tested_specifications_check(
     run_id: str,
-    model_manifest: list[ModelManifestRecord],
+    tested_specifications: list[TestedSpecificationRecord],
     metrics: list[EvaluationMetricRecord],
+    backtests: list[PortfolioBacktestRecord],
+    multiple_testing_report: MultipleTestingReportRecord | None,
 ) -> AuditCheckRecord:
-    model_count = len({record.model_id for record in model_manifest})
     target_count = len({record.target_name for record in metrics})
-    spec_count = len(
-        {
-            (record.model_id, record.target_name, record.split_id, record.role)
-            for record in metrics
-        }
-    )
-    status = "pass" if spec_count else "fail"
+    expected_minimum = len([record for record in metrics if record.role == "test"]) + len(backtests)
+    spec_count = len(tested_specifications)
+    if spec_count == 0 and expected_minimum > 0:
+        status = "fail"
+        message = "No tested specifications were recorded for available evaluation artifacts"
+    elif multiple_testing_report is None:
+        status = "fail" if spec_count > 1 else "warn"
+        message = "Tested specifications exist but multiple_testing_report.json is missing"
+    elif multiple_testing_report.specification_count != spec_count:
+        status = "fail"
+        message = "multiple_testing_report specification_count does not match registry rows"
+    else:
+        status = "pass"
+        message = "Tested specifications and multiple-testing report are present"
     return _check(
         run_id,
         "tested_specifications_disclosure",
         "audit",
         status,
-        (
-            "Tested specifications are disclosed through model_manifest and "
-            "evaluation_metrics artifacts"
-        ),
-        ["model_manifest.json", "evaluation_metrics.json"],
-        observed_value=f"models={model_count}, targets={target_count}, specs={spec_count}",
+        message,
+        ["tested_specifications.jsonl", "multiple_testing_report.json"],
+        observed_value=f"targets={target_count}, specs={spec_count}",
     )
 
 

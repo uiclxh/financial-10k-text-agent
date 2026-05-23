@@ -33,6 +33,8 @@ Implemented through the current research-grade upgrade path:
     and manifest audit fields
 16. Portfolio variants: equal-weight, value-weight, sector-neutral equal-weight,
     and sector-neutral value-weight construction when metadata is available
+17. Multiple-testing artifacts: tested-specification registry, Holm adjustment,
+    and Benjamini-Hochberg FDR report
 
 ## Key Commands
 
@@ -91,7 +93,7 @@ python -m ruff check .
 Current local acceptance result:
 
 ```text
-93 tests pass
+95 tests pass
 ruff passes
 ```
 
@@ -99,6 +101,6 @@ ruff passes
 
 This is still an MVP, not a full research-grade production system. Remaining
 work includes SEC download scheduling, survivorship-free universe construction,
-daily price-driven holdings, multiple-testing adjustment reports, cloud
-dashboard packaging, FinBERT / LLM embedding modules, earnings-call transcript
-ingestion, and credit-risk targets.
+daily price-driven holdings, Deflated Sharpe, CPCV/PBO, cloud dashboard
+packaging, FinBERT / LLM embedding modules, earnings-call transcript ingestion,
+and credit-risk targets.

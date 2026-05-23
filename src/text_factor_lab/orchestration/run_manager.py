@@ -74,6 +74,8 @@ class RunManager:
         self.portfolio_weights_path = self.run_dir / "portfolio_weights.jsonl"
         self.portfolio_returns_path = self.run_dir / "portfolio_returns.jsonl"
         self.portfolio_metrics_path = self.run_dir / "portfolio_metrics.json"
+        self.tested_specifications_path = self.run_dir / "tested_specifications.jsonl"
+        self.multiple_testing_report_path = self.run_dir / "multiple_testing_report.json"
         self.audit_report_path = self.run_dir / "audit_report.json"
         self.parsing_quality_report_path = self.run_dir / "parsing_quality_report.json"
 
@@ -648,6 +650,8 @@ class RunManager:
             and self.portfolio_weights_path.exists()
             and self.portfolio_returns_path.exists()
             and self.portfolio_metrics_path.exists()
+            and self.tested_specifications_path.exists()
+            and self.multiple_testing_report_path.exists()
         ):
             self.update_status("evaluated")
             self._append_stage(records, stage="evaluation", status="skipped_existing")
@@ -671,6 +675,11 @@ class RunManager:
             write_portfolio_returns_jsonl,
             write_portfolio_weights_jsonl,
         )
+        from text_factor_lab.inference import (
+            build_inference_artifacts,
+            write_multiple_testing_report_json,
+            write_tested_specifications_jsonl,
+        )
 
         result = build_evaluation_artifacts(
             run_id=self.config.run.run_id,
@@ -684,6 +693,20 @@ class RunManager:
         write_portfolio_weights_jsonl(result.portfolio_weights, self.portfolio_weights_path)
         write_portfolio_returns_jsonl(result.portfolio_returns, self.portfolio_returns_path)
         write_portfolio_metrics_json(result.portfolio_metrics, self.portfolio_metrics_path)
+        inference_result = build_inference_artifacts(
+            run_id=self.config.run.run_id,
+            metrics=result.metrics,
+            backtests=result.backtests,
+            portfolio_metrics=result.portfolio_metrics,
+        )
+        write_tested_specifications_jsonl(
+            inference_result.tested_specifications,
+            self.tested_specifications_path,
+        )
+        write_multiple_testing_report_json(
+            inference_result.multiple_testing_report,
+            self.multiple_testing_report_path,
+        )
         self.update_status("evaluated")
         self._append_stage(
             records,
@@ -695,6 +718,8 @@ class RunManager:
                 self.portfolio_weights_path,
                 self.portfolio_returns_path,
                 self.portfolio_metrics_path,
+                self.tested_specifications_path,
+                self.multiple_testing_report_path,
             ],
             metrics={
                 "metrics": len(result.metrics),
@@ -702,6 +727,10 @@ class RunManager:
                 "portfolio_weights": len(result.portfolio_weights),
                 "portfolio_returns": len(result.portfolio_returns),
                 "portfolio_metrics": len(result.portfolio_metrics),
+                "tested_specifications": len(inference_result.tested_specifications),
+                "multiple_testing_families": (
+                    inference_result.multiple_testing_report.family_count
+                ),
             },
         )
         return True
@@ -719,6 +748,8 @@ class RunManager:
             self.tuning_log_path,
             self.evaluation_metrics_path,
             self.backtest_results_path,
+            self.tested_specifications_path,
+            self.multiple_testing_report_path,
         ]
         if not self._inputs_exist(*audit_inputs):
             self._append_stage(

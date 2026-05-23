@@ -11,6 +11,11 @@ from text_factor_lab.schemas.evaluation import (
     PortfolioWeightRecord,
 )
 from text_factor_lab.schemas.features import FeatureManifestRecord, FeatureRecord
+from text_factor_lab.schemas.inference import (
+    MultipleTestingFamilyRecord,
+    MultipleTestingReportRecord,
+    TestedSpecificationRecord,
+)
 from text_factor_lab.schemas.labels import LabelRecord
 from text_factor_lab.schemas.model_manifest import ModelManifestRecord, TuningLogRecord
 from text_factor_lab.schemas.parsed_sections import ParsedSectionRecord, ParsingQualityReport
@@ -29,6 +34,8 @@ __all__ = [
     "FeatureRecord",
     "LabelRecord",
     "ModelManifestRecord",
+    "MultipleTestingFamilyRecord",
+    "MultipleTestingReportRecord",
     "ParsedSectionRecord",
     "ParsingQualityReport",
     "PredictionRecord",
@@ -39,6 +46,7 @@ __all__ = [
     "RunStatusRecord",
     "SplitAssignmentRecord",
     "SplitLeakageRecord",
+    "TestedSpecificationRecord",
     "TuningLogRecord",
     "UniverseQualityReport",
     "UniverseRecord",

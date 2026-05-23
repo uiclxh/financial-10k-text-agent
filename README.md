@@ -46,12 +46,14 @@ The core outputs are research artifacts, not conversational answers:
 - `portfolio_weights.jsonl`
 - `portfolio_returns.jsonl`
 - `portfolio_metrics.json`
+- `tested_specifications.jsonl`
+- `multiple_testing_report.json`
 - `audit_report.json`
 - `report.md` and `report_summary.json`
 
 ## Current Status
 
-Current package version: `v0.9.0`
+Current package version: `v0.10.0`
 
 The repository now contains a runnable MVP research framework:
 
@@ -66,6 +68,8 @@ The repository now contains a runnable MVP research framework:
 - portfolio time-series artifacts
 - equal-weight, value-weight, sector-neutral equal-weight, and sector-neutral
   value-weight portfolio variants when metadata is available
+- tested-specification registry and Holm / Benjamini-Hochberg FDR
+  multiple-testing adjustment report
 - NYSE calendar event-date alignment with holiday and early-close handling
 - audit-gated Markdown/JSON reports
 - GitHub Actions CI, Dockerfile, Makefile, and e2e smoke fixture
@@ -117,12 +121,12 @@ python -m text_factor_lab report --help
 | [v0.7.0](docs/releases/v0.7.0.md) | Event Calendar | NYSE trading calendar and event-date audit fields |
 | [v0.8.0](docs/releases/v0.8.0.md) | Portfolio Series | portfolio weights, returns, turnover, metrics |
 | [v0.9.0](docs/releases/v0.9.0.md) | Portfolio Variants | value-weight and sector-neutral portfolio construction |
+| [v0.10.0](docs/releases/v0.10.0.md) | Multiple Testing | tested specs, Holm, BH-FDR adjustment report |
 
 ## Boundaries
 
 This is a strong MVP research framework, not yet a formal empirical finance
 replication package. Remaining research-grade work includes survivorship-free
 universe construction, historical security master integration, delisting
-returns, deeper statistical inference, multiple-testing reports, richer
-empirical paper output, FinBERT / LLM embedding modules, earnings-call ingestion,
-and credit-risk targets.
+returns, Deflated Sharpe, CPCV/PBO, richer empirical paper output, FinBERT /
+LLM embedding modules, earnings-call ingestion, and credit-risk targets.

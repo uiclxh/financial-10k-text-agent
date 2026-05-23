@@ -7,6 +7,11 @@ from pathlib import Path
 import yaml
 
 from text_factor_lab.audit import audit_run
+from text_factor_lab.inference import (
+    build_inference_artifacts,
+    write_multiple_testing_report_json,
+    write_tested_specifications_jsonl,
+)
 from text_factor_lab.schemas import (
     EvaluationMetricRecord,
     LabelRecord,
@@ -196,8 +201,24 @@ def write_complete_audit_artifacts(run_dir: Path, *, bad_prediction_label: bool 
     write_jsonl(run_dir / "predictions.jsonl", [prediction])
     write_json_array(run_dir / "model_manifest.json", [model_manifest_record(label)])
     write_json_array(run_dir / "tuning_log.json", [tuning_log_record(label)])
-    write_json_array(run_dir / "evaluation_metrics.json", [metric_record(label)])
-    write_json_array(run_dir / "backtest_results.json", [backtest_record(label)])
+    metrics = [metric_record(label)]
+    backtests = [backtest_record(label)]
+    write_json_array(run_dir / "evaluation_metrics.json", metrics)
+    write_json_array(run_dir / "backtest_results.json", backtests)
+    inference = build_inference_artifacts(
+        run_id="audit_test_run",
+        metrics=metrics,
+        backtests=backtests,
+        portfolio_metrics=[],
+    )
+    write_tested_specifications_jsonl(
+        inference.tested_specifications,
+        run_dir / "tested_specifications.jsonl",
+    )
+    write_multiple_testing_report_json(
+        inference.multiple_testing_report,
+        run_dir / "multiple_testing_report.json",
+    )
 
 
 def test_audit_run_passes_complete_exploratory_artifacts(tmp_path: Path) -> None:

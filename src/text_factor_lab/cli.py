@@ -186,6 +186,8 @@ def build_parser() -> argparse.ArgumentParser:
     eval_parser.add_argument("--portfolio-weights-output")
     eval_parser.add_argument("--portfolio-returns-output")
     eval_parser.add_argument("--portfolio-metrics-output")
+    eval_parser.add_argument("--tested-specifications-output")
+    eval_parser.add_argument("--multiple-testing-output")
     eval_parser.add_argument("--transaction-cost-bps-one-way", type=float, default=10.0)
     eval_parser.add_argument("--newey-west-lag", type=int, default=19)
 
@@ -466,6 +468,29 @@ def main(argv: list[str] | None = None) -> int:
             write_portfolio_returns_jsonl(result.portfolio_returns, args.portfolio_returns_output)
         if args.portfolio_metrics_output:
             write_portfolio_metrics_json(result.portfolio_metrics, args.portfolio_metrics_output)
+        if args.tested_specifications_output or args.multiple_testing_output:
+            from text_factor_lab.inference import (
+                build_inference_artifacts,
+                write_multiple_testing_report_json,
+                write_tested_specifications_jsonl,
+            )
+
+            inference_result = build_inference_artifacts(
+                run_id=args.run_id,
+                metrics=result.metrics,
+                backtests=result.backtests,
+                portfolio_metrics=result.portfolio_metrics,
+            )
+            if args.tested_specifications_output:
+                write_tested_specifications_jsonl(
+                    inference_result.tested_specifications,
+                    args.tested_specifications_output,
+                )
+            if args.multiple_testing_output:
+                write_multiple_testing_report_json(
+                    inference_result.multiple_testing_report,
+                    args.multiple_testing_output,
+                )
         print(
             "Built evaluation artifacts. "
             f"metrics={len(result.metrics)} backtests={len(result.backtests)} "

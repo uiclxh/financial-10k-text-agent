@@ -13,7 +13,9 @@ from text_factor_lab.schemas import (
     EvaluationMetricRecord,
     FeatureManifestRecord,
     ModelManifestRecord,
+    MultipleTestingReportRecord,
     PortfolioBacktestRecord,
+    PortfolioMetricRecord,
     RunStatusRecord,
     TuningLogRecord,
     load_experiment_config,
@@ -33,6 +35,8 @@ class ReportArtifactPaths:
     model_manifest: Path
     tuning_log: Path
     feature_manifest: Path
+    portfolio_metrics: Path
+    multiple_testing_report: Path
     report_markdown: Path
     report_summary: Path
 
@@ -56,6 +60,8 @@ class ReportArtifactPaths:
             model_manifest=base / "model_manifest.json",
             tuning_log=base / "tuning_log.json",
             feature_manifest=base / "feature_manifest.json",
+            portfolio_metrics=base / "portfolio_metrics.json",
+            multiple_testing_report=base / "multiple_testing_report.json",
             report_markdown=output / "report.md",
             report_summary=output / "report_summary.json",
         )
@@ -165,6 +171,13 @@ def _load_report_artifacts(paths: ReportArtifactPaths) -> dict[str, Any]:
             FeatureManifestRecord.model_validate(item)
             for item in _read_optional_json_array(paths.feature_manifest)
         ],
+        "portfolio_metrics": [
+            PortfolioMetricRecord.model_validate(item)
+            for item in _read_optional_json_array(paths.portfolio_metrics)
+        ],
+        "multiple_testing_report": _read_optional_multiple_testing_report(
+            paths.multiple_testing_report
+        ),
         "document_count": _count_jsonl_records(paths.run_dir / "document_manifest.jsonl"),
         "label_count": _count_jsonl_records(paths.run_dir / "labels.jsonl"),
         "prediction_count": _count_jsonl_records(paths.run_dir / "predictions.jsonl"),
@@ -187,6 +200,10 @@ def _build_summary(
     model_manifest: list[ModelManifestRecord] = artifacts["model_manifest"]
     feature_manifest: list[FeatureManifestRecord] = artifacts["feature_manifest"]
     tuning_log: list[TuningLogRecord] = artifacts["tuning_log"]
+    portfolio_metrics: list[PortfolioMetricRecord] = artifacts["portfolio_metrics"]
+    multiple_testing_report: MultipleTestingReportRecord | None = artifacts[
+        "multiple_testing_report"
+    ]
 
     best_prediction = _best_prediction_metric(metrics)
     best_backtest = _best_backtest(backtests)
@@ -252,6 +269,7 @@ def _build_summary(
         },
         "backtest": {
             "result_count": len(backtests),
+            "portfolio_metric_count": len(portfolio_metrics),
             "portfolio_method": config.backtest.portfolio_method,
             "weighting": config.backtest.weighting,
             "transaction_cost_bps_one_way": config.backtest.transaction_cost_bps_one_way,
@@ -259,6 +277,7 @@ def _build_summary(
             "best_backtest": _backtest_summary(best_backtest) if best_backtest else None,
             "top_backtests": [_backtest_summary(record) for record in _top_backtests(backtests)],
         },
+        "multiple_testing": _multiple_testing_summary(multiple_testing_report),
         "reproducibility": {
             "config_path": str(paths.config),
             "report_markdown_path": str(paths.report_markdown),
@@ -351,12 +370,16 @@ def _render_markdown(summary: dict[str, Any]) -> str:
         "",
         _backtest_table(summary["backtest"]["top_backtests"]),
         "",
+        "## Multiple Testing Adjustment",
+        "",
+        _multiple_testing_section(summary["multiple_testing"]),
+        "",
         "## Robustness Checks",
         "",
         (
             "- Current MVP report summarizes split-level and `ALL_SPLITS` metrics. "
-            "Subperiod stability, multiple-testing adjustment, and sector-neutral "
-            "portfolio variants should be added before making production research claims."
+            "Subperiod stability, Deflated Sharpe, CPCV/PBO, and daily price-driven "
+            "portfolio holdings should be added before making production research claims."
         ),
         "",
         "## Leakage Audit",
@@ -463,6 +486,37 @@ def _backtest_summary(record: PortfolioBacktestRecord) -> dict[str, Any]:
     }
 
 
+def _multiple_testing_summary(
+    report: MultipleTestingReportRecord | None,
+) -> dict[str, Any]:
+    if report is None:
+        return {
+            "available": False,
+            "specification_count": 0,
+            "p_value_count": 0,
+            "family_count": 0,
+            "families": [],
+        }
+    return {
+        "available": True,
+        "specification_count": report.specification_count,
+        "p_value_count": report.p_value_count,
+        "family_count": report.family_count,
+        "methods_applied": report.methods_applied,
+        "families": [
+            {
+                "family_id": family.family_id,
+                "number_of_tests": family.number_of_tests,
+                "best_raw_p_value": family.best_raw_p_value,
+                "best_adjusted_p_value": family.best_adjusted_p_value,
+                "discoveries_at_5pct": family.discoveries_at_5pct,
+                "discoveries_at_10pct": family.discoveries_at_10pct,
+            }
+            for family in report.families
+        ],
+    }
+
+
 def _check_summary(check: Any) -> dict[str, Any]:
     return {
         "check_id": check.check_id,
@@ -510,6 +564,31 @@ def _backtest_table(rows: list[dict[str, Any]]) -> str:
             f"{_fmt(row['gross_long_short_return'])} | {_fmt(row['net_long_short_return'])} | "
             f"{_fmt(row['sharpe_ratio'])} | {_fmt(row['newey_west_t_stat'])} | "
             f"{_fmt(row['turnover'])} |"
+        )
+    return "\n".join(lines)
+
+
+def _multiple_testing_section(summary: dict[str, Any]) -> str:
+    if not summary["available"]:
+        return "No multiple-testing report was available."
+    lines = [
+        (
+            f"- Specifications: {summary['specification_count']}; "
+            f"p-values: {summary['p_value_count']}; "
+            f"families: {summary['family_count']}."
+        ),
+        f"- Methods: {_inline_list(summary.get('methods_applied', []))}.",
+        "",
+        "| Family | Tests | Best raw p | Best BH-FDR p | Discoveries 5% | Discoveries 10% |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for family in summary["families"]:
+        lines.append(
+            "| "
+            f"{family['family_id']} | {family['number_of_tests']} | "
+            f"{_fmt(family['best_raw_p_value'] or 0.0)} | "
+            f"{_fmt(family['best_adjusted_p_value'] or 0.0)} | "
+            f"{family['discoveries_at_5pct']} | {family['discoveries_at_10pct']} |"
         )
     return "\n".join(lines)
 
@@ -581,6 +660,12 @@ def _read_optional_json_array(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
     return _read_json_array(path)
+
+
+def _read_optional_multiple_testing_report(path: Path) -> MultipleTestingReportRecord | None:
+    if not path.exists():
+        return None
+    return MultipleTestingReportRecord.model_validate(_read_json_object(path))
 
 
 def _count_jsonl_records(path: Path) -> int:

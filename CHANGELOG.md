@@ -1,5 +1,25 @@
 # Changelog
 
+## [v0.10.0] - 2026-05-23
+
+Multiple-testing and specification-registry release.
+
+- Added `TestedSpecificationRecord`, `MultipleTestingFamilyRecord`, and
+  `MultipleTestingReportRecord` schemas.
+- Added `text_factor_lab.inference` for tested-specification generation and
+  multiple-testing adjustment.
+- Added `tested_specifications.jsonl`.
+- Added `multiple_testing_report.json`.
+- Added Bonferroni, Holm, and Benjamini-Hochberg FDR adjusted p-values.
+- Added specification families for Rank IC, Newey-West t-stat, and portfolio
+  Sharpe diagnostics.
+- Integrated inference artifacts into `evaluate-models`, `run --execute`,
+  audit checks, and generated reports.
+- Added tests for inference artifact generation, writer round trips, audit
+  acceptance, and e2e smoke output.
+
+Release notes: [docs/releases/v0.10.0.md](docs/releases/v0.10.0.md)
+
 ## [v0.9.0] - 2026-05-23
 
 Portfolio variant release.
