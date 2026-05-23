@@ -38,6 +38,9 @@ class ReportArtifactPaths:
     portfolio_metrics: Path
     multiple_testing_report: Path
     report_markdown: Path
+    empirical_report: Path
+    factor_card: Path
+    appendix_tables: Path
     report_summary: Path
 
     @classmethod
@@ -63,6 +66,9 @@ class ReportArtifactPaths:
             portfolio_metrics=base / "portfolio_metrics.json",
             multiple_testing_report=base / "multiple_testing_report.json",
             report_markdown=output / "report.md",
+            empirical_report=output / "empirical_report.md",
+            factor_card=output / "factor_card.md",
+            appendix_tables=output / "appendix_tables.md",
             report_summary=output / "report_summary.json",
         )
 
@@ -71,6 +77,9 @@ class ReportArtifactPaths:
 class ReportBuildResult:
     run_id: str
     report_markdown_path: Path
+    empirical_report_path: Path
+    factor_card_path: Path
+    appendix_tables_path: Path
     report_summary_path: Path
     conclusion_level: str
     formal_result_allowed: bool
@@ -112,9 +121,15 @@ def generate_run_report(
         allow_failed_audit=allow_failed_audit,
     )
     markdown = _render_markdown(summary)
+    empirical_report = _render_empirical_report(summary)
+    factor_card = _render_factor_card(summary)
+    appendix_tables = _render_appendix_tables(summary)
 
     paths.report_markdown.parent.mkdir(parents=True, exist_ok=True)
     paths.report_markdown.write_text(markdown, encoding="utf-8")
+    paths.empirical_report.write_text(empirical_report, encoding="utf-8")
+    paths.factor_card.write_text(factor_card, encoding="utf-8")
+    paths.appendix_tables.write_text(appendix_tables, encoding="utf-8")
     paths.report_summary.write_text(
         json.dumps(summary, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -123,6 +138,9 @@ def generate_run_report(
     return ReportBuildResult(
         run_id=run_id,
         report_markdown_path=paths.report_markdown,
+        empirical_report_path=paths.empirical_report,
+        factor_card_path=paths.factor_card,
+        appendix_tables_path=paths.appendix_tables,
         report_summary_path=paths.report_summary,
         conclusion_level=summary["conclusion_level"],
         formal_result_allowed=summary["formal_result_allowed"],
@@ -276,11 +294,25 @@ def _build_summary(
             "newey_west_lag": config.backtest.newey_west_lag,
             "best_backtest": _backtest_summary(best_backtest) if best_backtest else None,
             "top_backtests": [_backtest_summary(record) for record in _top_backtests(backtests)],
+            "portfolio_metrics": [
+                _portfolio_metric_summary(record)
+                for record in _top_portfolio_metrics(portfolio_metrics)
+            ],
         },
         "multiple_testing": _multiple_testing_summary(multiple_testing_report),
+        "interpretation": _interpretation_policy(
+            audit=audit,
+            best_prediction=best_prediction,
+            best_backtest=best_backtest,
+            multiple_testing_report=multiple_testing_report,
+            allow_failed_audit=allow_failed_audit,
+        ),
         "reproducibility": {
             "config_path": str(paths.config),
             "report_markdown_path": str(paths.report_markdown),
+            "empirical_report_path": str(paths.empirical_report),
+            "factor_card_path": str(paths.factor_card),
+            "appendix_tables_path": str(paths.appendix_tables),
             "report_summary_path": str(paths.report_summary),
             "commands": [
                 f"python -m text_factor_lab audit --run-id {run_id} --run-dir {paths.run_dir}",
@@ -406,6 +438,184 @@ def _render_markdown(summary: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _render_empirical_report(summary: dict[str, Any]) -> str:
+    lines = [
+        f"# Empirical Report - {summary['run_id']}",
+        "",
+        "## 1. Research Design",
+        "",
+        (
+            "This experiment evaluates whether SEC 10-K text features contain "
+            "out-of-sample information about configured return or volatility targets. "
+            "The workflow uses rolling splits, validation-only model selection, "
+            "artifact-level audit checks, and multiple-testing disclosure."
+        ),
+        "",
+        "## 2. Data And Universe Construction",
+        "",
+        f"- Universe: `{summary['sample']['universe']}`.",
+        f"- Selection date: `{summary['sample']['selection_date']}`.",
+        (
+            f"- Sample window: `{summary['sample']['sample_start']}` to "
+            f"`{summary['sample']['sample_end']}`."
+        ),
+        f"- Documents: {summary['sample']['document_count']}.",
+        f"- Labels: {summary['sample']['label_count']}.",
+        "",
+        "## 3. Event-Time Alignment",
+        "",
+        (
+            f"The configured timezone is `{summary['sample']['timezone']}`. "
+            "Document availability and prediction timestamps are audited before "
+            "formal conclusions are allowed."
+        ),
+        "",
+        "## 4. Text Feature Construction",
+        "",
+        f"- Methods: {_inline_list(summary['features']['methods'])}.",
+        f"- Text scopes: {_inline_list(summary['features']['text_scopes'])}.",
+        f"- Feature records: {summary['sample']['feature_count']}.",
+        "",
+        "## 5. Label Construction",
+        "",
+        f"- Targets: {_inline_list(summary['labels']['targets'])}.",
+        f"- Return type: `{summary['labels']['return_type']}`.",
+        f"- Benchmark: `{summary['labels']['market_benchmark']}`.",
+        "",
+        "## 6. Prediction Models",
+        "",
+        f"- Models: {_inline_list(summary['models']['enabled'])}.",
+        f"- Selection metric: `{summary['models']['selection_metric']}`.",
+        f"- Tuning logs: {summary['models']['tuning_log_count']}.",
+        "",
+        "## 7. Out-Of-Sample Forecasting Results",
+        "",
+        _metrics_table(summary["evaluation"]["test_metrics"]),
+        "",
+        "## 8. Portfolio Construction",
+        "",
+        (
+            f"The backtest uses `{summary['backtest']['portfolio_method']}` with "
+            f"`{summary['backtest']['weighting']}` weighting in the configured summary "
+            "backtest. Portfolio variant diagnostics are reported when available."
+        ),
+        "",
+        "## 9. Factor Backtest Results",
+        "",
+        _backtest_table(summary["backtest"]["top_backtests"]),
+        "",
+        "## 10. Sector-Neutral And Value-Weighted Robustness",
+        "",
+        _portfolio_metric_table(summary["backtest"]["portfolio_metrics"]),
+        "",
+        "## 11. Multiple Testing Adjustment",
+        "",
+        _multiple_testing_section(summary["multiple_testing"]),
+        "",
+        "## 12. Failure Cases And Audit Results",
+        "",
+        _audit_table(summary["audit"]["failed_checks"], summary["audit"]["warning_checks"]),
+        "",
+        "## 13. Economic Interpretation",
+        "",
+        summary["interpretation"]["economic_interpretation"],
+        "",
+        "## 14. Limitations",
+        "",
+        _limitations_text(summary),
+        "",
+        "## 15. Conclusion",
+        "",
+        summary["interpretation"]["conclusion_text"],
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def _render_factor_card(summary: dict[str, Any]) -> str:
+    best_metric = summary["evaluation"]["best_prediction_metric"]
+    best_backtest = summary["backtest"]["best_backtest"]
+    lines = [
+        f"# Factor Card - {summary['run_id']}",
+        "",
+        "| Field | Value |",
+        "| --- | --- |",
+        f"| Conclusion | `{summary['conclusion_level']}` |",
+        f"| Formal result allowed | `{summary['formal_result_allowed']}` |",
+        f"| Audit status | `{summary['audit']['status']}` |",
+        f"| Coverage | `{summary['audit']['coverage']:.3f}` |",
+        f"| Universe | `{summary['sample']['universe']}` |",
+        f"| Sample | `{summary['sample']['sample_start']}..{summary['sample']['sample_end']}` |",
+        f"| Targets | {_inline_list(summary['labels']['targets'])} |",
+        f"| Features | {_inline_list(summary['features']['methods'])} |",
+        f"| Models | {_inline_list(summary['models']['enabled'])} |",
+        f"| Multiple-testing families | `{summary['multiple_testing']['family_count']}` |",
+        "",
+        "## Best Prediction",
+        "",
+        _single_metric_block(best_metric),
+        "",
+        "## Best Backtest",
+        "",
+        _single_backtest_block(best_backtest),
+        "",
+        "## Evidence Level",
+        "",
+        summary["interpretation"]["evidence_level"],
+        "",
+        "## Usage Boundary",
+        "",
+        summary["interpretation"]["usage_boundary"],
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def _render_appendix_tables(summary: dict[str, Any]) -> str:
+    lines = [
+        f"# Appendix Tables - {summary['run_id']}",
+        "",
+        "## Table 1 Sample Coverage",
+        "",
+        "| Item | Count |",
+        "| --- | ---: |",
+        f"| Documents | {summary['sample']['document_count']} |",
+        f"| Labels | {summary['sample']['label_count']} |",
+        f"| Predictions | {summary['sample']['prediction_count']} |",
+        f"| Features | {summary['sample']['feature_count']} |",
+        "",
+        "## Table 2 Feature Summary",
+        "",
+        "| Item | Value |",
+        "| --- | --- |",
+        f"| Methods | {_inline_list(summary['features']['methods'])} |",
+        f"| Versions | {_inline_list(summary['features']['feature_versions'])} |",
+        f"| Text scopes | {_inline_list(summary['features']['text_scopes'])} |",
+        "",
+        "## Table 3 OOS Prediction Metrics",
+        "",
+        _metrics_table(summary["evaluation"]["test_metrics"]),
+        "",
+        "## Table 4 Portfolio Return Summary",
+        "",
+        _backtest_table(summary["backtest"]["top_backtests"]),
+        "",
+        "## Table 5 Portfolio Variant Metrics",
+        "",
+        _portfolio_metric_table(summary["backtest"]["portfolio_metrics"]),
+        "",
+        "## Table 6 Multiple-Testing-Adjusted Results",
+        "",
+        _multiple_testing_section(summary["multiple_testing"]),
+        "",
+        "## Table 7 Audit Checks",
+        "",
+        _audit_table(summary["audit"]["failed_checks"], summary["audit"]["warning_checks"]),
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def _best_prediction_metric(
     metrics: list[EvaluationMetricRecord],
 ) -> EvaluationMetricRecord | None:
@@ -436,6 +646,13 @@ def _top_backtests(
     limit: int = 10,
 ) -> list[PortfolioBacktestRecord]:
     return sorted(backtests, key=lambda item: (-item.net_long_short_return, item.model_id))[:limit]
+
+
+def _top_portfolio_metrics(
+    records: list[PortfolioMetricRecord],
+    limit: int = 12,
+) -> list[PortfolioMetricRecord]:
+    return sorted(records, key=lambda item: (-item.sharpe_ratio, item.model_id))[:limit]
 
 
 def _conclusion_level(
@@ -486,6 +703,27 @@ def _backtest_summary(record: PortfolioBacktestRecord) -> dict[str, Any]:
     }
 
 
+def _portfolio_metric_summary(record: PortfolioMetricRecord) -> dict[str, Any]:
+    return {
+        "model_id": record.model_id,
+        "split_id": record.split_id,
+        "target_name": record.target_name,
+        "portfolio_variant": record.portfolio_variant,
+        "weighting": record.weighting,
+        "sector_neutral": record.sector_neutral,
+        "observation_count": record.observation_count,
+        "cumulative_return": record.cumulative_return,
+        "annualized_return": record.annualized_return,
+        "annualized_volatility": record.annualized_volatility,
+        "sharpe_ratio": record.sharpe_ratio,
+        "max_drawdown": record.max_drawdown,
+        "hit_rate": record.hit_rate,
+        "average_turnover": record.average_turnover,
+        "average_gross_exposure": record.average_gross_exposure,
+        "average_net_exposure": record.average_net_exposure,
+    }
+
+
 def _multiple_testing_summary(
     report: MultipleTestingReportRecord | None,
 ) -> dict[str, Any]:
@@ -515,6 +753,84 @@ def _multiple_testing_summary(
             for family in report.families
         ],
     }
+
+
+def _interpretation_policy(
+    *,
+    audit: AuditReportRecord,
+    best_prediction: EvaluationMetricRecord | None,
+    best_backtest: PortfolioBacktestRecord | None,
+    multiple_testing_report: MultipleTestingReportRecord | None,
+    allow_failed_audit: bool,
+) -> dict[str, str]:
+    if audit.audit_status == "fail":
+        return {
+            "evidence_level": "diagnostic_only",
+            "economic_interpretation": (
+                "The audit failed, so the run should be interpreted only as a "
+                "pipeline diagnostic. No empirical factor claim should be made."
+            ),
+            "usage_boundary": "Use only for debugging failed artifacts and audit blockers.",
+            "conclusion_text": (
+                "This run is diagnostic only." if allow_failed_audit else "Report blocked."
+            ),
+        }
+    adjusted_discovery = _has_adjusted_discovery(multiple_testing_report)
+    prediction_positive = best_prediction is not None and best_prediction.rank_ic > 0
+    backtest_positive = (
+        best_backtest is not None and best_backtest.net_long_short_return > 0
+    )
+    if prediction_positive and backtest_positive and adjusted_discovery:
+        return {
+            "evidence_level": "research_evidence_positive",
+            "economic_interpretation": (
+                "The run shows positive out-of-sample ranking evidence, positive "
+                "net long-short performance, and at least one multiple-testing-adjusted "
+                "discovery. The evidence supports further research review."
+            ),
+            "usage_boundary": (
+                "Treat as research evidence, subject to universe quality, data rights, "
+                "daily holdings simulation, and additional robustness checks."
+            ),
+            "conclusion_text": (
+                "Evidence supports a candidate text factor under the current audited setup."
+            ),
+        }
+    if prediction_positive and not backtest_positive:
+        return {
+            "evidence_level": "predictive_signal_economic_value_weak",
+            "economic_interpretation": (
+                "Prediction metrics are positive, but the available backtest does not "
+                "show positive net economic value."
+            ),
+            "usage_boundary": "Do not describe the factor as economically validated.",
+            "conclusion_text": "Predictive evidence exists, but economic value is weak.",
+        }
+    if prediction_positive and not adjusted_discovery:
+        return {
+            "evidence_level": "exploratory_signal_not_adjusted_significant",
+            "economic_interpretation": (
+                "The best predictive metric is positive, but the multiple-testing layer "
+                "does not record an adjusted discovery."
+            ),
+            "usage_boundary": "Report as exploratory only and disclose tested specifications.",
+            "conclusion_text": "Pipeline works, but adjusted factor evidence is weak.",
+        }
+    return {
+        "evidence_level": "weak_or_incomplete_evidence",
+        "economic_interpretation": (
+            "The current artifacts do not provide strong positive predictive and "
+            "economic evidence after audit and multiple-testing review."
+        ),
+        "usage_boundary": "Use as a reproducible experiment log rather than a factor claim.",
+        "conclusion_text": "Evidence is weak or incomplete under the current setup.",
+    }
+
+
+def _has_adjusted_discovery(report: MultipleTestingReportRecord | None) -> bool:
+    if report is None:
+        return False
+    return any(family.discoveries_at_10pct > 0 for family in report.families)
 
 
 def _check_summary(check: Any) -> dict[str, Any]:
@@ -568,6 +884,24 @@ def _backtest_table(rows: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def _portfolio_metric_table(rows: list[dict[str, Any]]) -> str:
+    if not rows:
+        return "No portfolio variant metrics were available."
+    lines = [
+        "| Model | Variant | Target | N | Ann Ret | Ann Vol | Sharpe | Max DD | Turnover |",
+        "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for row in rows:
+        lines.append(
+            "| "
+            f"{row['model_id']} | {row['portfolio_variant']} | {row['target_name']} | "
+            f"{row['observation_count']} | {_fmt(row['annualized_return'])} | "
+            f"{_fmt(row['annualized_volatility'])} | {_fmt(row['sharpe_ratio'])} | "
+            f"{_fmt(row['max_drawdown'])} | {_fmt(row['average_turnover'])} |"
+        )
+    return "\n".join(lines)
+
+
 def _multiple_testing_section(summary: dict[str, Any]) -> str:
     if not summary["available"]:
         return "No multiple-testing report was available."
@@ -591,6 +925,49 @@ def _multiple_testing_section(summary: dict[str, Any]) -> str:
             f"{family['discoveries_at_5pct']} | {family['discoveries_at_10pct']} |"
         )
     return "\n".join(lines)
+
+
+def _single_metric_block(row: dict[str, Any] | None) -> str:
+    if row is None:
+        return "No prediction metric is available."
+    return "\n".join(
+        [
+            f"- Model: `{row['model_id']}`.",
+            f"- Target: `{row['target_name']}`.",
+            f"- Split: `{row['split_id']}`.",
+            f"- Rank IC: `{_fmt(row['rank_ic'])}`.",
+            f"- RMSE: `{_fmt(row['rmse'])}`.",
+            f"- Directional accuracy: `{_fmt(row['directional_accuracy'])}`.",
+        ]
+    )
+
+
+def _single_backtest_block(row: dict[str, Any] | None) -> str:
+    if row is None:
+        return "No backtest result is available."
+    return "\n".join(
+        [
+            f"- Model: `{row['model_id']}`.",
+            f"- Target: `{row['target_name']}`.",
+            f"- Net long-short return: `{_fmt(row['net_long_short_return'])}`.",
+            f"- Sharpe ratio: `{_fmt(row['sharpe_ratio'])}`.",
+            f"- Newey-West t-stat: `{_fmt(row['newey_west_t_stat'])}`.",
+            f"- Turnover: `{_fmt(row['turnover'])}`.",
+        ]
+    )
+
+
+def _limitations_text(summary: dict[str, Any]) -> str:
+    limitations = [
+        "Universe quality must be reviewed before formal empirical claims.",
+        "Current portfolio diagnostics still rely on available event-window artifacts.",
+        "Deflated Sharpe, CPCV/PBO, bootstrap intervals, and clustered errors are not included.",
+    ]
+    if not summary["multiple_testing"]["available"]:
+        limitations.append("Multiple-testing artifacts were not available for this report.")
+    if summary["audit"]["warn_count"]:
+        limitations.append("Audit warnings should be resolved or disclosed.")
+    return "\n".join(f"- {item}" for item in limitations)
 
 
 def _audit_table(failed: list[dict[str, Any]], warnings: list[dict[str, Any]]) -> str:

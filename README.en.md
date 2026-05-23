@@ -35,6 +35,8 @@ Implemented through the current research-grade upgrade path:
     and sector-neutral value-weight construction when metadata is available
 17. Multiple-testing artifacts: tested-specification registry, Holm adjustment,
     and Benjamini-Hochberg FDR report
+18. Empirical reporting artifacts: `empirical_report.md`, `factor_card.md`,
+    and `appendix_tables.md`
 
 ## Key Commands
 

@@ -808,7 +808,13 @@ class RunManager:
             records,
             stage="report",
             status="completed",
-            outputs=[result.report_markdown_path, result.report_summary_path],
+            outputs=[
+                result.report_markdown_path,
+                result.empirical_report_path,
+                result.factor_card_path,
+                result.appendix_tables_path,
+                result.report_summary_path,
+            ],
             metrics={"conclusion_level": result.conclusion_level},
         )
         return True

@@ -257,6 +257,9 @@ def main(argv: list[str] | None = None) -> int:
             f"run_id={result.run_id} conclusion={result.conclusion_level} "
             f"formal_allowed={result.formal_result_allowed} "
             f"markdown={result.report_markdown_path} "
+            f"empirical={result.empirical_report_path} "
+            f"factor_card={result.factor_card_path} "
+            f"appendix={result.appendix_tables_path} "
             f"summary={result.report_summary_path}"
         )
         return 0

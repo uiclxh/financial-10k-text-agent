@@ -30,3 +30,6 @@ def test_e2e_smoke_config_runs_full_pipeline(tmp_path: Path) -> None:
     assert (run_dir / "multiple_testing_report.json").exists()
     assert (run_dir / "audit_report.json").exists()
     assert (run_dir / "report.md").exists()
+    assert (run_dir / "empirical_report.md").exists()
+    assert (run_dir / "factor_card.md").exists()
+    assert (run_dir / "appendix_tables.md").exists()

@@ -1,5 +1,28 @@
 # Changelog
 
+## [v0.11.0] - 2026-05-23
+
+Empirical report package release.
+
+- Added `empirical_report.md` generation.
+- Added `factor_card.md` generation.
+- Added `appendix_tables.md` generation.
+- Added structured interpretation policy to report summary.
+- Added empirical report sections for research design, event-time alignment,
+  text features, labels, models, OOS results, portfolio construction,
+  multiple-testing adjustment, audit results, economic interpretation,
+  limitations, and conclusion.
+- Added factor card with audit status, evidence level, best prediction,
+  best backtest, and usage boundary.
+- Added appendix tables for sample coverage, feature summary, prediction
+  metrics, portfolio results, portfolio variants, multiple-testing results,
+  and audit checks.
+- Integrated new report artifacts into CLI output and orchestrator stage
+  outputs.
+- Added report and e2e smoke tests for the new artifacts.
+
+Release notes: [docs/releases/v0.11.0.md](docs/releases/v0.11.0.md)
+
 ## [v0.10.0] - 2026-05-23
 
 Multiple-testing and specification-registry release.

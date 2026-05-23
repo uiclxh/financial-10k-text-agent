@@ -239,12 +239,26 @@ def test_generate_run_report_writes_markdown_summary_and_status(tmp_path: Path) 
 
     assert result.conclusion_level == "exploratory_report"
     assert result.report_markdown_path.exists()
+    assert result.empirical_report_path.exists()
+    assert result.factor_card_path.exists()
+    assert result.appendix_tables_path.exists()
     assert result.report_summary_path.exists()
     markdown = result.report_markdown_path.read_text(encoding="utf-8")
+    empirical = result.empirical_report_path.read_text(encoding="utf-8")
+    factor_card = result.factor_card_path.read_text(encoding="utf-8")
+    appendix = result.appendix_tables_path.read_text(encoding="utf-8")
     assert "Executive Summary" in markdown
     assert "Out-Of-Sample Prediction Results" in markdown
+    assert "Empirical Report" in empirical
+    assert "Economic Interpretation" in empirical
+    assert "Factor Card" in factor_card
+    assert "Appendix Tables" in appendix
     summary = json.loads(result.report_summary_path.read_text(encoding="utf-8"))
     assert summary["evaluation"]["best_prediction_metric"]["rank_ic"] == 0.6
+    assert "interpretation" in summary
+    assert summary["reproducibility"]["empirical_report_path"].endswith(
+        "empirical_report.md"
+    )
     status = json.loads((run_dir / "run_status.json").read_text(encoding="utf-8"))
     assert status["status"] == "reported"
 
@@ -261,6 +275,9 @@ def test_report_cli_writes_artifacts(tmp_path: Path, capsys) -> None:
     assert exit_code == 0
     assert "Report generated" in captured.out
     assert (run_dir / "report.md").exists()
+    assert (run_dir / "empirical_report.md").exists()
+    assert (run_dir / "factor_card.md").exists()
+    assert (run_dir / "appendix_tables.md").exists()
     assert (run_dir / "report_summary.json").exists()
 
 

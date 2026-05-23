@@ -50,10 +50,13 @@ The core outputs are research artifacts, not conversational answers:
 - `multiple_testing_report.json`
 - `audit_report.json`
 - `report.md` and `report_summary.json`
+- `empirical_report.md`
+- `factor_card.md`
+- `appendix_tables.md`
 
 ## Current Status
 
-Current package version: `v0.10.0`
+Current package version: `v0.11.0`
 
 The repository now contains a runnable MVP research framework:
 
@@ -70,6 +73,7 @@ The repository now contains a runnable MVP research framework:
   value-weight portfolio variants when metadata is available
 - tested-specification registry and Holm / Benjamini-Hochberg FDR
   multiple-testing adjustment report
+- empirical report, factor card, and appendix table report artifacts
 - NYSE calendar event-date alignment with holiday and early-close handling
 - audit-gated Markdown/JSON reports
 - GitHub Actions CI, Dockerfile, Makefile, and e2e smoke fixture
@@ -122,6 +126,7 @@ python -m text_factor_lab report --help
 | [v0.8.0](docs/releases/v0.8.0.md) | Portfolio Series | portfolio weights, returns, turnover, metrics |
 | [v0.9.0](docs/releases/v0.9.0.md) | Portfolio Variants | value-weight and sector-neutral portfolio construction |
 | [v0.10.0](docs/releases/v0.10.0.md) | Multiple Testing | tested specs, Holm, BH-FDR adjustment report |
+| [v0.11.0](docs/releases/v0.11.0.md) | Empirical Reports | empirical report, factor card, appendix tables |
 
 ## Boundaries
 
