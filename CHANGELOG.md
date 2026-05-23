@@ -1,5 +1,25 @@
 # Changelog
 
+## [v0.13.0] - 2026-05-23
+
+Daily price-driven portfolio return release.
+
+- Added optional price-panel input to `build_evaluation_artifacts`.
+- Added `--prices` to `evaluate-models`.
+- Added `--portfolio-return-type` to `evaluate-models`.
+- Added daily price-driven portfolio return simulation when a price panel is
+  available.
+- Added `return_source` to `PortfolioReturnRecord`.
+- Marked label-window portfolio returns as `label_window`.
+- Marked price-driven daily portfolio returns as `daily_price_panel`.
+- Updated `run --execute` to use run-dir `prices.csv` for portfolio simulation
+  when available.
+- Added report summary tracking for portfolio return sources.
+- Added tests for daily price-driven portfolio returns and e2e smoke return
+  source validation.
+
+Release notes: [docs/releases/v0.13.0.md](docs/releases/v0.13.0.md)
+
 ## [v0.12.0] - 2026-05-23
 
 Research-grade universe schema release.

@@ -181,6 +181,10 @@ def build_parser() -> argparse.ArgumentParser:
     eval_parser.add_argument("--run-id", required=True)
     eval_parser.add_argument("--predictions", required=True)
     eval_parser.add_argument("--labels", required=True)
+    eval_parser.add_argument(
+        "--prices",
+        help="Optional price CSV for daily price-driven portfolio return simulation.",
+    )
     eval_parser.add_argument("--metrics-output", required=True)
     eval_parser.add_argument("--backtest-output", required=True)
     eval_parser.add_argument("--portfolio-weights-output")
@@ -188,6 +192,7 @@ def build_parser() -> argparse.ArgumentParser:
     eval_parser.add_argument("--portfolio-metrics-output")
     eval_parser.add_argument("--tested-specifications-output")
     eval_parser.add_argument("--multiple-testing-output")
+    eval_parser.add_argument("--portfolio-return-type", choices=["simple", "log"], default="simple")
     eval_parser.add_argument("--transaction-cost-bps-one-way", type=float, default=10.0)
     eval_parser.add_argument("--newey-west-lag", type=int, default=19)
 
@@ -455,11 +460,20 @@ def main(argv: list[str] | None = None) -> int:
             write_portfolio_returns_jsonl,
             write_portfolio_weights_jsonl,
         )
+        from text_factor_lab.data import load_price_panel_csv
+
+        price_panel = (
+            load_price_panel_csv(args.prices)
+            if args.prices is not None
+            else None
+        )
 
         result = build_evaluation_artifacts(
             run_id=args.run_id,
             predictions=read_predictions_jsonl(args.predictions),
             labels=read_labels_jsonl(args.labels),
+            price_panel=price_panel,
+            portfolio_return_type=args.portfolio_return_type,
             transaction_cost_bps_one_way=args.transaction_cost_bps_one_way,
             newey_west_lag=args.newey_west_lag,
         )

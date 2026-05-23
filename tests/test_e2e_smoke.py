@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import yaml
@@ -33,3 +34,9 @@ def test_e2e_smoke_config_runs_full_pipeline(tmp_path: Path) -> None:
     assert (run_dir / "empirical_report.md").exists()
     assert (run_dir / "factor_card.md").exists()
     assert (run_dir / "appendix_tables.md").exists()
+    portfolio_return_sources = {
+        json.loads(line)["return_source"]
+        for line in (run_dir / "portfolio_returns.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+    assert portfolio_return_sources == {"daily_price_panel"}

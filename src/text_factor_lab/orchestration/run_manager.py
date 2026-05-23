@@ -675,16 +675,27 @@ class RunManager:
             write_portfolio_returns_jsonl,
             write_portfolio_weights_jsonl,
         )
+        from text_factor_lab.data import load_price_panel_csv
         from text_factor_lab.inference import (
             build_inference_artifacts,
             write_multiple_testing_report_json,
             write_tested_specifications_jsonl,
+        )
+        price_panel = (
+            load_price_panel_csv(
+                self.prices_path,
+                price_field=self.config.labels.price_field,
+            )
+            if self.prices_path.exists()
+            else None
         )
 
         result = build_evaluation_artifacts(
             run_id=self.config.run.run_id,
             predictions=read_predictions_jsonl(self.predictions_path),
             labels=read_labels_jsonl(self.labels_path),
+            price_panel=price_panel,
+            portfolio_return_type=self.config.labels.portfolio_return_type,
             transaction_cost_bps_one_way=self.config.backtest.transaction_cost_bps_one_way,
             newey_west_lag=self.config.backtest.newey_west_lag,
         )
@@ -727,6 +738,9 @@ class RunManager:
                 "portfolio_weights": len(result.portfolio_weights),
                 "portfolio_returns": len(result.portfolio_returns),
                 "portfolio_metrics": len(result.portfolio_metrics),
+                "portfolio_return_source": (
+                    "daily_price_panel" if price_panel is not None else "label_window"
+                ),
                 "tested_specifications": len(inference_result.tested_specifications),
                 "multiple_testing_families": (
                     inference_result.multiple_testing_report.family_count

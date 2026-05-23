@@ -136,6 +136,7 @@ class PortfolioReturnRecord(StrictBaseModel):
     portfolio_variant: str = "equal_weight"
     weighting: str = "equal_weight"
     sector_neutral: bool = False
+    return_source: str = "label_window"
     date: date
     rebalance_date: date
     gross_long_return: float

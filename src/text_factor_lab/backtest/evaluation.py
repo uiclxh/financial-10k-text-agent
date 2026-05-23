@@ -9,6 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
+from text_factor_lab.data.prices import PricePanel, ReturnType
 from text_factor_lab.models import rank_ic
 from text_factor_lab.schemas import (
     EvaluationMetricRecord,
@@ -68,6 +69,8 @@ def build_evaluation_artifacts(
     run_id: str,
     predictions: list[PredictionRecord],
     labels: list[LabelRecord],
+    price_panel: PricePanel | None = None,
+    portfolio_return_type: ReturnType = "simple",
     transaction_cost_bps_one_way: float = 10.0,
     newey_west_lag: int = 19,
 ) -> EvaluationBuildResult:
@@ -113,6 +116,8 @@ def build_evaluation_artifacts(
                 split_id=split_id,
                 target_name=target_name,
                 rows=rows,
+                price_panel=price_panel,
+                portfolio_return_type=portfolio_return_type,
                 transaction_cost_bps_one_way=transaction_cost_bps_one_way,
             )
             portfolio_weights.extend(portfolio_result[0])
@@ -285,6 +290,8 @@ def _portfolio_time_series(
     split_id: str,
     target_name: str,
     rows: list[ScoredPrediction],
+    price_panel: PricePanel | None,
+    portfolio_return_type: ReturnType,
     transaction_cost_bps_one_way: float,
 ) -> tuple[list[PortfolioWeightRecord], list[PortfolioReturnRecord], list[PortfolioMetricRecord]]:
     if len(rows) < 2:
@@ -300,6 +307,8 @@ def _portfolio_time_series(
             split_id=split_id,
             target_name=target_name,
             rows=rows,
+            price_panel=price_panel,
+            portfolio_return_type=portfolio_return_type,
             transaction_cost_bps_one_way=transaction_cost_bps_one_way,
             variant=variant,
         )
@@ -332,6 +341,8 @@ def _portfolio_time_series_for_variant(
     split_id: str,
     target_name: str,
     rows: list[ScoredPrediction],
+    price_panel: PricePanel | None,
+    portfolio_return_type: ReturnType,
     transaction_cost_bps_one_way: float,
     variant: PortfolioVariant,
 ) -> tuple[list[PortfolioWeightRecord], list[PortfolioReturnRecord], PortfolioMetricRecord | None]:
@@ -374,21 +385,40 @@ def _portfolio_time_series_for_variant(
             )
             for record in selected
         )
-        returns.append(
-            _portfolio_return_for_rebalance(
-                run_id=run_id,
-                model_id=model_id,
-                split_id=split_id,
-                target_name=target_name,
-                rebalance_date=rebalance_date,
-                rows=rebalance_rows,
-                weights=current_weights,
-                variant=variant,
-                turnover=turnover,
-                transaction_cost_bps_one_way=transaction_cost_bps_one_way,
-                created_at_utc=now,
+        if price_panel is None:
+            returns.append(
+                _portfolio_return_for_rebalance(
+                    run_id=run_id,
+                    model_id=model_id,
+                    split_id=split_id,
+                    target_name=target_name,
+                    rebalance_date=rebalance_date,
+                    rows=rebalance_rows,
+                    weights=current_weights,
+                    variant=variant,
+                    turnover=turnover,
+                    transaction_cost_bps_one_way=transaction_cost_bps_one_way,
+                    created_at_utc=now,
+                )
             )
-        )
+        else:
+            returns.extend(
+                _daily_portfolio_returns_for_rebalance(
+                    run_id=run_id,
+                    model_id=model_id,
+                    split_id=split_id,
+                    target_name=target_name,
+                    rebalance_date=rebalance_date,
+                    rows=rebalance_rows,
+                    weights=current_weights,
+                    variant=variant,
+                    turnover=turnover,
+                    transaction_cost_bps_one_way=transaction_cost_bps_one_way,
+                    price_panel=price_panel,
+                    portfolio_return_type=portfolio_return_type,
+                    created_at_utc=now,
+                )
+            )
         previous_weights = current_weights
 
     if not returns:
@@ -622,6 +652,7 @@ def _portfolio_return_for_rebalance(
         portfolio_variant=variant.name,
         weighting=variant.weighting,
         sector_neutral=variant.sector_neutral,
+        return_source="label_window",
         date=max(label.label_end_date for label in label_by_ticker.values()),
         rebalance_date=rebalance_date,
         gross_long_return=float(long_return),
@@ -637,6 +668,96 @@ def _portfolio_return_for_rebalance(
         active_position_count=len(weights),
         created_at_utc=created_at_utc,
     )
+
+
+def _daily_portfolio_returns_for_rebalance(
+    *,
+    run_id: str,
+    model_id: str,
+    split_id: str,
+    target_name: str,
+    rebalance_date,
+    rows: list[ScoredPrediction],
+    weights: dict[str, float],
+    variant: PortfolioVariant,
+    turnover: float,
+    transaction_cost_bps_one_way: float,
+    price_panel: PricePanel,
+    portfolio_return_type: ReturnType,
+    created_at_utc: datetime,
+) -> list[PortfolioReturnRecord]:
+    label_by_ticker = {row.prediction.ticker: row.label for row in rows}
+    if not weights:
+        return []
+    start_date = min(label_by_ticker[ticker].label_start_date for ticker in weights)
+    end_date = max(label_by_ticker[ticker].label_end_date for ticker in weights)
+    return_column = f"{portfolio_return_type}_return"
+    frame = price_panel.frame
+    subset = frame[
+        frame["ticker"].isin(weights)
+        & (frame["date"] >= start_date)
+        & (frame["date"] <= end_date)
+    ]
+    if subset.empty:
+        return []
+    returns: list[PortfolioReturnRecord] = []
+    first_return = True
+    for holding_date, day_rows in subset.groupby("date", sort=True):
+        ticker_returns = {
+            str(row.ticker): float(getattr(row, return_column))
+            for row in day_rows.itertuples(index=False)
+            if not np.isnan(float(getattr(row, return_column)))
+        }
+        usable_weights = {
+            ticker: weight for ticker, weight in weights.items() if ticker in ticker_returns
+        }
+        if not usable_weights:
+            continue
+        long_return = sum(
+            weight * ticker_returns[ticker]
+            for ticker, weight in usable_weights.items()
+            if weight > 0
+        )
+        short_return = sum(
+            weight * ticker_returns[ticker]
+            for ticker, weight in usable_weights.items()
+            if weight < 0
+        )
+        gross_return = long_return + short_return
+        row_turnover = turnover if first_return else 0.0
+        transaction_cost = row_turnover * transaction_cost_bps_one_way / 10_000.0
+        returns.append(
+            PortfolioReturnRecord(
+                run_id=run_id,
+                model_id=model_id,
+                split_id=split_id,
+                target_name=target_name,
+                portfolio_variant=variant.name,
+                weighting=variant.weighting,
+                sector_neutral=variant.sector_neutral,
+                return_source="daily_price_panel",
+                date=holding_date,
+                rebalance_date=rebalance_date,
+                gross_long_return=float(long_return),
+                gross_short_return=float(short_return),
+                gross_long_short_return=float(gross_return),
+                transaction_cost=float(transaction_cost),
+                net_long_short_return=float(gross_return - transaction_cost),
+                long_exposure=float(
+                    sum(weight for weight in usable_weights.values() if weight > 0)
+                ),
+                short_exposure=float(
+                    sum(weight for weight in usable_weights.values() if weight < 0)
+                ),
+                gross_exposure=float(sum(abs(weight) for weight in usable_weights.values())),
+                net_exposure=float(sum(usable_weights.values())),
+                turnover=float(row_turnover),
+                active_position_count=len(usable_weights),
+                created_at_utc=created_at_utc,
+            )
+        )
+        first_return = False
+    return returns
 
 
 def _portfolio_metric(

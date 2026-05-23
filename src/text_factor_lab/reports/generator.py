@@ -193,6 +193,12 @@ def _load_report_artifacts(paths: ReportArtifactPaths) -> dict[str, Any]:
             PortfolioMetricRecord.model_validate(item)
             for item in _read_optional_json_array(paths.portfolio_metrics)
         ],
+        "portfolio_return_sources": sorted(
+            {
+                item.get("return_source", "label_window")
+                for item in _read_optional_jsonl_objects(paths.run_dir / "portfolio_returns.jsonl")
+            }
+        ),
         "multiple_testing_report": _read_optional_multiple_testing_report(
             paths.multiple_testing_report
         ),
@@ -288,6 +294,7 @@ def _build_summary(
         "backtest": {
             "result_count": len(backtests),
             "portfolio_metric_count": len(portfolio_metrics),
+            "portfolio_return_sources": artifacts["portfolio_return_sources"],
             "portfolio_method": config.backtest.portfolio_method,
             "weighting": config.backtest.weighting,
             "transaction_cost_bps_one_way": config.backtest.transaction_cost_bps_one_way,
@@ -497,7 +504,9 @@ def _render_empirical_report(summary: dict[str, Any]) -> str:
         (
             f"The backtest uses `{summary['backtest']['portfolio_method']}` with "
             f"`{summary['backtest']['weighting']}` weighting in the configured summary "
-            "backtest. Portfolio variant diagnostics are reported when available."
+            "backtest. Portfolio variant diagnostics are reported when available. "
+            "Portfolio return sources: "
+            f"{_inline_list(summary['backtest']['portfolio_return_sources'])}."
         ),
         "",
         "## 9. Factor Backtest Results",
@@ -550,6 +559,10 @@ def _render_factor_card(summary: dict[str, Any]) -> str:
         f"| Features | {_inline_list(summary['features']['methods'])} |",
         f"| Models | {_inline_list(summary['models']['enabled'])} |",
         f"| Multiple-testing families | `{summary['multiple_testing']['family_count']}` |",
+        (
+            "| Portfolio return sources | "
+            f"{_inline_list(summary['backtest']['portfolio_return_sources'])} |"
+        ),
         "",
         "## Best Prediction",
         "",
@@ -1037,6 +1050,17 @@ def _read_optional_json_array(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
     return _read_json_array(path)
+
+
+def _read_optional_jsonl_objects(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    records: list[dict[str, Any]] = []
+    with path.open("r", encoding="utf-8") as file:
+        for line in file:
+            if line.strip():
+                records.append(json.loads(line))
+    return records
 
 
 def _read_optional_multiple_testing_report(path: Path) -> MultipleTestingReportRecord | None:

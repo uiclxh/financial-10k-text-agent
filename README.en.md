@@ -39,6 +39,8 @@ Implemented through the current research-grade upgrade path:
     and `appendix_tables.md`
 19. Research-grade universe schemas for security master, dated membership
     intervals, and entity link history
+20. Daily price-driven portfolio return simulation when price panel data is
+    available
 
 ## Key Commands
 
@@ -97,7 +99,7 @@ python -m ruff check .
 Current local acceptance result:
 
 ```text
-98 tests pass
+99 tests pass
 ruff passes
 ```
 
@@ -106,5 +108,6 @@ ruff passes
 This is still an MVP, not a full research-grade production system. Remaining
 work includes SEC download scheduling, survivorship-free universe construction,
 licensed CRSP/WRDS-style data population, daily price-driven holdings, Deflated
-Sharpe, CPCV/PBO, cloud dashboard packaging, FinBERT / LLM embedding modules,
-earnings-call transcript ingestion, and credit-risk targets.
+Sharpe, CPCV/PBO, position drift, borrow costs, cloud dashboard packaging,
+FinBERT / LLM embedding modules, earnings-call transcript ingestion, and
+credit-risk targets.

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "financial-10k-text-agent"
-version = "0.12.0"
+version = "0.13.0"
 description = "Financial Text Factor Lab Agent MVP v0"
 readme = "README.md"
 requires-python = ">=3.11"

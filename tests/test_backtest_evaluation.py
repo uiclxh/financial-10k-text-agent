@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, date, datetime
+from math import isclose
 from pathlib import Path
+
+import pandas as pd
 
 from text_factor_lab.backtest import (
     build_evaluation_artifacts,
@@ -10,6 +13,7 @@ from text_factor_lab.backtest import (
     read_labels_jsonl,
     read_predictions_jsonl,
 )
+from text_factor_lab.data import build_price_panel
 from text_factor_lab.schemas import LabelRecord, PredictionRecord
 
 SPLIT_ID = "train_2010_2014__val_2015_2015__test_2016_2016"
@@ -235,6 +239,60 @@ def test_portfolio_variants_include_value_and_sector_neutral() -> None:
         record for record in result.portfolio_weights if record.portfolio_variant == "value_weight"
     ]
     assert any(abs(record.normalized_weight) != 0.5 for record in value_weights)
+
+
+def test_daily_price_panel_drives_portfolio_returns() -> None:
+    labels = [
+        label("sec:test:a", "AAA", 2016, 0.0).model_copy(
+            update={"label_start_date": date(2016, 3, 2), "label_end_date": date(2016, 3, 4)}
+        ),
+        label("sec:test:b", "BBB", 2016, 0.0).model_copy(
+            update={"label_start_date": date(2016, 3, 2), "label_end_date": date(2016, 3, 4)}
+        ),
+    ]
+    predictions = [
+        prediction(labels[0], model_id="ridge::CAR_1_20::split", role="test", value=0.1),
+        prediction(labels[1], model_id="ridge::CAR_1_20::split", role="test", value=0.9),
+    ]
+    price_panel = build_price_panel(
+        pd.DataFrame(
+            [
+                ("2016-03-01", "AAA", 100.0),
+                ("2016-03-02", "AAA", 90.0),
+                ("2016-03-03", "AAA", 81.0),
+                ("2016-03-04", "AAA", 72.9),
+                ("2016-03-01", "BBB", 100.0),
+                ("2016-03-02", "BBB", 110.0),
+                ("2016-03-03", "BBB", 121.0),
+                ("2016-03-04", "BBB", 133.1),
+            ],
+            columns=["date", "ticker", "adj_close"],
+        )
+    )
+
+    result = build_evaluation_artifacts(
+        run_id="eval_test_run",
+        predictions=predictions,
+        labels=labels,
+        price_panel=price_panel,
+        portfolio_return_type="simple",
+        transaction_cost_bps_one_way=10.0,
+        newey_west_lag=1,
+    )
+
+    assert len(result.portfolio_returns) == 3
+    assert {record.return_source for record in result.portfolio_returns} == {
+        "daily_price_panel"
+    }
+    assert [record.date for record in result.portfolio_returns] == [
+        date(2016, 3, 2),
+        date(2016, 3, 3),
+        date(2016, 3, 4),
+    ]
+    assert isclose(result.portfolio_returns[0].gross_long_short_return, 0.2)
+    assert isclose(result.portfolio_returns[0].net_long_short_return, 0.199)
+    assert result.portfolio_returns[1].turnover == 0.0
+    assert result.portfolio_metrics[0].observation_count == 3
 
 
 def test_newey_west_t_stat_handles_small_samples() -> None:
