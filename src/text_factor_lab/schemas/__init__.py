@@ -22,7 +22,13 @@ from text_factor_lab.schemas.parsed_sections import ParsedSectionRecord, Parsing
 from text_factor_lab.schemas.predictions import PredictionRecord
 from text_factor_lab.schemas.run_status import RunStatusRecord
 from text_factor_lab.schemas.splits import SplitAssignmentRecord, SplitLeakageRecord
-from text_factor_lab.schemas.universe import UniverseQualityReport, UniverseRecord
+from text_factor_lab.schemas.universe import (
+    EntityLinkHistoryRecord,
+    SecurityMasterRecord,
+    UniverseMembershipRecord,
+    UniverseQualityReport,
+    UniverseRecord,
+)
 
 __all__ = [
     "DocumentManifestRecord",
@@ -30,6 +36,7 @@ __all__ = [
     "AuditCheckRecord",
     "AuditReportRecord",
     "EvaluationMetricRecord",
+    "EntityLinkHistoryRecord",
     "FeatureManifestRecord",
     "FeatureRecord",
     "LabelRecord",
@@ -44,10 +51,12 @@ __all__ = [
     "PortfolioReturnRecord",
     "PortfolioWeightRecord",
     "RunStatusRecord",
+    "SecurityMasterRecord",
     "SplitAssignmentRecord",
     "SplitLeakageRecord",
     "TestedSpecificationRecord",
     "TuningLogRecord",
+    "UniverseMembershipRecord",
     "UniverseQualityReport",
     "UniverseRecord",
     "load_experiment_config",

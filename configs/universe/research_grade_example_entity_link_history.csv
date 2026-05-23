@@ -1,0 +1,3 @@
+entity_id,cik,ticker,permno,gvkey,link_start_date,link_end_date,link_type,link_confidence,source
+CIK0000320193,320193,AAPL,14593,001690,1980-12-12,,primary,1.0,research_grade_example
+CIK0000012345,12345,OLD,99999,009999,1990-01-01,2012-12-31,primary,0.95,research_grade_example

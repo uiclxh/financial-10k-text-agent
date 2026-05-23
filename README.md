@@ -56,7 +56,7 @@ The core outputs are research artifacts, not conversational answers:
 
 ## Current Status
 
-Current package version: `v0.11.0`
+Current package version: `v0.12.0`
 
 The repository now contains a runnable MVP research framework:
 
@@ -74,6 +74,8 @@ The repository now contains a runnable MVP research framework:
 - tested-specification registry and Holm / Benjamini-Hochberg FDR
   multiple-testing adjustment report
 - empirical report, factor card, and appendix table report artifacts
+- research-grade universe schemas for security master, membership intervals,
+  and entity link history
 - NYSE calendar event-date alignment with holiday and early-close handling
 - audit-gated Markdown/JSON reports
 - GitHub Actions CI, Dockerfile, Makefile, and e2e smoke fixture
@@ -127,11 +129,12 @@ python -m text_factor_lab report --help
 | [v0.9.0](docs/releases/v0.9.0.md) | Portfolio Variants | value-weight and sector-neutral portfolio construction |
 | [v0.10.0](docs/releases/v0.10.0.md) | Multiple Testing | tested specs, Holm, BH-FDR adjustment report |
 | [v0.11.0](docs/releases/v0.11.0.md) | Empirical Reports | empirical report, factor card, appendix tables |
+| [v0.12.0](docs/releases/v0.12.0.md) | Research Universe | security master, membership intervals, entity links |
 
 ## Boundaries
 
-This is a strong MVP research framework, not yet a formal empirical finance
-replication package. Remaining research-grade work includes survivorship-free
-universe construction, historical security master integration, delisting
-returns, Deflated Sharpe, CPCV/PBO, richer empirical paper output, FinBERT /
-LLM embedding modules, earnings-call ingestion, and credit-risk targets.
+This is a strong MVP research framework, not yet a full empirical finance
+replication package. Remaining research-grade work includes licensed CRSP/WRDS
+or equivalent universe population, delisting returns, daily price-driven
+holdings, Deflated Sharpe, CPCV/PBO, FinBERT / LLM embedding modules,
+earnings-call ingestion, and credit-risk targets.

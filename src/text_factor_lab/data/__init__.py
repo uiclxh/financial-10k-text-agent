@@ -21,7 +21,10 @@ from text_factor_lab.data.sec_edgar import (
 from text_factor_lab.data.universe import (
     build_universe_quality_report,
     load_and_report_universe,
+    load_entity_link_history,
+    load_security_master,
     load_universe_manifest,
+    load_universe_membership,
 )
 
 __all__ = [
@@ -33,8 +36,11 @@ __all__ = [
     "extract_annual_filings",
     "filing_row_to_manifest_record",
     "load_and_report_universe",
+    "load_entity_link_history",
     "load_price_panel_csv",
+    "load_security_master",
     "load_universe_manifest",
+    "load_universe_membership",
     "normalize_cik",
     "sec_event_date_resolution_from_acceptance_time",
     "sec_event_date_from_acceptance_time",

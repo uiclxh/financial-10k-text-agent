@@ -37,6 +37,8 @@ Implemented through the current research-grade upgrade path:
     and Benjamini-Hochberg FDR report
 18. Empirical reporting artifacts: `empirical_report.md`, `factor_card.md`,
     and `appendix_tables.md`
+19. Research-grade universe schemas for security master, dated membership
+    intervals, and entity link history
 
 ## Key Commands
 
@@ -95,7 +97,7 @@ python -m ruff check .
 Current local acceptance result:
 
 ```text
-95 tests pass
+98 tests pass
 ruff passes
 ```
 
@@ -103,6 +105,6 @@ ruff passes
 
 This is still an MVP, not a full research-grade production system. Remaining
 work includes SEC download scheduling, survivorship-free universe construction,
-daily price-driven holdings, Deflated Sharpe, CPCV/PBO, cloud dashboard
-packaging, FinBERT / LLM embedding modules, earnings-call transcript ingestion,
-and credit-risk targets.
+licensed CRSP/WRDS-style data population, daily price-driven holdings, Deflated
+Sharpe, CPCV/PBO, cloud dashboard packaging, FinBERT / LLM embedding modules,
+earnings-call transcript ingestion, and credit-risk targets.

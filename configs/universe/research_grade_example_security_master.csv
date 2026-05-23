@@ -1,0 +1,3 @@
+entity_id,permno,permco,gvkey,cik,ticker,historical_ticker,company_name,name_start_date,name_end_date,exchange,share_class,security_type,sic,naics,gics_sector,gics_industry,source,source_version,available_time_utc
+CIK0000320193,14593,7,001690,320193,AAPL,AAPL,Apple Inc.,1980-12-12,,NASDAQ,common,equity,3571,334220,Information Technology,Technology Hardware,research_grade_example,v1,2009-12-31T00:00:00Z
+CIK0000012345,99999,8,009999,12345,OLD,OLD,Old Co.,1990-01-01,2012-12-31,NYSE,common,equity,3500,333000,Industrials,Machinery,research_grade_example,v1,2009-12-31T00:00:00Z

@@ -16,6 +16,7 @@ ReturnType = Literal["log", "simple"]
 WeightingMethod = Literal["equal_weight", "value_weight"]
 PortfolioMethod = Literal["top_bottom_quintile"]
 FitScope = Literal["train_window_only"]
+UniverseDataLevel = Literal["exploratory", "applied", "research_grade"]
 
 
 class RunConfig(StrictBaseModel):
@@ -37,6 +38,10 @@ class UniverseConfig(StrictBaseModel):
     name: str = Field(min_length=1)
     selection_date: date
     tickers_file: Path
+    security_master_file: Path | None = None
+    membership_file: Path | None = None
+    entity_link_history_file: Path | None = None
+    universe_data_level: UniverseDataLevel = "exploratory"
     survivorship_bias_control: bool
     allow_delisted_firms: bool
     historical_ticker_mapping: bool

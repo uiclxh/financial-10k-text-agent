@@ -1,0 +1,19 @@
+universe:
+  name: "research_grade_example"
+  selection_date: "2010-01-01"
+  universe_data_level: "research_grade"
+  tickers_file: "configs/universe/research_grade_example_tickers.csv"
+  security_master_file: "configs/universe/research_grade_example_security_master.csv"
+  membership_file: "configs/universe/research_grade_example_membership.csv"
+  entity_link_history_file: "configs/universe/research_grade_example_entity_link_history.csv"
+  survivorship_bias_control: true
+  allow_delisted_firms: true
+  historical_ticker_mapping: true
+
+notes:
+  purpose: "Template for research-grade universe inputs; replace fixture rows with licensed historical data."
+  required_tables:
+    - "security_master"
+    - "universe_membership"
+    - "entity_link_history"
+  formal_rule: "Formal research-grade runs require all three tables to be populated and internally linked."

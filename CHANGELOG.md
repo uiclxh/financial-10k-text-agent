@@ -1,5 +1,29 @@
 # Changelog
 
+## [v0.12.0] - 2026-05-23
+
+Research-grade universe schema release.
+
+- Added `SecurityMasterRecord`.
+- Added `UniverseMembershipRecord`.
+- Added `EntityLinkHistoryRecord`.
+- Added optional config paths for `security_master_file`, `membership_file`,
+  and `entity_link_history_file`.
+- Added `universe_data_level` with `exploratory`, `applied`, and
+  `research_grade` levels.
+- Added CSV loaders for security master, membership intervals, and entity link
+  history.
+- Extended `universe_quality_report.json` with research-grade table counts,
+  linking diagnostics, low-confidence link counts, membership market-cap checks,
+  and delisted membership counts.
+- Added formal blockers for missing or inconsistent research-grade universe
+  tables.
+- Added research-grade universe example CSVs and template YAML.
+- Added tests for table loading, passing research-grade quality reports, and
+  missing-table blockers.
+
+Release notes: [docs/releases/v0.12.0.md](docs/releases/v0.12.0.md)
+
 ## [v0.11.0] - 2026-05-23
 
 Empirical report package release.
