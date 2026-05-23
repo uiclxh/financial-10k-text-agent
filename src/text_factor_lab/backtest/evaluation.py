@@ -644,6 +644,7 @@ def _portfolio_return_for_rebalance(
     )
     gross_return = long_return + short_return
     transaction_cost = turnover * transaction_cost_bps_one_way / 10_000.0
+    long_exposure, short_exposure, gross_exposure, net_exposure = _weight_exposures(weights)
     return PortfolioReturnRecord(
         run_id=run_id,
         model_id=model_id,
@@ -653,6 +654,7 @@ def _portfolio_return_for_rebalance(
         weighting=variant.weighting,
         sector_neutral=variant.sector_neutral,
         return_source="label_window",
+        position_accounting="label_window",
         date=max(label.label_end_date for label in label_by_ticker.values()),
         rebalance_date=rebalance_date,
         gross_long_return=float(long_return),
@@ -660,10 +662,14 @@ def _portfolio_return_for_rebalance(
         gross_long_short_return=float(gross_return),
         transaction_cost=float(transaction_cost),
         net_long_short_return=float(gross_return - transaction_cost),
-        long_exposure=float(sum(weight for weight in weights.values() if weight > 0)),
-        short_exposure=float(sum(weight for weight in weights.values() if weight < 0)),
-        gross_exposure=float(sum(abs(weight) for weight in weights.values())),
-        net_exposure=float(sum(weights.values())),
+        long_exposure=long_exposure,
+        short_exposure=short_exposure,
+        gross_exposure=gross_exposure,
+        net_exposure=net_exposure,
+        ending_long_exposure=long_exposure,
+        ending_short_exposure=short_exposure,
+        ending_gross_exposure=gross_exposure,
+        ending_net_exposure=net_exposure,
         turnover=float(turnover),
         active_position_count=len(weights),
         created_at_utc=created_at_utc,
@@ -702,6 +708,7 @@ def _daily_portfolio_returns_for_rebalance(
         return []
     returns: list[PortfolioReturnRecord] = []
     first_return = True
+    current_weights = dict(weights)
     for holding_date, day_rows in subset.groupby("date", sort=True):
         ticker_returns = {
             str(row.ticker): float(getattr(row, return_column))
@@ -709,7 +716,7 @@ def _daily_portfolio_returns_for_rebalance(
             if not np.isnan(float(getattr(row, return_column)))
         }
         usable_weights = {
-            ticker: weight for ticker, weight in weights.items() if ticker in ticker_returns
+            ticker: weight for ticker, weight in current_weights.items() if ticker in ticker_returns
         }
         if not usable_weights:
             continue
@@ -726,6 +733,20 @@ def _daily_portfolio_returns_for_rebalance(
         gross_return = long_return + short_return
         row_turnover = turnover if first_return else 0.0
         transaction_cost = row_turnover * transaction_cost_bps_one_way / 10_000.0
+        long_exposure, short_exposure, gross_exposure, net_exposure = _weight_exposures(
+            usable_weights
+        )
+        next_weights = _drift_position_weights(
+            weights=usable_weights,
+            ticker_returns=ticker_returns,
+            portfolio_return=gross_return,
+        )
+        (
+            ending_long_exposure,
+            ending_short_exposure,
+            ending_gross_exposure,
+            ending_net_exposure,
+        ) = _weight_exposures(next_weights)
         returns.append(
             PortfolioReturnRecord(
                 run_id=run_id,
@@ -736,6 +757,7 @@ def _daily_portfolio_returns_for_rebalance(
                 weighting=variant.weighting,
                 sector_neutral=variant.sector_neutral,
                 return_source="daily_price_panel",
+                position_accounting="drifted_daily_positions",
                 date=holding_date,
                 rebalance_date=rebalance_date,
                 gross_long_return=float(long_return),
@@ -743,21 +765,46 @@ def _daily_portfolio_returns_for_rebalance(
                 gross_long_short_return=float(gross_return),
                 transaction_cost=float(transaction_cost),
                 net_long_short_return=float(gross_return - transaction_cost),
-                long_exposure=float(
-                    sum(weight for weight in usable_weights.values() if weight > 0)
-                ),
-                short_exposure=float(
-                    sum(weight for weight in usable_weights.values() if weight < 0)
-                ),
-                gross_exposure=float(sum(abs(weight) for weight in usable_weights.values())),
-                net_exposure=float(sum(usable_weights.values())),
+                long_exposure=long_exposure,
+                short_exposure=short_exposure,
+                gross_exposure=gross_exposure,
+                net_exposure=net_exposure,
+                ending_long_exposure=ending_long_exposure,
+                ending_short_exposure=ending_short_exposure,
+                ending_gross_exposure=ending_gross_exposure,
+                ending_net_exposure=ending_net_exposure,
                 turnover=float(row_turnover),
                 active_position_count=len(usable_weights),
                 created_at_utc=created_at_utc,
             )
         )
+        current_weights = next_weights
         first_return = False
     return returns
+
+
+def _weight_exposures(weights: dict[str, float]) -> tuple[float, float, float, float]:
+    long_exposure = float(sum(weight for weight in weights.values() if weight > 0))
+    short_exposure = float(sum(weight for weight in weights.values() if weight < 0))
+    gross_exposure = float(sum(abs(weight) for weight in weights.values()))
+    net_exposure = float(sum(weights.values()))
+    return long_exposure, short_exposure, gross_exposure, net_exposure
+
+
+def _drift_position_weights(
+    *,
+    weights: dict[str, float],
+    ticker_returns: dict[str, float],
+    portfolio_return: float,
+) -> dict[str, float]:
+    denominator = 1.0 + portfolio_return
+    if denominator <= 0.0:
+        return dict(weights)
+    return {
+        ticker: weight * (1.0 + ticker_returns[ticker]) / denominator
+        for ticker, weight in weights.items()
+        if ticker in ticker_returns
+    }
 
 
 def _portfolio_metric(

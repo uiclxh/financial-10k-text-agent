@@ -41,6 +41,7 @@ Implemented through the current research-grade upgrade path:
     intervals, and entity link history
 20. Daily price-driven portfolio return simulation when price panel data is
     available
+21. Drifted daily position accounting with beginning and ending exposure fields
 
 ## Key Commands
 
@@ -107,7 +108,7 @@ ruff passes
 
 This is still an MVP, not a full research-grade production system. Remaining
 work includes SEC download scheduling, survivorship-free universe construction,
-licensed CRSP/WRDS-style data population, daily price-driven holdings, Deflated
-Sharpe, CPCV/PBO, position drift, borrow costs, cloud dashboard packaging,
-FinBERT / LLM embedding modules, earnings-call transcript ingestion, and
-credit-risk targets.
+licensed CRSP/WRDS-style data population, overlapping sub-portfolios, Deflated
+Sharpe, CPCV/PBO, borrow costs, capacity and slippage diagnostics, cloud
+dashboard packaging, FinBERT / LLM embedding modules, earnings-call transcript
+ingestion, and credit-risk targets.

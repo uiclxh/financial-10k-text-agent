@@ -56,7 +56,7 @@ The core outputs are research artifacts, not conversational answers:
 
 ## Current Status
 
-Current package version: `v0.13.0`
+Current package version: `v0.14.0`
 
 The repository now contains a runnable MVP research framework:
 
@@ -78,6 +78,7 @@ The repository now contains a runnable MVP research framework:
   and entity link history
 - daily price-driven portfolio return simulation when price panel data is
   available
+- drifted daily position accounting with beginning and ending exposure fields
 - NYSE calendar event-date alignment with holiday and early-close handling
 - audit-gated Markdown/JSON reports
 - GitHub Actions CI, Dockerfile, Makefile, and e2e smoke fixture
@@ -133,12 +134,13 @@ python -m text_factor_lab report --help
 | [v0.11.0](docs/releases/v0.11.0.md) | Empirical Reports | empirical report, factor card, appendix tables |
 | [v0.12.0](docs/releases/v0.12.0.md) | Research Universe | security master, membership intervals, entity links |
 | [v0.13.0](docs/releases/v0.13.0.md) | Daily Portfolio | daily price-driven portfolio returns |
+| [v0.14.0](docs/releases/v0.14.0.md) | Portfolio Accounting | drifted daily positions and exposure diagnostics |
 
 ## Boundaries
 
 This is a strong MVP research framework, not yet a full empirical finance
 replication package. Remaining research-grade work includes licensed CRSP/WRDS
-or equivalent universe population, delisting returns, position drift,
-overlapping sub-portfolio handling, borrow costs, Deflated Sharpe, CPCV/PBO,
-FinBERT / LLM embedding modules, earnings-call ingestion, and credit-risk
-targets.
+or equivalent universe population, delisting returns, overlapping sub-portfolio
+handling, borrow costs, capacity and slippage diagnostics, Deflated Sharpe,
+CPCV/PBO, FinBERT / LLM embedding modules, earnings-call ingestion, and
+credit-risk targets.

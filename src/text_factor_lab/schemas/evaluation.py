@@ -137,6 +137,7 @@ class PortfolioReturnRecord(StrictBaseModel):
     weighting: str = "equal_weight"
     sector_neutral: bool = False
     return_source: str = "label_window"
+    position_accounting: str = "label_window"
     date: date
     rebalance_date: date
     gross_long_return: float
@@ -148,6 +149,10 @@ class PortfolioReturnRecord(StrictBaseModel):
     short_exposure: float
     gross_exposure: float
     net_exposure: float
+    ending_long_exposure: float | None = None
+    ending_short_exposure: float | None = None
+    ending_gross_exposure: float | None = None
+    ending_net_exposure: float | None = None
     turnover: float = Field(ge=0)
     active_position_count: int = Field(ge=0)
     created_at_utc: datetime
@@ -162,10 +167,14 @@ class PortfolioReturnRecord(StrictBaseModel):
         "short_exposure",
         "gross_exposure",
         "net_exposure",
+        "ending_long_exposure",
+        "ending_short_exposure",
+        "ending_gross_exposure",
+        "ending_net_exposure",
     )
     @classmethod
-    def validate_finite_return_metric(cls, value: float) -> float:
-        if not isfinite(value):
+    def validate_finite_return_metric(cls, value: float | None) -> float | None:
+        if value is not None and not isfinite(value):
             raise ValueError("portfolio return fields must be finite")
         return value
 

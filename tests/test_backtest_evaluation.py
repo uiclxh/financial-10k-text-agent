@@ -289,8 +289,14 @@ def test_daily_price_panel_drives_portfolio_returns() -> None:
         date(2016, 3, 3),
         date(2016, 3, 4),
     ]
+    assert {record.position_accounting for record in result.portfolio_returns} == {
+        "drifted_daily_positions"
+    }
     assert isclose(result.portfolio_returns[0].gross_long_short_return, 0.2)
     assert isclose(result.portfolio_returns[0].net_long_short_return, 0.199)
+    assert isclose(result.portfolio_returns[0].ending_gross_exposure or 0.0, 1.6666666667)
+    assert isclose(result.portfolio_returns[1].gross_long_short_return, 1.0 / 6.0)
+    assert isclose(result.portfolio_returns[2].gross_long_short_return, 0.1442857143)
     assert result.portfolio_returns[1].turnover == 0.0
     assert result.portfolio_metrics[0].observation_count == 3
 

@@ -199,6 +199,12 @@ def _load_report_artifacts(paths: ReportArtifactPaths) -> dict[str, Any]:
                 for item in _read_optional_jsonl_objects(paths.run_dir / "portfolio_returns.jsonl")
             }
         ),
+        "portfolio_position_accounting": sorted(
+            {
+                item.get("position_accounting", "label_window")
+                for item in _read_optional_jsonl_objects(paths.run_dir / "portfolio_returns.jsonl")
+            }
+        ),
         "multiple_testing_report": _read_optional_multiple_testing_report(
             paths.multiple_testing_report
         ),
@@ -295,6 +301,7 @@ def _build_summary(
             "result_count": len(backtests),
             "portfolio_metric_count": len(portfolio_metrics),
             "portfolio_return_sources": artifacts["portfolio_return_sources"],
+            "portfolio_position_accounting": artifacts["portfolio_position_accounting"],
             "portfolio_method": config.backtest.portfolio_method,
             "weighting": config.backtest.weighting,
             "transaction_cost_bps_one_way": config.backtest.transaction_cost_bps_one_way,
@@ -417,8 +424,8 @@ def _render_markdown(summary: dict[str, Any]) -> str:
         "",
         (
             "- Current MVP report summarizes split-level and `ALL_SPLITS` metrics. "
-            "Subperiod stability, Deflated Sharpe, CPCV/PBO, and daily price-driven "
-            "portfolio holdings should be added before making production research claims."
+            "Subperiod stability, Deflated Sharpe, CPCV/PBO, borrow costs, and capacity "
+            "diagnostics should be added before making production research claims."
         ),
         "",
         "## Leakage Audit",
@@ -506,7 +513,9 @@ def _render_empirical_report(summary: dict[str, Any]) -> str:
             f"`{summary['backtest']['weighting']}` weighting in the configured summary "
             "backtest. Portfolio variant diagnostics are reported when available. "
             "Portfolio return sources: "
-            f"{_inline_list(summary['backtest']['portfolio_return_sources'])}."
+            f"{_inline_list(summary['backtest']['portfolio_return_sources'])}. "
+            "Position accounting: "
+            f"{_inline_list(summary['backtest']['portfolio_position_accounting'])}."
         ),
         "",
         "## 9. Factor Backtest Results",
@@ -562,6 +571,10 @@ def _render_factor_card(summary: dict[str, Any]) -> str:
         (
             "| Portfolio return sources | "
             f"{_inline_list(summary['backtest']['portfolio_return_sources'])} |"
+        ),
+        (
+            "| Position accounting | "
+            f"{_inline_list(summary['backtest']['portfolio_position_accounting'])} |"
         ),
         "",
         "## Best Prediction",
@@ -803,7 +816,7 @@ def _interpretation_policy(
             ),
             "usage_boundary": (
                 "Treat as research evidence, subject to universe quality, data rights, "
-                "daily holdings simulation, and additional robustness checks."
+                "capacity diagnostics, borrow costs, and additional robustness checks."
             ),
             "conclusion_text": (
                 "Evidence supports a candidate text factor under the current audited setup."
