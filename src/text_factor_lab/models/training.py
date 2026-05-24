@@ -258,11 +258,11 @@ def _features_by_document_split_role(
     for feature in features:
         if isinstance(feature.feature_value, str):
             continue
-        if feature.feature_family == "tfidf":
+        if feature.feature_family in {"tfidf", "tfidf_svd"}:
             split_id, role = _tfidf_split_role(feature.feature_version)
             if split_id is None or role is None:
                 continue
-            key = f"tfidf::{split_id}::{role}"
+            key = f"{feature.feature_family}::{split_id}::{role}"
         else:
             key = "global"
         grouped[feature.source_document_id][key][feature.feature_name] = float(
@@ -292,6 +292,7 @@ def _features_for_assignment(
     document_features = features_by_document.get(document_id, {})
     row_features = dict(document_features.get("global", {}))
     row_features.update(document_features.get(f"tfidf::{split_id}::{role}", {}))
+    row_features.update(document_features.get(f"tfidf_svd::{split_id}::{role}", {}))
     return row_features
 
 

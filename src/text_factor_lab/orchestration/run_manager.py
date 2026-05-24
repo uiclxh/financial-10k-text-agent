@@ -66,6 +66,8 @@ class RunManager:
         self.features_path = self.run_dir / "features.jsonl"
         self.vocabulary_path = self.run_dir / "vocabulary.json"
         self.feature_manifest_path = self.run_dir / "feature_manifest.json"
+        self.feature_matrix_dir = self.run_dir / "feature_matrices"
+        self.feature_matrix_index_path = self.run_dir / "feature_matrix_index.json"
         self.predictions_path = self.run_dir / "predictions.jsonl"
         self.model_manifest_path = self.run_dir / "model_manifest.json"
         self.tuning_log_path = self.run_dir / "tuning_log.json"
@@ -74,8 +76,13 @@ class RunManager:
         self.portfolio_weights_path = self.run_dir / "portfolio_weights.jsonl"
         self.portfolio_returns_path = self.run_dir / "portfolio_returns.jsonl"
         self.portfolio_metrics_path = self.run_dir / "portfolio_metrics.json"
+        self.factor_panel_path = self.run_dir / "factor_panel.jsonl"
+        self.monthly_portfolio_weights_path = self.run_dir / "monthly_portfolio_weights.jsonl"
+        self.monthly_portfolio_returns_path = self.run_dir / "monthly_portfolio_returns.jsonl"
+        self.monthly_portfolio_metrics_path = self.run_dir / "monthly_portfolio_metrics.json"
         self.tested_specifications_path = self.run_dir / "tested_specifications.jsonl"
         self.multiple_testing_report_path = self.run_dir / "multiple_testing_report.json"
+        self.specification_registry_path = self.run_dir / "specification_registry.json"
         self.audit_report_path = self.run_dir / "audit_report.json"
         self.parsing_quality_report_path = self.run_dir / "parsing_quality_report.json"
 
@@ -232,10 +239,11 @@ class RunManager:
             self._run_report_stage(records, allow_failed_audit_report=allow_failed_audit_report)
             return self.write_orchestrator_report(records)
         except Exception as exc:
+            message = str(exc) or exc.__class__.__name__
             self.fail_run(
                 stage="orchestrator",
                 failure_type="orchestrator_failed",
-                failure_message=str(exc),
+                failure_message=message,
                 affected_artifacts=[str(self.run_dir)],
                 recoverable=True,
                 recommended_action="Inspect orchestrator_report.json and rerun the failed stage.",
@@ -244,9 +252,9 @@ class RunManager:
                 records,
                 stage="orchestrator",
                 status="failed",
-                message=str(exc),
+                message=message,
             )
-            return self.write_orchestrator_report(records, blocked_reason=str(exc))
+            return self.write_orchestrator_report(records, blocked_reason=message)
 
     def write_orchestrator_report(
         self,
@@ -526,12 +534,15 @@ class RunManager:
             build_dictionary_feature_manifests,
             build_dictionary_tone_features,
             build_feature_input_hashes,
+            build_metadata_features,
             build_tfidf_features,
+            build_tfidf_matrix_store,
             load_document_texts,
             read_document_manifest_jsonl,
             read_parsed_sections_jsonl,
             read_split_assignments_jsonl,
             write_feature_manifest_json,
+            write_feature_matrix_index_json,
             write_features_jsonl,
             write_vocabulary_json,
         )
@@ -560,7 +571,18 @@ class RunManager:
                     input_hashes=input_hashes,
                 )
             )
-        if "tfidf" in self.config.features.methods and self.config.features.tfidf is not None:
+        universe_records, _ = load_and_report_universe(self.config)
+        features.extend(
+            build_metadata_features(
+                manifest_by_document_id=manifest_by_document_id,
+                universe_records=universe_records,
+            )
+        )
+        if (
+            "tfidf" in self.config.features.methods
+            and self.config.features.tfidf is not None
+            and self.config.features.tfidf.write_long_features
+        ):
             tfidf_config = self.config.features.tfidf
             tfidf_result = build_tfidf_features(
                 document_texts,
@@ -574,6 +596,40 @@ class RunManager:
             features.extend(tfidf_result.features)
             feature_manifests.extend(tfidf_result.feature_manifests)
             vocabulary_by_split = tfidf_result.vocabulary_by_split
+        if "tfidf" in self.config.features.methods and self.config.features.tfidf is not None:
+            tfidf_config = self.config.features.tfidf
+            if (
+                tfidf_config.matrix_store_dir is not None
+                or tfidf_config.svd_components > 0
+                or not tfidf_config.write_long_features
+            ):
+                matrix_dir = (
+                    tfidf_config.matrix_store_dir
+                    if tfidf_config.matrix_store_dir is not None
+                    else self.feature_matrix_dir
+                )
+                matrix_index_path = (
+                    tfidf_config.matrix_index_file
+                    if tfidf_config.matrix_index_file is not None
+                    else self.feature_matrix_index_path
+                )
+                matrix_result = build_tfidf_matrix_store(
+                    document_texts,
+                    split_assignments,
+                    output_dir=matrix_dir,
+                    max_features=tfidf_config.max_features,
+                    ngram_range=tfidf_config.ngram_range,
+                    min_df=tfidf_config.min_df,
+                    max_df=tfidf_config.max_df,
+                    svd_components=tfidf_config.svd_components,
+                    input_hashes=input_hashes,
+                )
+                features.extend(matrix_result.svd_features)
+                feature_manifests.extend(matrix_result.svd_manifests)
+                write_feature_matrix_index_json(
+                    matrix_result.index_records,
+                    matrix_index_path,
+                )
         write_features_jsonl(features, self.features_path)
         write_vocabulary_json(vocabulary_by_split, self.vocabulary_path)
         write_feature_manifest_json(feature_manifests, self.feature_manifest_path)
@@ -650,8 +706,13 @@ class RunManager:
             and self.portfolio_weights_path.exists()
             and self.portfolio_returns_path.exists()
             and self.portfolio_metrics_path.exists()
+            and self.factor_panel_path.exists()
+            and self.monthly_portfolio_weights_path.exists()
+            and self.monthly_portfolio_returns_path.exists()
+            and self.monthly_portfolio_metrics_path.exists()
             and self.tested_specifications_path.exists()
             and self.multiple_testing_report_path.exists()
+            and self.specification_registry_path.exists()
         ):
             self.update_status("evaluated")
             self._append_stage(records, stage="evaluation", status="skipped_existing")
@@ -671,6 +732,7 @@ class RunManager:
             read_predictions_jsonl,
             write_backtest_results_json,
             write_evaluation_metrics_json,
+            write_factor_panel_jsonl,
             write_portfolio_metrics_json,
             write_portfolio_returns_jsonl,
             write_portfolio_weights_jsonl,
@@ -679,6 +741,7 @@ class RunManager:
         from text_factor_lab.inference import (
             build_inference_artifacts,
             write_multiple_testing_report_json,
+            write_specification_registry_json,
             write_tested_specifications_jsonl,
         )
         price_panel = (
@@ -698,17 +761,34 @@ class RunManager:
             portfolio_return_type=self.config.labels.portfolio_return_type,
             transaction_cost_bps_one_way=self.config.backtest.transaction_cost_bps_one_way,
             newey_west_lag=self.config.backtest.newey_west_lag,
+            portfolio_signal_direction=self.config.backtest.portfolio_signal_direction,
+            target_aware_portfolio_policy=(
+                self.config.backtest.target_aware_portfolio_policy
+            ),
         )
         write_evaluation_metrics_json(result.metrics, self.evaluation_metrics_path)
         write_backtest_results_json(result.backtests, self.backtest_results_path)
         write_portfolio_weights_jsonl(result.portfolio_weights, self.portfolio_weights_path)
         write_portfolio_returns_jsonl(result.portfolio_returns, self.portfolio_returns_path)
         write_portfolio_metrics_json(result.portfolio_metrics, self.portfolio_metrics_path)
+        write_factor_panel_jsonl(result.factor_panel, self.factor_panel_path)
+        write_portfolio_weights_jsonl(
+            result.monthly_portfolio_weights,
+            self.monthly_portfolio_weights_path,
+        )
+        write_portfolio_returns_jsonl(
+            result.monthly_portfolio_returns,
+            self.monthly_portfolio_returns_path,
+        )
+        write_portfolio_metrics_json(
+            result.monthly_portfolio_metrics,
+            self.monthly_portfolio_metrics_path,
+        )
         inference_result = build_inference_artifacts(
             run_id=self.config.run.run_id,
             metrics=result.metrics,
             backtests=result.backtests,
-            portfolio_metrics=result.portfolio_metrics,
+            portfolio_metrics=result.portfolio_metrics + result.monthly_portfolio_metrics,
         )
         write_tested_specifications_jsonl(
             inference_result.tested_specifications,
@@ -717,6 +797,10 @@ class RunManager:
         write_multiple_testing_report_json(
             inference_result.multiple_testing_report,
             self.multiple_testing_report_path,
+        )
+        write_specification_registry_json(
+            inference_result.specification_registry,
+            self.specification_registry_path,
         )
         self.update_status("evaluated")
         self._append_stage(
@@ -729,8 +813,13 @@ class RunManager:
                 self.portfolio_weights_path,
                 self.portfolio_returns_path,
                 self.portfolio_metrics_path,
+                self.factor_panel_path,
+                self.monthly_portfolio_weights_path,
+                self.monthly_portfolio_returns_path,
+                self.monthly_portfolio_metrics_path,
                 self.tested_specifications_path,
                 self.multiple_testing_report_path,
+                self.specification_registry_path,
             ],
             metrics={
                 "metrics": len(result.metrics),
@@ -738,12 +827,19 @@ class RunManager:
                 "portfolio_weights": len(result.portfolio_weights),
                 "portfolio_returns": len(result.portfolio_returns),
                 "portfolio_metrics": len(result.portfolio_metrics),
+                "factor_panel_rows": len(result.factor_panel),
+                "monthly_portfolio_weights": len(result.monthly_portfolio_weights),
+                "monthly_portfolio_returns": len(result.monthly_portfolio_returns),
+                "monthly_portfolio_metrics": len(result.monthly_portfolio_metrics),
                 "portfolio_return_source": (
                     "daily_price_panel" if price_panel is not None else "label_window"
                 ),
                 "tested_specifications": len(inference_result.tested_specifications),
                 "multiple_testing_families": (
                     inference_result.multiple_testing_report.family_count
+                ),
+                "primary_specifications": (
+                    inference_result.multiple_testing_report.primary_specification_count
                 ),
             },
         )

@@ -38,7 +38,7 @@ class FeatureRecord(StrictBaseModel):
 
 class FeatureManifestRecord(StrictBaseModel):
     feature_version: str = Field(min_length=1)
-    feature_method: Literal["dictionary_tone", "tfidf"]
+    feature_method: Literal["dictionary_tone", "tfidf", "tfidf_svd"]
     dictionary_source: str | None = None
     dictionary_version: str | None = None
     dictionary_license_note: str | None = None
@@ -68,7 +68,7 @@ class FeatureManifestRecord(StrictBaseModel):
                 raise ValueError("dictionary_tone manifest requires dictionary metadata")
             if self.dictionary_term_count is None:
                 raise ValueError("dictionary_tone manifest requires dictionary_term_count")
-        if self.feature_method == "tfidf" and not self.tfidf_params:
+        if self.feature_method in {"tfidf", "tfidf_svd"} and not self.tfidf_params:
             raise ValueError("tfidf manifest requires tfidf_params")
         return self
 

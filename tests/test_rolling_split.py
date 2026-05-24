@@ -100,8 +100,9 @@ def test_embargo_excludes_training_label_that_crosses_validation_boundary() -> N
 
     assert result.assignments == []
     assert len(result.leakage_records) == 1
+    assert result.leakage_records[0].severity == "purged"
     assert result.leakage_records[0].leakage_type == (
-        "train_label_window_crosses_validation_embargo"
+        "purged_train_label_window_crosses_validation_embargo"
     )
 
 
@@ -117,8 +118,9 @@ def test_embargo_excludes_validation_label_that_crosses_test_boundary() -> None:
     )
 
     assert result.assignments == []
+    assert result.leakage_records[0].severity == "purged"
     assert result.leakage_records[0].leakage_type == (
-        "validation_label_window_crosses_test_embargo"
+        "purged_validation_label_window_crosses_test_embargo"
     )
 
 

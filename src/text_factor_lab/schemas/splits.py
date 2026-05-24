@@ -8,7 +8,7 @@ from pydantic import Field, model_validator
 from text_factor_lab.schemas.base import StrictBaseModel
 
 SplitRole = Literal["train", "validation", "test"]
-LeakageSeverity = Literal["warn", "fail"]
+LeakageSeverity = Literal["purged", "warn", "fail"]
 
 
 class SplitAssignmentRecord(StrictBaseModel):

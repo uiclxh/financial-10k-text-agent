@@ -24,9 +24,27 @@ class EvaluationMetricRecord(StrictBaseModel):
     directional_accuracy: float = Field(ge=0, le=1)
     pearson_ic: float
     rank_ic: float
+    aggregation_method: str = "single_window"
+    split_count: int = Field(default=1, ge=0)
+    ic_grouping: str = "pooled"
+    ic_observation_count: int = Field(default=0, ge=0)
+    pearson_ic_t_stat: float = 0.0
+    rank_ic_t_stat: float = 0.0
+    pearson_ic_newey_west_t_stat: float = 0.0
+    rank_ic_newey_west_t_stat: float = 0.0
     created_at_utc: datetime
 
-    @field_validator("rmse", "mae", "r_squared", "pearson_ic", "rank_ic")
+    @field_validator(
+        "rmse",
+        "mae",
+        "r_squared",
+        "pearson_ic",
+        "rank_ic",
+        "pearson_ic_t_stat",
+        "rank_ic_t_stat",
+        "pearson_ic_newey_west_t_stat",
+        "rank_ic_newey_west_t_stat",
+    )
     @classmethod
     def validate_finite_metric(cls, value: float) -> float:
         if not isfinite(value):
@@ -49,6 +67,8 @@ class PortfolioBacktestRecord(StrictBaseModel):
     role: Literal["test"]
     portfolio_method: str = Field(min_length=1)
     weighting: str = Field(min_length=1)
+    signal_direction: Literal["long_high_score", "long_low_score"] = "long_high_score"
+    target_aware_policy: Literal["none", "long_low_vol", "risk_scaled"] = "none"
     rebalance_frequency: str = Field(min_length=1)
     long_count: int = Field(ge=0)
     short_count: int = Field(ge=0)
@@ -88,6 +108,8 @@ class PortfolioWeightRecord(StrictBaseModel):
     target_name: str = Field(min_length=1)
     portfolio_variant: str = "equal_weight"
     weighting: str = "equal_weight"
+    signal_direction: Literal["long_high_score", "long_low_score"] = "long_high_score"
+    target_aware_policy: Literal["none", "long_low_vol", "risk_scaled"] = "none"
     sector_neutral: bool = False
     rebalance_date: date
     holding_start_date: date
@@ -135,6 +157,8 @@ class PortfolioReturnRecord(StrictBaseModel):
     target_name: str = Field(min_length=1)
     portfolio_variant: str = "equal_weight"
     weighting: str = "equal_weight"
+    signal_direction: Literal["long_high_score", "long_low_score"] = "long_high_score"
+    target_aware_policy: Literal["none", "long_low_vol", "risk_scaled"] = "none"
     sector_neutral: bool = False
     return_source: str = "label_window"
     position_accounting: str = "label_window"
@@ -194,12 +218,18 @@ class PortfolioMetricRecord(StrictBaseModel):
     portfolio_variant: str = "equal_weight"
     portfolio_method: str = Field(min_length=1)
     weighting: str = Field(min_length=1)
+    signal_direction: Literal["long_high_score", "long_low_score"] = "long_high_score"
+    target_aware_policy: Literal["none", "long_low_vol", "risk_scaled"] = "none"
     sector_neutral: bool = False
     observation_count: int = Field(ge=0)
     cumulative_return: float
     annualized_return: float
     annualized_volatility: float
     sharpe_ratio: float
+    mean_period_return: float = 0.0
+    period_return_t_stat: float = 0.0
+    newey_west_lag: int = Field(default=0, ge=0)
+    newey_west_t_stat: float = 0.0
     max_drawdown: float
     hit_rate: float = Field(ge=0, le=1)
     average_turnover: float = Field(ge=0)
@@ -212,6 +242,9 @@ class PortfolioMetricRecord(StrictBaseModel):
         "annualized_return",
         "annualized_volatility",
         "sharpe_ratio",
+        "mean_period_return",
+        "period_return_t_stat",
+        "newey_west_t_stat",
         "max_drawdown",
         "average_net_exposure",
     )
@@ -224,6 +257,40 @@ class PortfolioMetricRecord(StrictBaseModel):
     @field_validator("created_at_utc")
     @classmethod
     def validate_aware_datetime(cls, value: datetime) -> datetime:
+        if not is_timezone_aware(value):
+            raise ValueError("created_at_utc must be timezone-aware")
+        return value
+
+
+class FactorPanelRecord(StrictBaseModel):
+    run_id: str = Field(min_length=1)
+    model_id: str = Field(min_length=1)
+    split_id: str = Field(min_length=1)
+    target_name: str = Field(min_length=1)
+    rebalance_date: date
+    ticker: str = Field(min_length=1)
+    entity_id: str = Field(min_length=1)
+    sector: str | None = None
+    industry: str | None = None
+    market_cap: float | None = Field(default=None, gt=0)
+    signal_event_date: date
+    signal_age_days: int = Field(ge=0)
+    factor_score: float
+    rank: int = Field(ge=1)
+    quantile: int = Field(ge=1, le=5)
+    is_active: bool = True
+    created_at_utc: datetime
+
+    @field_validator("factor_score")
+    @classmethod
+    def validate_finite_factor_score(cls, value: float) -> float:
+        if not isfinite(value):
+            raise ValueError("factor_score must be finite")
+        return value
+
+    @field_validator("created_at_utc")
+    @classmethod
+    def validate_factor_panel_datetime(cls, value: datetime) -> datetime:
         if not is_timezone_aware(value):
             raise ValueError("created_at_utc must be timezone-aware")
         return value

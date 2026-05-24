@@ -20,6 +20,7 @@ env/
 # Large or generated research artifacts
 data/raw/
 data/processed/
+data/real_10k*/
 runs/
 /reports/
 model_cache/

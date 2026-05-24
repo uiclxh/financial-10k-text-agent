@@ -48,6 +48,7 @@ class AuditArtifactPaths:
     backtest_results: Path
     tested_specifications: Path
     multiple_testing_report: Path
+    specification_registry: Path
     audit_report: Path
 
     @classmethod
@@ -68,6 +69,7 @@ class AuditArtifactPaths:
             backtest_results=base / "backtest_results.json",
             tested_specifications=base / "tested_specifications.jsonl",
             multiple_testing_report=base / "multiple_testing_report.json",
+            specification_registry=base / "specification_registry.json",
             audit_report=base / "audit_report.json",
         )
 
@@ -87,6 +89,7 @@ class LoadedAuditArtifacts:
     backtest_results: list[PortfolioBacktestRecord]
     tested_specifications: list[TestedSpecificationRecord]
     multiple_testing_report: MultipleTestingReportRecord | None
+    specification_registry: dict[str, object] | None
 
 
 def audit_run(
@@ -135,6 +138,7 @@ def audit_run(
                 artifacts.evaluation_metrics,
                 artifacts.backtest_results,
                 artifacts.multiple_testing_report,
+                artifacts.specification_registry,
             ),
             _formal_metadata_check(
                 run_id=run_id,
@@ -241,6 +245,12 @@ def _load_artifacts(
         checks,
         required=False,
     )
+    specification_registry = _load_optional_json_object(
+        run_id,
+        paths.specification_registry,
+        checks,
+        required=False,
+    )
     return LoadedAuditArtifacts(
         document_manifest=document_manifest,
         labels=labels,
@@ -255,6 +265,7 @@ def _load_artifacts(
         backtest_results=backtest_results,
         tested_specifications=tested_specifications,
         multiple_testing_report=multiple_testing_report,
+        specification_registry=specification_registry,
     )
 
 
@@ -414,6 +425,55 @@ def _load_json_object_artifact(
     return record
 
 
+def _load_optional_json_object(
+    run_id: str,
+    path: Path,
+    checks: list[AuditCheckRecord],
+    *,
+    required: bool,
+) -> dict[str, object] | None:
+    if not path.exists():
+        checks.append(
+            _check(
+                run_id,
+                f"artifact_exists::{path.name}",
+                "artifact",
+                "fail" if required else "warn",
+                f"Missing {'required' if required else 'optional'} artifact: {path.name}",
+                [str(path)],
+            )
+        )
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError("artifact must contain a JSON object")
+    except (json.JSONDecodeError, ValueError, OSError) as exc:
+        checks.append(
+            _check(
+                run_id,
+                f"schema_valid::{path.name}",
+                "schema",
+                "fail",
+                f"{path.name} failed schema validation: {exc}",
+                [str(path)],
+            )
+        )
+        return None
+    checks.append(
+        _check(
+            run_id,
+            f"schema_valid::{path.name}",
+            "schema",
+            "pass",
+            f"{path.name} parsed successfully",
+            [str(path)],
+            observed_value=1,
+        )
+    )
+    return payload
+
+
 def _load_vocabulary_json(path: Path) -> dict[str, dict[str, dict[str, int]]] | None:
     if not path.exists():
         return None
@@ -474,14 +534,21 @@ def _split_leakage_check(
     split_leakage: list[SplitLeakageRecord],
 ) -> AuditCheckRecord:
     fail_count = sum(record.severity == "fail" for record in split_leakage)
+    purged_count = sum(record.severity == "purged" for record in split_leakage)
+    warn_count = sum(record.severity == "warn" for record in split_leakage)
+    status = "fail" if fail_count else "warn" if purged_count or warn_count else "pass"
     return _check(
         run_id,
-        "split_leakage_failures",
+        "split_purge_and_leakage",
         "split",
-        "fail" if fail_count else "pass",
-        f"{fail_count} split leakage records have severity=fail",
+        status,
+        (
+            f"{fail_count} split records have severity=fail; "
+            f"{purged_count} records were purged by embargo; "
+            f"{warn_count} records have severity=warn"
+        ),
         ["split_leakage.jsonl"],
-        observed_value=fail_count,
+        observed_value=f"fail={fail_count}, purged={purged_count}, warn={warn_count}",
         threshold=0,
     )
 
@@ -609,6 +676,7 @@ def _tested_specifications_check(
     metrics: list[EvaluationMetricRecord],
     backtests: list[PortfolioBacktestRecord],
     multiple_testing_report: MultipleTestingReportRecord | None,
+    specification_registry: dict[str, object] | None,
 ) -> AuditCheckRecord:
     target_count = len({record.target_name for record in metrics})
     expected_minimum = len([record for record in metrics if record.role == "test"]) + len(backtests)
@@ -622,16 +690,32 @@ def _tested_specifications_check(
     elif multiple_testing_report.specification_count != spec_count:
         status = "fail"
         message = "multiple_testing_report specification_count does not match registry rows"
+    elif specification_registry is None:
+        status = "warn"
+        message = "Specification registry artifact is missing"
+    elif int(specification_registry.get("specification_count", -1)) != spec_count:
+        status = "fail"
+        message = "specification_registry specification_count does not match registry rows"
+    elif int(specification_registry.get("role_counts", {}).get("primary", 0)) <= 0:
+        status = "warn"
+        message = "Specification registry has no primary specifications"
     else:
         status = "pass"
-        message = "Tested specifications and multiple-testing report are present"
+        message = (
+            "Tested specifications, multiple-testing report, and specification "
+            "registry are present"
+        )
     return _check(
         run_id,
         "tested_specifications_disclosure",
         "audit",
         status,
         message,
-        ["tested_specifications.jsonl", "multiple_testing_report.json"],
+        [
+            "tested_specifications.jsonl",
+            "multiple_testing_report.json",
+            "specification_registry.json",
+        ],
         observed_value=f"targets={target_count}, specs={spec_count}",
     )
 

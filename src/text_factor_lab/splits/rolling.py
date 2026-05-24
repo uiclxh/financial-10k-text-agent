@@ -153,11 +153,13 @@ def _leakage_for_label(
             return _leakage_record(
                 label=label,
                 role=role,
+                severity="purged",
                 split_id=window.split_id,
-                leakage_type="train_label_window_crosses_validation_embargo",
+                leakage_type="purged_train_label_window_crosses_validation_embargo",
                 message=(
-                    f"Train label_end_date={label.label_end_date} crosses embargo cutoff "
-                    f"before validation_start_date={window.validation_start_date}."
+                    f"Purged train label because label_end_date={label.label_end_date} "
+                    "crosses the embargo cutoff before "
+                    f"validation_start_date={window.validation_start_date}."
                 ),
                 event_date=event_date,
             )
@@ -167,11 +169,13 @@ def _leakage_for_label(
             return _leakage_record(
                 label=label,
                 role=role,
+                severity="purged",
                 split_id=window.split_id,
-                leakage_type="validation_label_window_crosses_test_embargo",
+                leakage_type="purged_validation_label_window_crosses_test_embargo",
                 message=(
-                    f"Validation label_end_date={label.label_end_date} crosses embargo cutoff "
-                    f"before test_start_date={window.test_start_date}."
+                    f"Purged validation label because label_end_date={label.label_end_date} "
+                    "crosses the embargo cutoff before "
+                    f"test_start_date={window.test_start_date}."
                 ),
                 event_date=event_date,
             )
@@ -179,6 +183,7 @@ def _leakage_for_label(
         return _leakage_record(
             label=label,
             role=role,
+            severity="fail",
             split_id=window.split_id,
             leakage_type="test_label_starts_before_or_on_event_date",
             message="Test label_start_date must be after event_date.",
@@ -191,6 +196,7 @@ def _leakage_record(
     *,
     label: LabelRecord,
     role: SplitRole,
+    severity: str,
     split_id: str,
     leakage_type: str,
     message: str,
@@ -202,7 +208,7 @@ def _leakage_record(
         ticker=label.ticker,
         target_name=label.target_name,
         role=role,
-        severity="fail",
+        severity=severity,
         leakage_type=leakage_type,
         message=message,
         event_date=event_date,

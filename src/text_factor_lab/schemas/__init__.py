@@ -5,6 +5,7 @@ from text_factor_lab.schemas.config import ExperimentConfig, load_experiment_con
 from text_factor_lab.schemas.document_manifest import DocumentManifestRecord
 from text_factor_lab.schemas.evaluation import (
     EvaluationMetricRecord,
+    FactorPanelRecord,
     PortfolioBacktestRecord,
     PortfolioMetricRecord,
     PortfolioReturnRecord,
@@ -37,6 +38,7 @@ __all__ = [
     "AuditReportRecord",
     "EvaluationMetricRecord",
     "EntityLinkHistoryRecord",
+    "FactorPanelRecord",
     "FeatureManifestRecord",
     "FeatureRecord",
     "LabelRecord",

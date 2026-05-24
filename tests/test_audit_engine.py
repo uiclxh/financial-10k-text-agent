@@ -10,6 +10,7 @@ from text_factor_lab.audit import audit_run
 from text_factor_lab.inference import (
     build_inference_artifacts,
     write_multiple_testing_report_json,
+    write_specification_registry_json,
     write_tested_specifications_jsonl,
 )
 from text_factor_lab.schemas import (
@@ -219,21 +220,28 @@ def write_complete_audit_artifacts(run_dir: Path, *, bad_prediction_label: bool 
         inference.multiple_testing_report,
         run_dir / "multiple_testing_report.json",
     )
+    write_specification_registry_json(
+        inference.specification_registry,
+        run_dir / "specification_registry.json",
+    )
 
 
-def test_audit_run_passes_complete_exploratory_artifacts(tmp_path: Path) -> None:
+def test_audit_run_warns_when_complete_exploratory_artifacts_lack_primary_specs(
+    tmp_path: Path,
+) -> None:
     run_dir = tmp_path / "runs" / "audit_test_run"
     write_complete_audit_artifacts(run_dir)
 
     report = audit_run(run_id="audit_test_run", run_dir=run_dir)
 
-    assert report.audit_status == "pass"
+    assert report.audit_status == "warn"
+    assert any(check.check_id == "tested_specifications_disclosure" for check in report.checks)
     assert report.coverage == 1.0
     assert report.formal_result_allowed is False
     assert (run_dir / "audit_report.json").exists()
     status = json.loads((run_dir / "run_status.json").read_text(encoding="utf-8"))
     assert status["status"] == "audited"
-    assert status["audit_status"] == "pass"
+    assert status["audit_status"] == "warn"
 
 
 def test_audit_run_rejects_missing_prediction_alignment(tmp_path: Path) -> None:
@@ -260,4 +268,4 @@ def test_audit_cli_writes_report(tmp_path: Path, capsys) -> None:
 
     assert exit_code == 0
     assert "Audit completed" in captured.out
-    assert "status=pass" in captured.out
+    assert "status=warn" in captured.out

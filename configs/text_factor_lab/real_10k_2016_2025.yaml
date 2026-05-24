@@ -1,0 +1,94 @@
+run:
+  run_id: real_10k_2016_2025_public_v0
+  run_type: exploratory_run
+  random_seed: 42
+  output_dir: runs\text_factor_lab\real_10k_2016_2025_public_v0
+inputs:
+  document_manifest_path: data\real_10k_2016_2025\document_manifest.jsonl
+  prices_path: data\real_10k_2016_2025\prices.csv
+  parsed_sections_path: null
+  raw_filings_dir: data\real_10k_2016_2025\raw_filings
+  copy_inputs_to_run_dir: true
+universe:
+  name: real_public_10k_selected_large_caps_2016_2025
+  selection_date: '2016-01-01'
+  tickers_file: configs\universe\real_10k_2016_2025.csv
+  universe_data_level: exploratory
+  survivorship_bias_control: false
+  allow_delisted_firms: false
+  historical_ticker_mapping: true
+sample:
+  start_date: '2016-01-01'
+  end_date: '2025-12-31'
+  timezone: America/New_York
+text_source:
+  document_type: 10-K
+  source: SEC_EDGAR_PUBLIC_ARCHIVE
+  sections:
+  - Risk Factors
+  - MD&A
+  - Business
+  - Legal Proceedings
+  require_available_time: true
+  require_license_note: true
+  sec_user_agent: 'financial-10k-text-agent/0.14 contact: linxihang0810@gmail.com'
+labels:
+  targets:
+  - CAR_1_5
+  - CAR_1_20
+  - realized_volatility_1_20
+  return_type: log
+  portfolio_return_type: simple
+  price_field: adj_close
+  market_benchmark: SPY
+  annualization_days: 252
+split:
+  method: rolling_year
+  train_years_min: 5
+  validation_years: 1
+  test_years: 1
+  embargo_days: 20
+features:
+  methods:
+  - dictionary_tone
+  - tfidf
+  dictionary_tone:
+    dictionaries:
+    - builtin_mvp_toy_financial_dictionary
+  tfidf:
+    max_features: 1000
+    ngram_range:
+    - 1
+    - 2
+    min_df: 3
+    max_df: 0.95
+    fit_scope: train_window_only
+    write_long_features: false
+    matrix_store_dir: runs\text_factor_lab\real_10k_2016_2025_public_v0\feature_matrices
+    matrix_index_file: runs\text_factor_lab\real_10k_2016_2025_public_v0\feature_matrix_index.json
+    svd_components: 16
+models:
+  enabled:
+  - historical_mean
+  - industry_mean
+  - ridge
+  - xgboost
+  tuning:
+    selection_metric: validation_rank_ic
+    save_tuning_log: true
+backtest:
+  rebalance_frequency: event_based
+  portfolio_method: top_bottom_quintile
+  weighting: equal_weight
+  holding_window_days: 20
+  transaction_cost_bps_one_way: 10
+  sector_neutral: true
+  newey_west_lag: 19
+  portfolio_signal_direction: long_high_score
+  target_aware_portfolio_policy: none
+audit:
+  coverage_threshold: 0.45
+  require_license_note: true
+  require_available_time: true
+  reject_on_lookahead: true
+  reject_on_train_test_leakage: true

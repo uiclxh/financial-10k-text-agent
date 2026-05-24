@@ -6,13 +6,19 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from math import sqrt
 from pathlib import Path
+from typing import Literal
 
 import numpy as np
 
+from text_factor_lab.backtest.monthly import (
+    aggregate_monthly_portfolio_metrics,
+    build_monthly_portfolio_artifacts,
+)
 from text_factor_lab.data.prices import PricePanel, ReturnType
 from text_factor_lab.models import rank_ic
 from text_factor_lab.schemas import (
     EvaluationMetricRecord,
+    FactorPanelRecord,
     LabelRecord,
     PortfolioBacktestRecord,
     PortfolioMetricRecord,
@@ -22,6 +28,13 @@ from text_factor_lab.schemas import (
 )
 
 BACKTEST_VERSION = "backtest-evaluation-v0"
+PortfolioSignalDirection = Literal[
+    "long_high_score",
+    "long_low_score",
+    "validation_selected",
+]
+ResolvedSignalDirection = Literal["long_high_score", "long_low_score"]
+TargetAwarePortfolioPolicy = Literal["none", "long_low_vol", "risk_scaled"]
 
 
 @dataclass(frozen=True)
@@ -37,6 +50,10 @@ class EvaluationBuildResult:
     portfolio_weights: list[PortfolioWeightRecord]
     portfolio_returns: list[PortfolioReturnRecord]
     portfolio_metrics: list[PortfolioMetricRecord]
+    factor_panel: list[FactorPanelRecord]
+    monthly_portfolio_weights: list[PortfolioWeightRecord]
+    monthly_portfolio_returns: list[PortfolioReturnRecord]
+    monthly_portfolio_metrics: list[PortfolioMetricRecord]
 
 
 @dataclass(frozen=True)
@@ -44,6 +61,8 @@ class PortfolioVariant:
     name: str
     weighting: str
     sector_neutral: bool
+    signal_direction: ResolvedSignalDirection
+    target_aware_policy: TargetAwarePortfolioPolicy
 
 
 def read_predictions_jsonl(path: str | Path) -> list[PredictionRecord]:
@@ -73,6 +92,8 @@ def build_evaluation_artifacts(
     portfolio_return_type: ReturnType = "simple",
     transaction_cost_bps_one_way: float = 10.0,
     newey_west_lag: int = 19,
+    portfolio_signal_direction: PortfolioSignalDirection = "long_high_score",
+    target_aware_portfolio_policy: TargetAwarePortfolioPolicy = "none",
 ) -> EvaluationBuildResult:
     labels_by_id = {label.label_id: label for label in labels}
     scored = [
@@ -81,11 +102,20 @@ def build_evaluation_artifacts(
         if prediction.label_id is not None and prediction.label_id in labels_by_id
     ]
     grouped = _group_scored_predictions(scored)
+    signal_directions = _resolved_signal_directions(
+        grouped,
+        portfolio_signal_direction,
+        target_aware_portfolio_policy,
+    )
     metrics: list[EvaluationMetricRecord] = []
     backtests: list[PortfolioBacktestRecord] = []
     portfolio_weights: list[PortfolioWeightRecord] = []
     portfolio_returns: list[PortfolioReturnRecord] = []
     portfolio_metrics: list[PortfolioMetricRecord] = []
+    factor_panel: list[FactorPanelRecord] = []
+    monthly_portfolio_weights: list[PortfolioWeightRecord] = []
+    monthly_portfolio_returns: list[PortfolioReturnRecord] = []
+    monthly_portfolio_metrics: list[PortfolioMetricRecord] = []
 
     for (model_id, split_id, target_name, role), rows in sorted(grouped.items()):
         metrics.append(
@@ -96,6 +126,7 @@ def build_evaluation_artifacts(
                 target_name=target_name,
                 role=role,
                 rows=rows,
+                ic_newey_west_lag=newey_west_lag,
             )
         )
         if role == "test":
@@ -107,6 +138,8 @@ def build_evaluation_artifacts(
                 rows=rows,
                 transaction_cost_bps_one_way=transaction_cost_bps_one_way,
                 newey_west_lag=newey_west_lag,
+                signal_direction=signal_directions[(model_id, split_id, target_name)],
+                target_aware_policy=target_aware_portfolio_policy,
             )
             if backtest is not None:
                 backtests.append(backtest)
@@ -119,18 +152,49 @@ def build_evaluation_artifacts(
                 price_panel=price_panel,
                 portfolio_return_type=portfolio_return_type,
                 transaction_cost_bps_one_way=transaction_cost_bps_one_way,
+                signal_direction=signal_directions[(model_id, split_id, target_name)],
+                target_aware_policy=target_aware_portfolio_policy,
             )
             portfolio_weights.extend(portfolio_result[0])
             portfolio_returns.extend(portfolio_result[1])
             portfolio_metrics.extend(portfolio_result[2])
+            monthly_result = build_monthly_portfolio_artifacts(
+                run_id=run_id,
+                rows=rows,
+                price_panel=price_panel,
+                portfolio_return_type=portfolio_return_type,
+                transaction_cost_bps_one_way=transaction_cost_bps_one_way,
+                signal_direction=signal_directions[(model_id, split_id, target_name)],
+                target_aware_policy=target_aware_portfolio_policy,
+            )
+            factor_panel.extend(monthly_result.factor_panel)
+            monthly_portfolio_weights.extend(monthly_result.portfolio_weights)
+            monthly_portfolio_returns.extend(monthly_result.portfolio_returns)
+            monthly_portfolio_metrics.extend(monthly_result.portfolio_metrics)
 
-    metrics.extend(_aggregate_metrics(run_id=run_id, scored=scored))
+    metrics.extend(
+        _aggregate_metrics(
+            run_id=run_id,
+            split_metrics=metrics,
+            ic_newey_west_lag=newey_west_lag,
+        )
+    )
+    monthly_portfolio_metrics.extend(
+        aggregate_monthly_portfolio_metrics(
+            monthly_portfolio_returns,
+            run_id=run_id,
+        )
+    )
     return EvaluationBuildResult(
         metrics=metrics,
         backtests=backtests,
         portfolio_weights=portfolio_weights,
         portfolio_returns=portfolio_returns,
         portfolio_metrics=portfolio_metrics,
+        factor_panel=factor_panel,
+        monthly_portfolio_weights=monthly_portfolio_weights,
+        monthly_portfolio_returns=monthly_portfolio_returns,
+        monthly_portfolio_metrics=monthly_portfolio_metrics,
     )
 
 
@@ -151,6 +215,60 @@ def _group_scored_predictions(
     return grouped
 
 
+def _resolved_signal_directions(
+    grouped: dict[tuple[str, str, str, str], list[ScoredPrediction]],
+    requested_direction: PortfolioSignalDirection,
+    target_aware_policy: TargetAwarePortfolioPolicy,
+) -> dict[tuple[str, str, str], ResolvedSignalDirection]:
+    keys = {
+        (model_id, split_id, target_name)
+        for model_id, split_id, target_name, _ in grouped
+    }
+    target_aware = {
+        key: "long_low_score"
+        for key in keys
+        if _is_volatility_target(key[2])
+        and target_aware_policy in {"long_low_vol", "risk_scaled"}
+    }
+    if requested_direction != "validation_selected":
+        return {
+            key: target_aware.get(key, requested_direction)
+            for key in keys
+        }
+
+    resolved: dict[tuple[str, str, str], ResolvedSignalDirection] = {}
+    for model_id, split_id, target_name in keys:
+        validation_rows = grouped.get((model_id, split_id, target_name, "validation"), [])
+        key = (model_id, split_id, target_name)
+        resolved[key] = target_aware.get(
+            key,
+            _direction_from_validation_rows(validation_rows),
+        )
+    return resolved
+
+
+def _direction_from_validation_rows(
+    rows: list[ScoredPrediction],
+) -> ResolvedSignalDirection:
+    if len(rows) < 2:
+        return "long_high_score"
+    sorted_rows = sorted(rows, key=lambda row: row.prediction.factor_score)
+    leg_size = max(1, int(len(sorted_rows) * 0.2))
+    low_rows = sorted_rows[:leg_size]
+    high_rows = sorted_rows[-leg_size:]
+    high_minus_low = float(
+        np.mean([row.label.target_value for row in high_rows])
+        - np.mean([row.label.target_value for row in low_rows])
+    )
+    return "long_high_score" if high_minus_low >= 0.0 else "long_low_score"
+
+
+def _is_volatility_target(target_name: str) -> bool:
+    return "volatility" in target_name.lower() or target_name.lower().startswith(
+        "realized_vol"
+    )
+
+
 def _evaluation_metric(
     *,
     run_id: str,
@@ -159,6 +277,7 @@ def _evaluation_metric(
     target_name: str,
     role: str,
     rows: list[ScoredPrediction],
+    ic_newey_west_lag: int,
 ) -> EvaluationMetricRecord:
     y_true = np.array([row.label.target_value for row in rows], dtype=float)
     y_pred = np.array([row.prediction.prediction_value for row in rows], dtype=float)
@@ -169,6 +288,11 @@ def _evaluation_metric(
     directional_accuracy = _directional_accuracy(y_true, y_pred)
     pearson = pearson_ic(y_true, y_pred)
     rank = rank_ic(y_true, y_pred)
+    pearson_series, rank_series, ic_grouping = _ic_diagnostic_series(
+        rows,
+        pooled_pearson=pearson,
+        pooled_rank=rank,
+    )
     return EvaluationMetricRecord(
         run_id=run_id,
         model_id=model_id,
@@ -182,6 +306,17 @@ def _evaluation_metric(
         directional_accuracy=directional_accuracy,
         pearson_ic=pearson,
         rank_ic=rank,
+        aggregation_method="pooled_window_metrics_with_date_ic_diagnostics",
+        split_count=1,
+        ic_grouping=ic_grouping,
+        ic_observation_count=max(len(pearson_series), len(rank_series)),
+        pearson_ic_t_stat=_mean_t_stat(pearson_series),
+        rank_ic_t_stat=_mean_t_stat(rank_series),
+        pearson_ic_newey_west_t_stat=newey_west_t_stat(
+            pearson_series,
+            ic_newey_west_lag,
+        ),
+        rank_ic_newey_west_t_stat=newey_west_t_stat(rank_series, ic_newey_west_lag),
         created_at_utc=datetime.now(UTC),
     )
 
@@ -189,23 +324,121 @@ def _evaluation_metric(
 def _aggregate_metrics(
     *,
     run_id: str,
-    scored: list[ScoredPrediction],
+    split_metrics: list[EvaluationMetricRecord],
+    ic_newey_west_lag: int,
 ) -> list[EvaluationMetricRecord]:
-    grouped: dict[tuple[str, str, str], list[ScoredPrediction]] = defaultdict(list)
-    for row in scored:
-        role = row.prediction.role or "test"
-        grouped[(row.prediction.model_id, row.prediction.target_name, role)].append(row)
+    grouped: dict[tuple[str, str, str], list[EvaluationMetricRecord]] = defaultdict(list)
+    for metric in split_metrics:
+        if metric.split_id == "ALL_SPLITS":
+            continue
+        grouped[
+            (
+                _aggregate_model_id(metric.model_id, metric.target_name),
+                metric.target_name,
+                metric.role,
+            )
+        ].append(metric)
     return [
-        _evaluation_metric(
+        _aggregate_metric_from_split_metrics(
             run_id=run_id,
             model_id=model_id,
             split_id="ALL_SPLITS",
             target_name=target_name,
             role=role,
             rows=rows,
+            ic_newey_west_lag=ic_newey_west_lag,
         )
         for (model_id, target_name, role), rows in sorted(grouped.items())
     ]
+
+
+def _aggregate_metric_from_split_metrics(
+    *,
+    run_id: str,
+    model_id: str,
+    split_id: str,
+    target_name: str,
+    role: str,
+    rows: list[EvaluationMetricRecord],
+    ic_newey_west_lag: int,
+) -> EvaluationMetricRecord:
+    total_observations = sum(record.observation_count for record in rows)
+    weights = np.array([record.observation_count for record in rows], dtype=float)
+    if weights.sum() == 0:
+        weights = np.ones(len(rows), dtype=float)
+    rmse = float(
+        sqrt(
+            float(
+                np.average(
+                    [record.rmse**2 for record in rows],
+                    weights=weights,
+                )
+            )
+        )
+    )
+    pearson_values = np.array([record.pearson_ic for record in rows], dtype=float)
+    rank_values = np.array([record.rank_ic for record in rows], dtype=float)
+    return EvaluationMetricRecord(
+        run_id=run_id,
+        model_id=model_id,
+        split_id=split_id,
+        target_name=target_name,
+        role=role,
+        observation_count=total_observations,
+        rmse=rmse,
+        mae=float(np.average([record.mae for record in rows], weights=weights)),
+        r_squared=float(np.average([record.r_squared for record in rows], weights=weights)),
+        directional_accuracy=float(
+            np.average([record.directional_accuracy for record in rows], weights=weights)
+        ),
+        pearson_ic=float(np.mean(pearson_values)) if len(pearson_values) else 0.0,
+        rank_ic=float(np.mean(rank_values)) if len(rank_values) else 0.0,
+        aggregation_method="split_mean_ic_weighted_error_metrics",
+        split_count=len(rows),
+        ic_grouping="split",
+        ic_observation_count=len(rows),
+        pearson_ic_t_stat=_mean_t_stat(pearson_values),
+        rank_ic_t_stat=_mean_t_stat(rank_values),
+        pearson_ic_newey_west_t_stat=newey_west_t_stat(
+            pearson_values,
+            ic_newey_west_lag,
+        ),
+        rank_ic_newey_west_t_stat=newey_west_t_stat(rank_values, ic_newey_west_lag),
+        created_at_utc=datetime.now(UTC),
+    )
+
+
+def _aggregate_model_id(model_id: str, target_name: str) -> str:
+    parts = model_id.split("::")
+    if len(parts) >= 2 and parts[1] == target_name:
+        return f"{parts[0]}::{target_name}::ALL_SPLITS"
+    if len(parts) >= 1:
+        return f"{parts[0]}::{target_name}::ALL_SPLITS"
+    return f"{model_id}::{target_name}::ALL_SPLITS"
+
+
+def _ic_diagnostic_series(
+    rows: list[ScoredPrediction],
+    *,
+    pooled_pearson: float,
+    pooled_rank: float,
+    min_cross_section: int = 2,
+) -> tuple[np.ndarray, np.ndarray, str]:
+    rows_by_date: dict[date, list[ScoredPrediction]] = defaultdict(list)
+    for row in rows:
+        rows_by_date[row.prediction.event_date].append(row)
+    pearson_values: list[float] = []
+    rank_values: list[float] = []
+    for date_rows in rows_by_date.values():
+        if len(date_rows) < min_cross_section:
+            continue
+        y_true = np.array([row.label.target_value for row in date_rows], dtype=float)
+        y_pred = np.array([row.prediction.prediction_value for row in date_rows], dtype=float)
+        pearson_values.append(pearson_ic(y_true, y_pred))
+        rank_values.append(rank_ic(y_true, y_pred))
+    if pearson_values or rank_values:
+        return np.array(pearson_values), np.array(rank_values), "event_date_cross_section"
+    return np.array([pooled_pearson]), np.array([pooled_rank]), "pooled_fallback"
 
 
 def _r_squared(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -222,6 +455,16 @@ def _directional_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     if len(y_true) == 0:
         return 0.0
     return float(np.mean(np.sign(y_true) == np.sign(y_pred)))
+
+
+def _mean_t_stat(values: np.ndarray | list[float]) -> float:
+    values = np.asarray(values, dtype=float)
+    if len(values) < 2:
+        return 0.0
+    standard_error = float(np.std(values, ddof=1) / sqrt(len(values)))
+    if standard_error == 0.0:
+        return 0.0
+    return float(values.mean() / standard_error)
 
 
 def pearson_ic(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -241,6 +484,8 @@ def _portfolio_backtest(
     rows: list[ScoredPrediction],
     transaction_cost_bps_one_way: float,
     newey_west_lag: int,
+    signal_direction: ResolvedSignalDirection,
+    target_aware_policy: TargetAwarePortfolioPolicy,
 ) -> PortfolioBacktestRecord | None:
     if len(rows) < 2:
         return None
@@ -248,6 +493,8 @@ def _portfolio_backtest(
     leg_size = max(1, int(len(sorted_rows) * 0.2))
     short_rows = sorted_rows[:leg_size]
     long_rows = sorted_rows[-leg_size:]
+    if signal_direction == "long_low_score":
+        long_rows, short_rows = short_rows, long_rows
     long_return = float(np.mean([row.label.target_value for row in long_rows]))
     short_return = float(np.mean([row.label.target_value for row in short_rows]))
     gross_return = long_return - short_return
@@ -269,6 +516,8 @@ def _portfolio_backtest(
         role="test",
         portfolio_method="top_bottom_quintile_min_one",
         weighting="equal_weight",
+        signal_direction=signal_direction,
+        target_aware_policy=target_aware_policy,
         rebalance_frequency="event_based",
         long_count=len(long_rows),
         short_count=len(short_rows),
@@ -293,6 +542,8 @@ def _portfolio_time_series(
     price_panel: PricePanel | None,
     portfolio_return_type: ReturnType,
     transaction_cost_bps_one_way: float,
+    signal_direction: ResolvedSignalDirection,
+    target_aware_policy: TargetAwarePortfolioPolicy,
 ) -> tuple[list[PortfolioWeightRecord], list[PortfolioReturnRecord], list[PortfolioMetricRecord]]:
     if len(rows) < 2:
         return [], [], []
@@ -300,7 +551,11 @@ def _portfolio_time_series(
     all_weights: list[PortfolioWeightRecord] = []
     all_returns: list[PortfolioReturnRecord] = []
     metric_rows: list[PortfolioMetricRecord] = []
-    for variant in _available_portfolio_variants(rows):
+    for variant in _available_portfolio_variants(
+        rows,
+        signal_direction,
+        target_aware_policy,
+    ):
         weights, returns, metric = _portfolio_time_series_for_variant(
             run_id=run_id,
             model_id=model_id,
@@ -319,17 +574,49 @@ def _portfolio_time_series(
     return all_weights, all_returns, metric_rows
 
 
-def _available_portfolio_variants(rows: list[ScoredPrediction]) -> list[PortfolioVariant]:
-    variants = [PortfolioVariant("equal_weight", "equal_weight", False)]
+def _available_portfolio_variants(
+    rows: list[ScoredPrediction],
+    signal_direction: ResolvedSignalDirection,
+    target_aware_policy: TargetAwarePortfolioPolicy,
+) -> list[PortfolioVariant]:
+    variants = [
+        PortfolioVariant(
+            "equal_weight",
+            "equal_weight",
+            False,
+            signal_direction,
+            target_aware_policy,
+        )
+    ]
     if all(row.prediction.market_cap is not None for row in rows):
-        variants.append(PortfolioVariant("value_weight", "value_weight", False))
+        variants.append(
+            PortfolioVariant(
+                "value_weight",
+                "value_weight",
+                False,
+                signal_direction,
+                target_aware_policy,
+            )
+        )
     if all(row.prediction.sector for row in rows):
         variants.append(
-            PortfolioVariant("sector_neutral_equal_weight", "equal_weight", True)
+            PortfolioVariant(
+                "sector_neutral_equal_weight",
+                "equal_weight",
+                True,
+                signal_direction,
+                target_aware_policy,
+            )
         )
     if all(row.prediction.sector and row.prediction.market_cap is not None for row in rows):
         variants.append(
-            PortfolioVariant("sector_neutral_value_weight", "value_weight", True)
+            PortfolioVariant(
+                "sector_neutral_value_weight",
+                "value_weight",
+                True,
+                signal_direction,
+                target_aware_policy,
+            )
         )
     return variants
 
@@ -465,6 +752,9 @@ def _portfolio_weights_for_rebalance(
         short_rows=short_rows,
         weighting=variant.weighting,
         gross_allocation=2.0,
+        signal_direction=variant.signal_direction,
+        target_aware_policy=variant.target_aware_policy,
+        target_name=target_name,
     )
     records: list[PortfolioWeightRecord] = []
     for rank_index, row in enumerate(sorted_rows, start=1):
@@ -481,6 +771,8 @@ def _portfolio_weights_for_rebalance(
                 target_name=target_name,
                 portfolio_variant=variant.name,
                 weighting=variant.weighting,
+                signal_direction=variant.signal_direction,
+                target_aware_policy=variant.target_aware_policy,
                 sector_neutral=variant.sector_neutral,
                 rebalance_date=row.prediction.event_date,
                 holding_start_date=row.label.label_start_date,
@@ -542,6 +834,9 @@ def _sector_neutral_weights_for_rebalance(
             short_rows=sorted_rows[:leg_size],
             weighting=variant.weighting,
             gross_allocation=gross_allocation,
+            signal_direction=variant.signal_direction,
+            target_aware_policy=variant.target_aware_policy,
+            target_name=target_name,
         )
         selected_weights.update(sector_weights)
 
@@ -559,6 +854,8 @@ def _sector_neutral_weights_for_rebalance(
                 target_name=target_name,
                 portfolio_variant=variant.name,
                 weighting=variant.weighting,
+                signal_direction=variant.signal_direction,
+                target_aware_policy=variant.target_aware_policy,
                 sector_neutral=variant.sector_neutral,
                 rebalance_date=row.prediction.event_date,
                 holding_start_date=row.label.label_start_date,
@@ -588,13 +885,31 @@ def _leg_weights(
     short_rows: list[ScoredPrediction],
     weighting: str,
     gross_allocation: float,
+    signal_direction: ResolvedSignalDirection,
+    target_aware_policy: TargetAwarePortfolioPolicy,
+    target_name: str,
 ) -> dict[int, float]:
+    if signal_direction == "long_low_score":
+        long_rows, short_rows = short_rows, long_rows
     long_allocation = gross_allocation / 2.0
     short_allocation = gross_allocation / 2.0
     weights: dict[int, float] = {}
-    for row, weight in _side_weights(long_rows, weighting=weighting, allocation=long_allocation):
+    use_risk_scaled = (
+        target_aware_policy == "risk_scaled" and _is_volatility_target(target_name)
+    )
+    for row, weight in _side_weights(
+        long_rows,
+        weighting=weighting,
+        allocation=long_allocation,
+        risk_scaled=use_risk_scaled,
+    ):
         weights[id(row)] = weight
-    for row, weight in _side_weights(short_rows, weighting=weighting, allocation=short_allocation):
+    for row, weight in _side_weights(
+        short_rows,
+        weighting=weighting,
+        allocation=short_allocation,
+        risk_scaled=use_risk_scaled,
+    ):
         weights[id(row)] = -weight
     return weights
 
@@ -604,9 +919,21 @@ def _side_weights(
     *,
     weighting: str,
     allocation: float,
+    risk_scaled: bool = False,
 ) -> list[tuple[ScoredPrediction, float]]:
     if not rows:
         return []
+    if risk_scaled:
+        inverse_vol_weights = [
+            1.0 / max(abs(float(row.prediction.factor_score)), 1e-6)
+            for row in rows
+        ]
+        denominator = sum(inverse_vol_weights)
+        if denominator > 0:
+            return [
+                (row, allocation * inverse_vol_weight / denominator)
+                for row, inverse_vol_weight in zip(rows, inverse_vol_weights, strict=True)
+            ]
     if weighting == "value_weight" and all(row.prediction.market_cap for row in rows):
         denominator = sum(float(row.prediction.market_cap or 0.0) for row in rows)
         if denominator > 0:
@@ -652,6 +979,8 @@ def _portfolio_return_for_rebalance(
         target_name=target_name,
         portfolio_variant=variant.name,
         weighting=variant.weighting,
+        signal_direction=variant.signal_direction,
+        target_aware_policy=variant.target_aware_policy,
         sector_neutral=variant.sector_neutral,
         return_source="label_window",
         position_accounting="label_window",
@@ -755,6 +1084,8 @@ def _daily_portfolio_returns_for_rebalance(
                 target_name=target_name,
                 portfolio_variant=variant.name,
                 weighting=variant.weighting,
+                signal_direction=variant.signal_direction,
+                target_aware_policy=variant.target_aware_policy,
                 sector_neutral=variant.sector_neutral,
                 return_source="daily_price_panel",
                 position_accounting="drifted_daily_positions",
@@ -829,6 +1160,7 @@ def _portfolio_metric(
         if len(values) > 1 and np.std(values, ddof=1)
         else 0.0
     )
+    newey_west_lag = min(21, max(len(values) - 1, 0))
     equity_curve = np.cumprod(1.0 + values)
     running_max = np.maximum.accumulate(equity_curve)
     drawdowns = equity_curve / running_max - 1.0
@@ -840,12 +1172,18 @@ def _portfolio_metric(
         portfolio_variant=variant.name,
         portfolio_method="top_bottom_quintile_min_one_time_series",
         weighting=variant.weighting,
+        signal_direction=variant.signal_direction,
+        target_aware_policy=variant.target_aware_policy,
         sector_neutral=variant.sector_neutral,
         observation_count=len(returns),
         cumulative_return=cumulative,
         annualized_return=annualized_return,
         annualized_volatility=annualized_volatility,
         sharpe_ratio=sharpe_ratio,
+        mean_period_return=float(np.mean(values)),
+        period_return_t_stat=_mean_t_stat(values),
+        newey_west_lag=newey_west_lag,
+        newey_west_t_stat=newey_west_t_stat(values, newey_west_lag),
         max_drawdown=float(np.min(drawdowns)),
         hit_rate=float(np.mean(values > 0)),
         average_turnover=float(np.mean([record.turnover for record in returns])),
@@ -929,3 +1267,9 @@ def write_portfolio_metrics_json(
     with output.open("w", encoding="utf-8") as file:
         json.dump([record.model_dump(mode="json") for record in records], file, indent=2)
         file.write("\n")
+
+
+def write_factor_panel_jsonl(records: list[FactorPanelRecord], path: str | Path) -> None:
+    from text_factor_lab.backtest.monthly import write_factor_panel_jsonl as _write
+
+    _write(records, path)

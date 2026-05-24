@@ -83,6 +83,8 @@ backtest:
   transaction_cost_bps_one_way: 10
   sector_neutral: false
   newey_west_lag: 2
+  portfolio_signal_direction: long_high_score
+  target_aware_portfolio_policy: none
 
 audit:
   coverage_threshold: 0.6

@@ -126,6 +126,10 @@ def build_parser() -> argparse.ArgumentParser:
     feature_parser.add_argument("--document-manifest", required=True)
     feature_parser.add_argument("--parsed-sections", required=True)
     feature_parser.add_argument("--split-assignments", required=True)
+    feature_parser.add_argument(
+        "--universe-manifest",
+        help="Optional universe CSV used to attach sector, industry, and market-cap metadata.",
+    )
     feature_parser.add_argument("--features-output", required=True)
     feature_parser.add_argument("--vocabulary-output", required=True)
     feature_parser.add_argument(
@@ -146,6 +150,25 @@ def build_parser() -> argparse.ArgumentParser:
     feature_parser.add_argument("--tfidf-ngram-max", type=int, default=2)
     feature_parser.add_argument("--tfidf-min-df", type=int, default=1)
     feature_parser.add_argument("--tfidf-max-df", type=float, default=1.0)
+    feature_parser.add_argument(
+        "--no-tfidf-long-features",
+        action="store_true",
+        help="Do not expand non-zero TF-IDF terms into features.jsonl.",
+    )
+    feature_parser.add_argument(
+        "--feature-matrix-dir",
+        help="Optional directory for split/scope/role sparse TF-IDF .npz matrices.",
+    )
+    feature_parser.add_argument(
+        "--feature-matrix-index-output",
+        help="Output JSON index for sparse TF-IDF matrices.",
+    )
+    feature_parser.add_argument(
+        "--tfidf-svd-components",
+        type=int,
+        default=0,
+        help="Optional train-fit TruncatedSVD component count to emit as compact features.",
+    )
 
     model_parser = subparsers.add_parser(
         "build-models",
@@ -190,11 +213,34 @@ def build_parser() -> argparse.ArgumentParser:
     eval_parser.add_argument("--portfolio-weights-output")
     eval_parser.add_argument("--portfolio-returns-output")
     eval_parser.add_argument("--portfolio-metrics-output")
+    eval_parser.add_argument("--factor-panel-output")
+    eval_parser.add_argument("--monthly-portfolio-weights-output")
+    eval_parser.add_argument("--monthly-portfolio-returns-output")
+    eval_parser.add_argument("--monthly-portfolio-metrics-output")
     eval_parser.add_argument("--tested-specifications-output")
     eval_parser.add_argument("--multiple-testing-output")
+    eval_parser.add_argument("--specification-registry-output")
     eval_parser.add_argument("--portfolio-return-type", choices=["simple", "log"], default="simple")
     eval_parser.add_argument("--transaction-cost-bps-one-way", type=float, default=10.0)
     eval_parser.add_argument("--newey-west-lag", type=int, default=19)
+    eval_parser.add_argument(
+        "--portfolio-signal-direction",
+        choices=["long_high_score", "long_low_score", "validation_selected"],
+        default="long_high_score",
+        help=(
+            "Portfolio side policy. validation_selected chooses long_high_score or "
+            "long_low_score from the validation window and freezes it for test."
+        ),
+    )
+    eval_parser.add_argument(
+        "--target-aware-portfolio-policy",
+        choices=["none", "long_low_vol", "risk_scaled"],
+        default="none",
+        help=(
+            "Target-aware portfolio policy. Volatility targets can force low-score "
+            "long portfolios or inverse predicted-volatility risk scaling."
+        ),
+    )
 
     return parser
 
@@ -351,16 +397,20 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "build-features":
+        from text_factor_lab.data import load_universe_manifest
         from text_factor_lab.features import (
             build_dictionary_feature_manifests,
             build_dictionary_tone_features,
             build_feature_input_hashes,
+            build_metadata_features,
             build_tfidf_features,
+            build_tfidf_matrix_store,
             load_document_texts,
             read_document_manifest_jsonl,
             read_parsed_sections_jsonl,
             read_split_assignments_jsonl,
             write_feature_manifest_json,
+            write_feature_matrix_index_json,
             write_features_jsonl,
             write_vocabulary_json,
         )
@@ -389,7 +439,15 @@ def main(argv: list[str] | None = None) -> int:
                     input_hashes=input_hashes,
                 )
             )
-        if "tfidf" in args.method:
+        if args.universe_manifest:
+            universe_records = load_universe_manifest(args.universe_manifest)
+            features.extend(
+                build_metadata_features(
+                    manifest_by_document_id=manifest_by_document_id,
+                    universe_records=universe_records,
+                )
+            )
+        if "tfidf" in args.method and not args.no_tfidf_long_features:
             tfidf_result = build_tfidf_features(
                 document_texts,
                 split_assignments,
@@ -402,6 +460,36 @@ def main(argv: list[str] | None = None) -> int:
             features.extend(tfidf_result.features)
             feature_manifests.extend(tfidf_result.feature_manifests)
             vocabulary_by_split = tfidf_result.vocabulary_by_split
+        if (
+            "tfidf" in args.method
+            and (
+                args.feature_matrix_dir
+                or args.tfidf_svd_components > 0
+                or args.no_tfidf_long_features
+            )
+        ):
+            matrix_dir = Path(args.feature_matrix_dir) if args.feature_matrix_dir else (
+                Path(args.features_output).with_name("feature_matrices")
+            )
+            matrix_result = build_tfidf_matrix_store(
+                document_texts,
+                split_assignments,
+                output_dir=matrix_dir,
+                max_features=args.tfidf_max_features,
+                ngram_range=(args.tfidf_ngram_min, args.tfidf_ngram_max),
+                min_df=args.tfidf_min_df,
+                max_df=args.tfidf_max_df,
+                svd_components=args.tfidf_svd_components,
+                input_hashes=input_hashes,
+            )
+            features.extend(matrix_result.svd_features)
+            feature_manifests.extend(matrix_result.svd_manifests)
+            matrix_index_output = (
+                Path(args.feature_matrix_index_output)
+                if args.feature_matrix_index_output
+                else Path(args.features_output).with_name("feature_matrix_index.json")
+            )
+            write_feature_matrix_index_json(matrix_result.index_records, matrix_index_output)
         manifest_output = (
             Path(args.feature_manifest_output)
             if args.feature_manifest_output
@@ -456,6 +544,7 @@ def main(argv: list[str] | None = None) -> int:
             read_predictions_jsonl,
             write_backtest_results_json,
             write_evaluation_metrics_json,
+            write_factor_panel_jsonl,
             write_portfolio_metrics_json,
             write_portfolio_returns_jsonl,
             write_portfolio_weights_jsonl,
@@ -476,6 +565,8 @@ def main(argv: list[str] | None = None) -> int:
             portfolio_return_type=args.portfolio_return_type,
             transaction_cost_bps_one_way=args.transaction_cost_bps_one_way,
             newey_west_lag=args.newey_west_lag,
+            portfolio_signal_direction=args.portfolio_signal_direction,
+            target_aware_portfolio_policy=args.target_aware_portfolio_policy,
         )
         write_evaluation_metrics_json(result.metrics, args.metrics_output)
         write_backtest_results_json(result.backtests, args.backtest_output)
@@ -485,10 +576,32 @@ def main(argv: list[str] | None = None) -> int:
             write_portfolio_returns_jsonl(result.portfolio_returns, args.portfolio_returns_output)
         if args.portfolio_metrics_output:
             write_portfolio_metrics_json(result.portfolio_metrics, args.portfolio_metrics_output)
-        if args.tested_specifications_output or args.multiple_testing_output:
+        if args.factor_panel_output:
+            write_factor_panel_jsonl(result.factor_panel, args.factor_panel_output)
+        if args.monthly_portfolio_weights_output:
+            write_portfolio_weights_jsonl(
+                result.monthly_portfolio_weights,
+                args.monthly_portfolio_weights_output,
+            )
+        if args.monthly_portfolio_returns_output:
+            write_portfolio_returns_jsonl(
+                result.monthly_portfolio_returns,
+                args.monthly_portfolio_returns_output,
+            )
+        if args.monthly_portfolio_metrics_output:
+            write_portfolio_metrics_json(
+                result.monthly_portfolio_metrics,
+                args.monthly_portfolio_metrics_output,
+            )
+        if (
+            args.tested_specifications_output
+            or args.multiple_testing_output
+            or args.specification_registry_output
+        ):
             from text_factor_lab.inference import (
                 build_inference_artifacts,
                 write_multiple_testing_report_json,
+                write_specification_registry_json,
                 write_tested_specifications_jsonl,
             )
 
@@ -496,7 +609,7 @@ def main(argv: list[str] | None = None) -> int:
                 run_id=args.run_id,
                 metrics=result.metrics,
                 backtests=result.backtests,
-                portfolio_metrics=result.portfolio_metrics,
+                portfolio_metrics=result.portfolio_metrics + result.monthly_portfolio_metrics,
             )
             if args.tested_specifications_output:
                 write_tested_specifications_jsonl(
@@ -508,10 +621,16 @@ def main(argv: list[str] | None = None) -> int:
                     inference_result.multiple_testing_report,
                     args.multiple_testing_output,
                 )
+            if args.specification_registry_output:
+                write_specification_registry_json(
+                    inference_result.specification_registry,
+                    args.specification_registry_output,
+                )
         print(
             "Built evaluation artifacts. "
             f"metrics={len(result.metrics)} backtests={len(result.backtests)} "
-            f"portfolio_returns={len(result.portfolio_returns)}"
+            f"portfolio_returns={len(result.portfolio_returns)} "
+            f"monthly_portfolio_returns={len(result.monthly_portfolio_returns)}"
         )
         return 0
 

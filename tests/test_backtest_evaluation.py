@@ -41,6 +41,15 @@ def label(document_id: str, ticker: str, year: int, value: float) -> LabelRecord
     )
 
 
+def volatility_label(document_id: str, ticker: str, year: int, value: float) -> LabelRecord:
+    return label(document_id, ticker, year, value).model_copy(
+        update={
+            "label_id": f"{document_id}:realized_volatility_1_20:labels-v0",
+            "target_name": "realized_volatility_1_20",
+        }
+    )
+
+
 def prediction(
     label_record: LabelRecord,
     *,
@@ -130,7 +139,17 @@ def test_build_evaluation_artifacts_computes_metrics_and_backtests() -> None:
     assert test_metric.observation_count == 5
     assert test_metric.rank_ic > 0
     assert test_metric.directional_accuracy >= 0
+    assert test_metric.aggregation_method == "pooled_window_metrics_with_date_ic_diagnostics"
+    assert test_metric.ic_observation_count >= 1
     assert any(record.split_id == "ALL_SPLITS" for record in result.metrics)
+    aggregate_metric = next(
+        record
+        for record in result.metrics
+        if record.role == "test" and record.split_id == "ALL_SPLITS"
+    )
+    assert aggregate_metric.aggregation_method == "split_mean_ic_weighted_error_metrics"
+    assert aggregate_metric.split_count == 1
+    assert aggregate_metric.model_id == "ridge::CAR_1_20::ALL_SPLITS"
     backtest = result.backtests[0]
     assert backtest.long_count == 1
     assert backtest.short_count == 1
@@ -144,6 +163,7 @@ def test_build_evaluation_artifacts_computes_metrics_and_backtests() -> None:
     assert portfolio_return.turnover == 1.0
     assert portfolio_return.active_position_count == 2
     assert result.portfolio_metrics[0].observation_count == 1
+    assert result.portfolio_metrics[0].newey_west_lag == 0
 
 
 def test_portfolio_time_series_tracks_rebalance_turnover() -> None:
@@ -190,6 +210,109 @@ def test_portfolio_time_series_tracks_rebalance_turnover() -> None:
     assert [record.turnover for record in result.portfolio_returns] == [1.0, 2.0]
     assert result.portfolio_metrics[0].observation_count == 2
     assert result.portfolio_metrics[0].average_gross_exposure == 2.0
+
+
+def test_validation_selected_signal_direction_freezes_validation_choice() -> None:
+    labels = [
+        label("sec:val:a", "AAA", 2015, 0.5),
+        label("sec:val:b", "BBB", 2015, -0.5),
+        label("sec:test:a", "CCC", 2016, 0.3),
+        label("sec:test:b", "DDD", 2016, -0.2),
+    ]
+    predictions = [
+        prediction(labels[0], model_id="ridge::CAR_1_20::split", role="validation", value=0.1),
+        prediction(labels[1], model_id="ridge::CAR_1_20::split", role="validation", value=0.9),
+        prediction(labels[2], model_id="ridge::CAR_1_20::split", role="test", value=0.1),
+        prediction(labels[3], model_id="ridge::CAR_1_20::split", role="test", value=0.9),
+    ]
+
+    result = build_evaluation_artifacts(
+        run_id="eval_test_run",
+        predictions=predictions,
+        labels=labels,
+        transaction_cost_bps_one_way=10.0,
+        newey_west_lag=1,
+        portfolio_signal_direction="validation_selected",
+    )
+
+    assert result.backtests[0].signal_direction == "long_low_score"
+    assert result.backtests[0].gross_long_short_return == 0.5
+    assert result.portfolio_weights[0].signal_direction == "long_low_score"
+    assert result.portfolio_returns[0].signal_direction == "long_low_score"
+    assert result.portfolio_metrics[0].signal_direction == "long_low_score"
+
+
+def test_target_aware_long_low_vol_forces_volatility_direction() -> None:
+    labels = [
+        volatility_label("sec:test:a", "AAA", 2016, 0.1),
+        volatility_label("sec:test:b", "BBB", 2016, 0.5),
+    ]
+    predictions = [
+        prediction(
+            labels[0],
+            model_id="ridge::realized_volatility_1_20::split",
+            role="test",
+            value=0.1,
+        ),
+        prediction(
+            labels[1],
+            model_id="ridge::realized_volatility_1_20::split",
+            role="test",
+            value=0.9,
+        ),
+    ]
+
+    result = build_evaluation_artifacts(
+        run_id="eval_test_run",
+        predictions=predictions,
+        labels=labels,
+        transaction_cost_bps_one_way=10.0,
+        newey_west_lag=1,
+        portfolio_signal_direction="long_high_score",
+        target_aware_portfolio_policy="long_low_vol",
+    )
+
+    assert result.backtests[0].signal_direction == "long_low_score"
+    assert result.backtests[0].target_aware_policy == "long_low_vol"
+    assert result.portfolio_weights[0].target_aware_policy == "long_low_vol"
+    assert result.portfolio_returns[0].signal_direction == "long_low_score"
+
+
+def test_target_aware_risk_scaled_uses_inverse_predicted_vol_weights() -> None:
+    labels = [
+        volatility_label(f"sec:test:{index}", f"T{index:02d}", 2016, 0.0)
+        for index in range(10)
+    ]
+    scores = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    predictions = [
+        prediction(
+            label_record,
+            model_id="ridge::realized_volatility_1_20::split",
+            role="test",
+            value=score,
+        )
+        for label_record, score in zip(labels, scores, strict=True)
+    ]
+
+    result = build_evaluation_artifacts(
+        run_id="eval_test_run",
+        predictions=predictions,
+        labels=labels,
+        transaction_cost_bps_one_way=10.0,
+        newey_west_lag=1,
+        portfolio_signal_direction="long_high_score",
+        target_aware_portfolio_policy="risk_scaled",
+    )
+
+    long_weights = {
+        record.ticker: record.normalized_weight
+        for record in result.portfolio_weights
+        if record.side == "long" and record.portfolio_variant == "equal_weight"
+    }
+    assert result.backtests[0].signal_direction == "long_low_score"
+    assert result.backtests[0].target_aware_policy == "risk_scaled"
+    assert isclose(long_weights["T00"], 2.0 / 3.0)
+    assert isclose(long_weights["T01"], 1.0 / 3.0)
 
 
 def test_portfolio_variants_include_value_and_sector_neutral() -> None:
@@ -299,6 +422,97 @@ def test_daily_price_panel_drives_portfolio_returns() -> None:
     assert isclose(result.portfolio_returns[2].gross_long_short_return, 0.1442857143)
     assert result.portfolio_returns[1].turnover == 0.0
     assert result.portfolio_metrics[0].observation_count == 3
+    assert result.portfolio_metrics[0].mean_period_return != 0.0
+    assert result.portfolio_metrics[0].newey_west_lag == 2
+
+
+def test_monthly_common_rebalance_uses_active_signals_and_sector_neutral() -> None:
+    rows = [
+        ("sec:test:a", "AAA", -0.4, 0.1, "Tech", 100.0),
+        ("sec:test:b", "BBB", 0.2, 0.9, "Tech", 300.0),
+        ("sec:test:c", "CCC", -0.1, 0.2, "Finance", 200.0),
+        ("sec:test:d", "DDD", 0.5, 0.8, "Finance", 600.0),
+    ]
+    labels = [
+        label(document_id, ticker, 2016, target).model_copy(
+            update={"label_start_date": date(2016, 3, 2), "label_end_date": date(2016, 5, 31)}
+        )
+        for document_id, ticker, target, _, _, _ in rows
+    ]
+    predictions = [
+        prediction(
+            label_record,
+            model_id="ridge::CAR_1_20::split",
+            role="test",
+            value=score,
+            sector=sector,
+            market_cap=market_cap,
+        )
+        for label_record, (_, _, _, score, sector, market_cap) in zip(labels, rows, strict=True)
+    ]
+    price_rows = []
+    for ticker in ["AAA", "BBB", "CCC", "DDD"]:
+        price = 100.0
+        for day in pd.bdate_range("2016-03-01", "2016-05-31"):
+            if ticker in {"BBB", "DDD"} and day > pd.Timestamp("2016-03-31"):
+                price *= 1.002
+            elif ticker in {"AAA", "CCC"} and day > pd.Timestamp("2016-03-31"):
+                price *= 0.999
+            price_rows.append((day.date().isoformat(), ticker, price))
+    price_panel = build_price_panel(
+        pd.DataFrame(price_rows, columns=["date", "ticker", "adj_close"])
+    )
+
+    result = build_evaluation_artifacts(
+        run_id="eval_test_run",
+        predictions=predictions,
+        labels=labels,
+        price_panel=price_panel,
+        portfolio_return_type="simple",
+        transaction_cost_bps_one_way=10.0,
+        newey_west_lag=1,
+    )
+
+    assert result.factor_panel
+    assert all(
+        record.signal_event_date <= record.rebalance_date for record in result.factor_panel
+    )
+    monthly_variants = {
+        record.portfolio_variant for record in result.monthly_portfolio_metrics
+    }
+    assert "monthly_equal_weight" in monthly_variants
+    assert "monthly_sector_neutral_equal_weight" in monthly_variants
+    aggregate_monthly = [
+        record
+        for record in result.monthly_portfolio_metrics
+        if record.split_id == "ALL_SPLITS"
+    ]
+    assert aggregate_monthly
+    assert {
+        record.model_id for record in aggregate_monthly
+    } == {"ridge::CAR_1_20::ALL_SPLITS"}
+    assert all(
+        record.portfolio_method == "monthly_common_rebalance_top_bottom_quintile"
+        for record in aggregate_monthly
+    )
+    assert {
+        record.return_source for record in result.monthly_portfolio_returns
+    } == {"monthly_common_rebalance_price_panel"}
+    sector_neutral_returns = [
+        record for record in result.monthly_portfolio_returns if record.sector_neutral
+    ]
+    assert sector_neutral_returns
+    sector_neutral_weights = [
+        record for record in result.monthly_portfolio_weights if record.sector_neutral
+    ]
+    weights_by_rebalance: dict[date, float] = {}
+    for record in sector_neutral_weights:
+        weights_by_rebalance[record.rebalance_date] = (
+            weights_by_rebalance.get(record.rebalance_date, 0.0)
+            + record.normalized_weight
+        )
+    assert all(abs(net_weight) < 1e-12 for net_weight in weights_by_rebalance.values())
+    assert all(record.newey_west_lag >= 0 for record in result.monthly_portfolio_metrics)
 
 
 def test_newey_west_t_stat_handles_small_samples() -> None:

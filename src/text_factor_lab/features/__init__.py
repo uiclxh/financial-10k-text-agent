@@ -1,5 +1,11 @@
 """Text feature construction."""
 
+from text_factor_lab.features.matrix_store import (
+    FeatureMatrixIndexRecord,
+    FeatureMatrixStoreResult,
+    build_tfidf_matrix_store,
+    write_feature_matrix_index_json,
+)
 from text_factor_lab.features.text import (
     DEFAULT_FINANCIAL_DICTIONARIES,
     DICTIONARY_FEATURE_VERSION,
@@ -9,6 +15,7 @@ from text_factor_lab.features.text import (
     build_dictionary_feature_manifests,
     build_dictionary_tone_features,
     build_feature_input_hashes,
+    build_metadata_features,
     build_tfidf_features,
     document_id_from_label_id,
     load_document_texts,
@@ -27,9 +34,13 @@ __all__ = [
     "TFIDF_FEATURE_VERSION",
     "DocumentText",
     "FeatureBuildResult",
+    "FeatureMatrixIndexRecord",
+    "FeatureMatrixStoreResult",
+    "build_metadata_features",
     "build_dictionary_feature_manifests",
     "build_dictionary_tone_features",
     "build_feature_input_hashes",
+    "build_tfidf_matrix_store",
     "build_tfidf_features",
     "document_id_from_label_id",
     "load_document_texts",
@@ -38,6 +49,7 @@ __all__ = [
     "read_split_assignments_jsonl",
     "tokenize",
     "write_feature_manifest_json",
+    "write_feature_matrix_index_json",
     "write_features_jsonl",
     "write_vocabulary_json",
 ]

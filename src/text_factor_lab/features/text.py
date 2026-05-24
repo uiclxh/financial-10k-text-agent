@@ -14,6 +14,7 @@ from text_factor_lab.schemas.document_manifest import DocumentManifestRecord
 from text_factor_lab.schemas.features import FeatureManifestRecord, FeatureRecord
 from text_factor_lab.schemas.parsed_sections import ParsedSectionRecord
 from text_factor_lab.schemas.splits import SplitAssignmentRecord, SplitRole
+from text_factor_lab.schemas.universe import UniverseRecord
 
 DICTIONARY_FEATURE_VERSION = "dictionary-tone-v0"
 TFIDF_FEATURE_VERSION = "tfidf-v0"
@@ -201,6 +202,44 @@ def build_dictionary_tone_features(
                         source_chunk_id=f"{document.document_id}:{block_name}",
                     )
                 )
+    return features
+
+
+def build_metadata_features(
+    *,
+    manifest_by_document_id: dict[str, DocumentManifestRecord],
+    universe_records: list[UniverseRecord],
+    feature_version: str = "metadata-v0",
+) -> list[FeatureRecord]:
+    universe_by_entity = {record.entity_id: record for record in universe_records}
+    features: list[FeatureRecord] = []
+    for document in manifest_by_document_id.values():
+        universe = universe_by_entity.get(document.entity_id)
+        if universe is None:
+            continue
+        metadata_values: dict[str, str | float] = {
+            "metadata__sector": universe.sector,
+            "metadata__industry": universe.industry,
+        }
+        if universe.market_cap_at_selection is not None:
+            metadata_values["metadata__market_cap"] = float(universe.market_cap_at_selection)
+        for feature_name, feature_value in metadata_values.items():
+            features.append(
+                FeatureRecord(
+                    feature_id=f"{document.document_id}:{feature_version}:{feature_name}",
+                    entity_id=document.entity_id,
+                    ticker=document.ticker,
+                    event_time_utc=document.event_time_utc,
+                    prediction_time_utc=document.event_time_utc,
+                    feature_time_utc=document.event_time_utc,
+                    feature_family="metadata",
+                    feature_name=feature_name,
+                    feature_value=feature_value,
+                    feature_version=feature_version,
+                    source_document_id=document.document_id,
+                    source_chunk_id=f"{document.document_id}:metadata",
+                )
+            )
     return features
 
 

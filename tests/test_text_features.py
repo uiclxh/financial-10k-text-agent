@@ -9,6 +9,7 @@ from text_factor_lab.features import (
     build_dictionary_tone_features,
     build_feature_input_hashes,
     build_tfidf_features,
+    build_tfidf_matrix_store,
     document_id_from_label_id,
     load_document_texts,
     read_document_manifest_jsonl,
@@ -16,6 +17,7 @@ from text_factor_lab.features import (
     read_split_assignments_jsonl,
     tokenize,
     write_feature_manifest_json,
+    write_feature_matrix_index_json,
     write_features_jsonl,
     write_vocabulary_json,
 )
@@ -213,6 +215,66 @@ def test_tfidf_vocabulary_is_fit_on_train_documents_only(tmp_path: Path) -> None
         for manifest in result.feature_manifests
     )
     assert any(":test" in feature.feature_version for feature in result.features)
+
+
+def test_tfidf_matrix_store_writes_npz_index_and_svd_features(tmp_path: Path) -> None:
+    from scipy import sparse
+
+    train_a = manifest("sec:train:a", "AAA", 2014)
+    train_b = manifest("sec:train:b", "BBB", 2014)
+    validation_doc = manifest("sec:validation:doc", "CCC", 2015)
+    test_doc = manifest("sec:test:doc", "DDD", 2016)
+    section_dir = tmp_path / "sections"
+    section_dir.mkdir()
+    texts = {
+        train_a.document_id: "risk liquidity pressure debt risk",
+        train_b.document_id: "growth margin demand supply growth",
+        validation_doc.document_id: "risk demand liquidity",
+        test_doc.document_id: "moonshot exclusive testonly risk",
+    }
+    manifests = [train_a, train_b, validation_doc, test_doc]
+    parsed_sections = []
+    for document in manifests:
+        artifact_path = section_dir / f"{document.ticker}.txt"
+        artifact_path.write_text(texts[document.document_id], encoding="utf-8")
+        parsed_sections.append(
+            parsed_section(document=document, section_key="item_1a", artifact_path=artifact_path)
+        )
+    assignments = [
+        split_assignment(train_a, "train"),
+        split_assignment(train_b, "train"),
+        split_assignment(validation_doc, "validation"),
+        split_assignment(test_doc, "test"),
+    ]
+    document_texts = load_document_texts(
+        manifest_by_document_id={record.document_id: record for record in manifests},
+        parsed_sections=parsed_sections,
+    )
+    result = build_tfidf_matrix_store(
+        document_texts,
+        assignments,
+        output_dir=tmp_path / "feature_matrices",
+        max_features=20,
+        ngram_range=(1, 1),
+        min_df=1,
+        max_df=1.0,
+        svd_components=1,
+    )
+    index_path = tmp_path / "feature_matrix_index.json"
+    write_feature_matrix_index_json(result.index_records, index_path)
+
+    payload = json.loads(index_path.read_text(encoding="utf-8"))
+    assert {record["role"] for record in payload} == {"train", "validation", "test"}
+    train_record = next(record for record in payload if record["role"] == "train")
+    train_matrix = sparse.load_npz(train_record["matrix_path"])
+    assert train_matrix.shape[0] == 2
+    assert train_matrix.nnz > 0
+    assert result.svd_features
+    assert {feature.feature_family for feature in result.svd_features} == {"tfidf_svd"}
+    assert "moonshot" not in Path(train_record["feature_names_path"]).read_text(
+        encoding="utf-8"
+    )
+    assert result.svd_manifests[0].feature_method == "tfidf_svd"
 
 
 def test_document_id_from_label_id_strips_target_and_version() -> None:

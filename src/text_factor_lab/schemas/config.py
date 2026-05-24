@@ -15,6 +15,12 @@ DocumentType = Literal["10-K", "10-Q", "earnings_call"]
 ReturnType = Literal["log", "simple"]
 WeightingMethod = Literal["equal_weight", "value_weight"]
 PortfolioMethod = Literal["top_bottom_quintile"]
+PortfolioSignalDirection = Literal[
+    "long_high_score",
+    "long_low_score",
+    "validation_selected",
+]
+TargetAwarePortfolioPolicy = Literal["none", "long_low_vol", "risk_scaled"]
 FitScope = Literal["train_window_only"]
 UniverseDataLevel = Literal["exploratory", "applied", "research_grade"]
 
@@ -95,6 +101,10 @@ class TfidfConfig(StrictBaseModel):
     min_df: int = Field(gt=0)
     max_df: float = Field(gt=0, le=1)
     fit_scope: FitScope
+    write_long_features: bool = True
+    matrix_store_dir: Path | None = None
+    matrix_index_file: Path | None = None
+    svd_components: int = Field(default=0, ge=0)
 
     @field_validator("ngram_range")
     @classmethod
@@ -139,6 +149,8 @@ class BacktestConfig(StrictBaseModel):
     transaction_cost_bps_one_way: float = Field(ge=0)
     sector_neutral: bool
     newey_west_lag: int = Field(ge=0)
+    portfolio_signal_direction: PortfolioSignalDirection = "long_high_score"
+    target_aware_portfolio_policy: TargetAwarePortfolioPolicy = "none"
 
     @model_validator(mode="after")
     def validate_newey_west_lag(self) -> BacktestConfig:

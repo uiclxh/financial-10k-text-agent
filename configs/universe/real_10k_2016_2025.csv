@@ -1,0 +1,11 @@
+entity_id,ticker,historical_ticker,cik,company_name,sector,industry,selection_date,market_cap_at_selection,entry_date,exit_date,delisting_date,mapping_source,mapping_available_time_utc
+CIK0000789019,MSFT,MSFT,0000789019,Microsoft Corporation,Information Technology,Software,2016-01-01,999,2016-01-01,,,SEC_company_tickers_plus_manual_sector_mapping,2016-01-01T00:00:00+00:00
+CIK0001065280,NFLX,NFLX,0001065280,"Netflix, Inc.",Communication Services,Entertainment,2016-01-01,998,2016-01-01,,,SEC_company_tickers_plus_manual_sector_mapping,2016-01-01T00:00:00+00:00
+CIK0000320187,NKE,NKE,0000320187,"NIKE, Inc.",Consumer Discretionary,Textiles Apparel & Luxury Goods,2016-01-01,997,2016-01-01,,,SEC_company_tickers_plus_manual_sector_mapping,2016-01-01T00:00:00+00:00
+CIK0000063908,MCD,MCD,0000063908,McDonald's Corporation,Consumer Discretionary,Hotels Restaurants & Leisure,2016-01-01,996,2016-01-01,,,SEC_company_tickers_plus_manual_sector_mapping,2016-01-01T00:00:00+00:00
+CIK0001326801,META,META,0001326801,"Meta Platforms, Inc.",Communication Services,Interactive Media & Services,2016-01-01,995,2016-01-01,,,SEC_company_tickers_plus_manual_sector_mapping,2016-01-01T00:00:00+00:00
+CIK0000829224,SBUX,SBUX,0000829224,Starbucks Corporation,Consumer Discretionary,Hotels Restaurants & Leisure,2016-01-01,994,2016-01-01,,,SEC_company_tickers_plus_manual_sector_mapping,2016-01-01T00:00:00+00:00
+CIK0000313838,SONY,SONY,0000313838,Sony Group Corporation,Consumer Discretionary,Consumer Electronics,2016-01-01,993,2016-01-01,,,SEC_company_tickers_plus_manual_sector_mapping,2016-01-01T00:00:00+00:00
+CIK0001403161,V,V,0001403161,Visa Inc.,Financials,Transaction & Payment Processing Services,2016-01-01,992,2016-01-01,,,SEC_company_tickers_plus_manual_sector_mapping,2016-01-01T00:00:00+00:00
+CIK0000034088,XOM,XOM,0000034088,Exxon Mobil Corporation,Energy,Oil Gas & Consumable Fuels,2016-01-01,991,2016-01-01,,,SEC_company_tickers_plus_manual_sector_mapping,2016-01-01T00:00:00+00:00
+CIK0000059478,LLY,LLY,0000059478,Eli Lilly and Company,Health Care,Pharmaceuticals,2016-01-01,990,2016-01-01,,,SEC_company_tickers_plus_manual_sector_mapping,2016-01-01T00:00:00+00:00

@@ -36,7 +36,9 @@ class ReportArtifactPaths:
     tuning_log: Path
     feature_manifest: Path
     portfolio_metrics: Path
+    monthly_portfolio_metrics: Path
     multiple_testing_report: Path
+    specification_registry: Path
     report_markdown: Path
     empirical_report: Path
     factor_card: Path
@@ -64,7 +66,9 @@ class ReportArtifactPaths:
             tuning_log=base / "tuning_log.json",
             feature_manifest=base / "feature_manifest.json",
             portfolio_metrics=base / "portfolio_metrics.json",
+            monthly_portfolio_metrics=base / "monthly_portfolio_metrics.json",
             multiple_testing_report=base / "multiple_testing_report.json",
+            specification_registry=base / "specification_registry.json",
             report_markdown=output / "report.md",
             empirical_report=output / "empirical_report.md",
             factor_card=output / "factor_card.md",
@@ -192,22 +196,37 @@ def _load_report_artifacts(paths: ReportArtifactPaths) -> dict[str, Any]:
         "portfolio_metrics": [
             PortfolioMetricRecord.model_validate(item)
             for item in _read_optional_json_array(paths.portfolio_metrics)
+        ]
+        + [
+            PortfolioMetricRecord.model_validate(item)
+            for item in _read_optional_json_array(paths.monthly_portfolio_metrics)
         ],
         "portfolio_return_sources": sorted(
             {
                 item.get("return_source", "label_window")
-                for item in _read_optional_jsonl_objects(paths.run_dir / "portfolio_returns.jsonl")
+                for item in (
+                    _read_optional_jsonl_objects(paths.run_dir / "portfolio_returns.jsonl")
+                    + _read_optional_jsonl_objects(
+                        paths.run_dir / "monthly_portfolio_returns.jsonl"
+                    )
+                )
             }
         ),
         "portfolio_position_accounting": sorted(
             {
                 item.get("position_accounting", "label_window")
-                for item in _read_optional_jsonl_objects(paths.run_dir / "portfolio_returns.jsonl")
+                for item in (
+                    _read_optional_jsonl_objects(paths.run_dir / "portfolio_returns.jsonl")
+                    + _read_optional_jsonl_objects(
+                        paths.run_dir / "monthly_portfolio_returns.jsonl"
+                    )
+                )
             }
         ),
         "multiple_testing_report": _read_optional_multiple_testing_report(
             paths.multiple_testing_report
         ),
+        "specification_registry": _read_optional_json_object(paths.specification_registry),
         "document_count": _count_jsonl_records(paths.run_dir / "document_manifest.jsonl"),
         "label_count": _count_jsonl_records(paths.run_dir / "labels.jsonl"),
         "prediction_count": _count_jsonl_records(paths.run_dir / "predictions.jsonl"),
@@ -234,6 +253,7 @@ def _build_summary(
     multiple_testing_report: MultipleTestingReportRecord | None = artifacts[
         "multiple_testing_report"
     ]
+    specification_registry = artifacts["specification_registry"] or {}
 
     best_prediction = _best_prediction_metric(metrics)
     best_backtest = _best_backtest(backtests)
@@ -314,6 +334,21 @@ def _build_summary(
             ],
         },
         "multiple_testing": _multiple_testing_summary(multiple_testing_report),
+        "specification_registry": {
+            "available": bool(specification_registry),
+            "registry_version": specification_registry.get("registry_version"),
+            "registry_designation": specification_registry.get("registry_designation"),
+            "preregistration": specification_registry.get("preregistration", {}),
+            "preregistered_primary_rules": specification_registry.get(
+                "preregistered_primary_rules",
+                [],
+            ),
+            "role_counts": specification_registry.get("role_counts", {}),
+            "primary_specifications": specification_registry.get(
+                "primary_specifications",
+                [],
+            ),
+        },
         "interpretation": _interpretation_policy(
             audit=audit,
             best_prediction=best_prediction,
@@ -419,6 +454,10 @@ def _render_markdown(summary: dict[str, Any]) -> str:
         "## Multiple Testing Adjustment",
         "",
         _multiple_testing_section(summary["multiple_testing"]),
+        "",
+        "## Specification Registry",
+        "",
+        _specification_registry_section(summary["specification_registry"]),
         "",
         "## Robustness Checks",
         "",
@@ -530,19 +569,23 @@ def _render_empirical_report(summary: dict[str, Any]) -> str:
         "",
         _multiple_testing_section(summary["multiple_testing"]),
         "",
-        "## 12. Failure Cases And Audit Results",
+        "## 12. Specification Registry",
+        "",
+        _specification_registry_section(summary["specification_registry"]),
+        "",
+        "## 13. Failure Cases And Audit Results",
         "",
         _audit_table(summary["audit"]["failed_checks"], summary["audit"]["warning_checks"]),
         "",
-        "## 13. Economic Interpretation",
+        "## 14. Economic Interpretation",
         "",
         summary["interpretation"]["economic_interpretation"],
         "",
-        "## 14. Limitations",
+        "## 15. Limitations",
         "",
         _limitations_text(summary),
         "",
-        "## 15. Conclusion",
+        "## 16. Conclusion",
         "",
         summary["interpretation"]["conclusion_text"],
         "",
@@ -634,7 +677,11 @@ def _render_appendix_tables(summary: dict[str, Any]) -> str:
         "",
         _multiple_testing_section(summary["multiple_testing"]),
         "",
-        "## Table 7 Audit Checks",
+        "## Table 7 Primary Specification Registry",
+        "",
+        _specification_registry_section(summary["specification_registry"]),
+        "",
+        "## Table 8 Audit Checks",
         "",
         _audit_table(summary["audit"]["failed_checks"], summary["audit"]["warning_checks"]),
         "",
@@ -658,7 +705,9 @@ def _top_test_metrics(
     limit: int = 10,
 ) -> list[EvaluationMetricRecord]:
     candidates = [metric for metric in metrics if metric.role == "test"]
-    return sorted(candidates, key=lambda item: (-item.rank_ic, item.rmse, item.model_id))[:limit]
+    aggregate = [metric for metric in candidates if metric.split_id == "ALL_SPLITS"]
+    pool = aggregate or candidates
+    return sorted(pool, key=lambda item: (-item.rank_ic, item.rmse, item.model_id))[:limit]
 
 
 def _best_backtest(backtests: list[PortfolioBacktestRecord]) -> PortfolioBacktestRecord | None:
@@ -711,6 +760,14 @@ def _metric_summary(metric: EvaluationMetricRecord) -> dict[str, Any]:
         "directional_accuracy": metric.directional_accuracy,
         "pearson_ic": metric.pearson_ic,
         "rank_ic": metric.rank_ic,
+        "aggregation_method": metric.aggregation_method,
+        "split_count": metric.split_count,
+        "ic_grouping": metric.ic_grouping,
+        "ic_observation_count": metric.ic_observation_count,
+        "pearson_ic_t_stat": metric.pearson_ic_t_stat,
+        "rank_ic_t_stat": metric.rank_ic_t_stat,
+        "pearson_ic_newey_west_t_stat": metric.pearson_ic_newey_west_t_stat,
+        "rank_ic_newey_west_t_stat": metric.rank_ic_newey_west_t_stat,
     }
 
 
@@ -725,6 +782,8 @@ def _backtest_summary(record: PortfolioBacktestRecord) -> dict[str, Any]:
         "net_long_short_return": record.net_long_short_return,
         "sharpe_ratio": record.sharpe_ratio,
         "newey_west_t_stat": record.newey_west_t_stat,
+        "signal_direction": record.signal_direction,
+        "target_aware_policy": record.target_aware_policy,
         "turnover": record.turnover,
     }
 
@@ -736,12 +795,18 @@ def _portfolio_metric_summary(record: PortfolioMetricRecord) -> dict[str, Any]:
         "target_name": record.target_name,
         "portfolio_variant": record.portfolio_variant,
         "weighting": record.weighting,
+        "signal_direction": record.signal_direction,
+        "target_aware_policy": record.target_aware_policy,
         "sector_neutral": record.sector_neutral,
         "observation_count": record.observation_count,
         "cumulative_return": record.cumulative_return,
         "annualized_return": record.annualized_return,
         "annualized_volatility": record.annualized_volatility,
         "sharpe_ratio": record.sharpe_ratio,
+        "mean_period_return": record.mean_period_return,
+        "period_return_t_stat": record.period_return_t_stat,
+        "newey_west_lag": record.newey_west_lag,
+        "newey_west_t_stat": record.newey_west_t_stat,
         "max_drawdown": record.max_drawdown,
         "hit_rate": record.hit_rate,
         "average_turnover": record.average_turnover,
@@ -757,19 +822,37 @@ def _multiple_testing_summary(
         return {
             "available": False,
             "specification_count": 0,
+            "primary_specification_count": 0,
+            "robustness_specification_count": 0,
+            "exploratory_specification_count": 0,
             "p_value_count": 0,
             "family_count": 0,
+            "role_family_counts": {},
+            "primary_discoveries_at_5pct": 0,
+            "primary_discoveries_at_10pct": 0,
+            "robustness_discoveries_at_10pct": 0,
+            "exploratory_discoveries_at_10pct": 0,
             "families": [],
         }
     return {
         "available": True,
         "specification_count": report.specification_count,
+        "primary_specification_count": report.primary_specification_count,
+        "robustness_specification_count": report.robustness_specification_count,
+        "exploratory_specification_count": report.exploratory_specification_count,
         "p_value_count": report.p_value_count,
         "family_count": report.family_count,
+        "role_family_counts": report.role_family_counts,
+        "primary_discoveries_at_5pct": report.primary_discoveries_at_5pct,
+        "primary_discoveries_at_10pct": report.primary_discoveries_at_10pct,
+        "robustness_discoveries_at_10pct": report.robustness_discoveries_at_10pct,
+        "exploratory_discoveries_at_10pct": report.exploratory_discoveries_at_10pct,
         "methods_applied": report.methods_applied,
         "families": [
             {
                 "family_id": family.family_id,
+                "base_family_id": family.base_family_id or family.family_id,
+                "specification_role": family.specification_role,
                 "number_of_tests": family.number_of_tests,
                 "best_raw_p_value": family.best_raw_p_value,
                 "best_adjusted_p_value": family.best_adjusted_p_value,
@@ -836,9 +919,10 @@ def _interpretation_policy(
         return {
             "evidence_level": "exploratory_signal_not_adjusted_significant",
             "economic_interpretation": (
-                "The best predictive metric is positive, but the multiple-testing layer "
-                "does not record an adjusted discovery."
-            ),
+            "The best predictive metric is positive, but the multiple-testing layer "
+            "does not record an adjusted discovery. Primary, robustness, and "
+            "exploratory specifications should be interpreted separately."
+        ),
             "usage_boundary": "Report as exploratory only and disclose tested specifications.",
             "conclusion_text": "Pipeline works, but adjusted factor evidence is weak.",
         }
@@ -856,7 +940,7 @@ def _interpretation_policy(
 def _has_adjusted_discovery(report: MultipleTestingReportRecord | None) -> bool:
     if report is None:
         return False
-    return any(family.discoveries_at_10pct > 0 for family in report.families)
+    return report.primary_discoveries_at_10pct > 0
 
 
 def _check_summary(check: Any) -> dict[str, Any]:
@@ -876,16 +960,19 @@ def _metrics_table(rows: list[dict[str, Any]]) -> str:
     if not rows:
         return "No out-of-sample prediction metrics were available."
     lines = [
-        "| Model | Split | Target | N | RMSE | MAE | R2 | Direction | Pearson IC | Rank IC |",
-        "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Model | Split | Target | N | Agg | IC Group | Rank IC | Rank IC t | "
+        "Rank IC NW t | RMSE | Direction |",
+        "| --- | --- | --- | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in rows:
         lines.append(
             "| "
             f"{row['model_id']} | {row['split_id']} | {row['target_name']} | "
-            f"{row['observation_count']} | {_fmt(row['rmse'])} | {_fmt(row['mae'])} | "
-            f"{_fmt(row['r_squared'])} | {_fmt(row['directional_accuracy'])} | "
-            f"{_fmt(row['pearson_ic'])} | {_fmt(row['rank_ic'])} |"
+            f"{row['observation_count']} | {row['aggregation_method']} | "
+            f"{row['ic_grouping']} | {_fmt(row['rank_ic'])} | "
+            f"{_fmt(row['rank_ic_t_stat'])} | "
+            f"{_fmt(row['rank_ic_newey_west_t_stat'])} | "
+            f"{_fmt(row['rmse'])} | {_fmt(row['directional_accuracy'])} |"
         )
     return "\n".join(lines)
 
@@ -895,8 +982,8 @@ def _backtest_table(rows: list[dict[str, Any]]) -> str:
         return "No factor backtest results were available."
     lines = [
         "| Model | Split | Target | Long | Short | Gross LS | Net LS | "
-        "Sharpe | NW t-stat | Turnover |",
-        "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "Sharpe | NW t-stat | Direction | Turnover |",
+        "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: |",
     ]
     for row in rows:
         lines.append(
@@ -905,7 +992,7 @@ def _backtest_table(rows: list[dict[str, Any]]) -> str:
             f"{row['long_count']} | {row['short_count']} | "
             f"{_fmt(row['gross_long_short_return'])} | {_fmt(row['net_long_short_return'])} | "
             f"{_fmt(row['sharpe_ratio'])} | {_fmt(row['newey_west_t_stat'])} | "
-            f"{_fmt(row['turnover'])} |"
+            f"{row['signal_direction']} | {_fmt(row['turnover'])} |"
         )
     return "\n".join(lines)
 
@@ -914,16 +1001,19 @@ def _portfolio_metric_table(rows: list[dict[str, Any]]) -> str:
     if not rows:
         return "No portfolio variant metrics were available."
     lines = [
-        "| Model | Variant | Target | N | Ann Ret | Ann Vol | Sharpe | Max DD | Turnover |",
-        "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Model | Variant | Target | Direction | N | Ann Ret | Ann Vol | "
+        "Sharpe | NW t | Max DD | Turnover |",
+        "| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in rows:
         lines.append(
             "| "
             f"{row['model_id']} | {row['portfolio_variant']} | {row['target_name']} | "
-            f"{row['observation_count']} | {_fmt(row['annualized_return'])} | "
+            f"{row['signal_direction']} | {row['observation_count']} | "
+            f"{_fmt(row['annualized_return'])} | "
             f"{_fmt(row['annualized_volatility'])} | {_fmt(row['sharpe_ratio'])} | "
-            f"{_fmt(row['max_drawdown'])} | {_fmt(row['average_turnover'])} |"
+            f"{_fmt(row['newey_west_t_stat'])} | {_fmt(row['max_drawdown'])} | "
+            f"{_fmt(row['average_turnover'])} |"
         )
     return "\n".join(lines)
 
@@ -937,19 +1027,72 @@ def _multiple_testing_section(summary: dict[str, Any]) -> str:
             f"p-values: {summary['p_value_count']}; "
             f"families: {summary['family_count']}."
         ),
+        (
+            f"- Registry roles: primary={summary['primary_specification_count']}, "
+            f"robustness={summary['robustness_specification_count']}, "
+            f"exploratory={summary['exploratory_specification_count']}."
+        ),
+        (
+            "- Role-split adjusted discoveries at 10% FDR: "
+            f"primary={summary['primary_discoveries_at_10pct']}, "
+            f"robustness={summary['robustness_discoveries_at_10pct']}, "
+            f"exploratory={summary['exploratory_discoveries_at_10pct']}."
+        ),
         f"- Methods: {_inline_list(summary.get('methods_applied', []))}.",
         "",
-        "| Family | Tests | Best raw p | Best BH-FDR p | Discoveries 5% | Discoveries 10% |",
-        "| --- | ---: | ---: | ---: | ---: | ---: |",
+        "| Role | Family | Tests | Best raw p | Best BH-FDR p | Discoveries 5% | Discoveries 10% |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for family in summary["families"]:
         lines.append(
             "| "
-            f"{family['family_id']} | {family['number_of_tests']} | "
+            f"{family['specification_role']} | {family['base_family_id']} | "
+            f"{family['number_of_tests']} | "
             f"{_fmt(family['best_raw_p_value'] or 0.0)} | "
             f"{_fmt(family['best_adjusted_p_value'] or 0.0)} | "
             f"{family['discoveries_at_5pct']} | {family['discoveries_at_10pct']} |"
         )
+    return "\n".join(lines)
+
+
+def _specification_registry_section(summary: dict[str, Any]) -> str:
+    if not summary["available"]:
+        return "No specification registry artifact was available."
+    role_counts = summary.get("role_counts", {})
+    primary_specs = summary.get("primary_specifications", [])
+    preregistration = summary.get("preregistration", {})
+    preregistered_rules = summary.get("preregistered_primary_rules", [])
+    lines = [
+        (
+            "- Role counts: "
+            f"primary={role_counts.get('primary', 0)}, "
+            f"robustness={role_counts.get('robustness', 0)}, "
+            f"exploratory={role_counts.get('exploratory', 0)}."
+        ),
+        f"- Registry version: `{summary.get('registry_version')}`.",
+        f"- Registry designation: `{summary.get('registry_designation')}`.",
+        (
+            "- Preregistration status: "
+            f"`{preregistration.get('status', 'unspecified')}`."
+        ),
+        (
+            "- Preregistered primary rule count: "
+            f"`{len(preregistered_rules)}`."
+        ),
+        "",
+        "| Role | Status | Target | Model | Metric | Split | Portfolio | Raw metric | Raw p |",
+        "| --- | --- | --- | --- | --- | --- | --- | ---: | ---: |",
+    ]
+    for spec in primary_specs[:12]:
+        lines.append(
+            "| primary | "
+            f"{spec.get('rule_status', 'unspecified')} | "
+            f"{spec['target_name']} | {spec['model_name']} | {spec['metric_name']} | "
+            f"{spec['split_id']} | {spec['portfolio_method']} | "
+            f"{_fmt(spec['raw_metric'])} | {_fmt(spec['raw_p_value'] or 0.0)} |"
+        )
+    if not primary_specs:
+        lines.append("| primary | none | none | none | none | none | none | 0 | 0 |")
     return "\n".join(lines)
 
 
@@ -962,6 +1105,8 @@ def _single_metric_block(row: dict[str, Any] | None) -> str:
             f"- Target: `{row['target_name']}`.",
             f"- Split: `{row['split_id']}`.",
             f"- Rank IC: `{_fmt(row['rank_ic'])}`.",
+            f"- Rank IC Newey-West t-stat: `{_fmt(row['rank_ic_newey_west_t_stat'])}`.",
+            f"- Aggregation: `{row['aggregation_method']}`.",
             f"- RMSE: `{_fmt(row['rmse'])}`.",
             f"- Directional accuracy: `{_fmt(row['directional_accuracy'])}`.",
         ]
@@ -978,6 +1123,7 @@ def _single_backtest_block(row: dict[str, Any] | None) -> str:
             f"- Net long-short return: `{_fmt(row['net_long_short_return'])}`.",
             f"- Sharpe ratio: `{_fmt(row['sharpe_ratio'])}`.",
             f"- Newey-West t-stat: `{_fmt(row['newey_west_t_stat'])}`.",
+            f"- Signal direction: `{row['signal_direction']}`.",
             f"- Turnover: `{_fmt(row['turnover'])}`.",
         ]
     )
@@ -1050,6 +1196,12 @@ def _fmt(value: float) -> str:
 
 def _read_json_object(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _read_optional_json_object(path: Path) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    return _read_json_object(path)
 
 
 def _read_json_array(path: Path) -> list[dict[str, Any]]:
