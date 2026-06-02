@@ -73,6 +73,12 @@ Selected summaries are in [docs/results](docs/results/README.md).
 - Preregistered primary specifications and multiple-testing adjustment.
 - Explicit public-data, licensed-data, and delisting-return boundaries.
 
+## Architecture And Roadmap
+
+See [System Architecture And Roadmap](docs/system_architecture_and_roadmap.md)
+for the SEC-to-report algorithm flow, agent responsibilities, research gates,
+and the planned prompt-governed LLM feature strategy.
+
 ## Install And Smoke Run
 
 ```bash
