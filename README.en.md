@@ -63,7 +63,10 @@ replication still requires a licensed survivorship-free universe, historical
 entity links, delisting returns, and stricter market-data controls.
 
 See [working paper positioning](docs/working_paper_positioning.md) and
-[compact result summaries](docs/results/README.md).
+[compact result summaries](docs/results/README.md). The
+[system architecture and roadmap](docs/system_architecture_and_roadmap.md)
+documents the algorithm flow, agent responsibilities, and prompt-governed LLM
+extension strategy.
 
 ## License
 
