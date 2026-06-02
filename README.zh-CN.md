@@ -1,120 +1,65 @@
-# Financial 10-K Text Agent
+# 从 SEC 10-K 年报到波动率信号
 
-[English](README.en.md) | 中文
+[主 README](README.md) | [English](README.en.md)
 
 ## 项目定位
 
-`Financial 10-K Text Agent` 是一个面向金融文本因子研究的 MVP 工程实现。
-它不是通用 Financial RAG，而是围绕 SEC 10-K 文本构建可复现、可审计的
-empirical finance pipeline：文本解析、事件标签、滚动切分、特征构建、
-模型训练、样本外评估、组合回测、审计门槛和自动报告。
+本仓库是一个面向金融文本因子研究的可审计、泄漏安全 agent pipeline。当前最适合回答的研究问题是：
 
-## 当前状态
+> **10-K 文本信息能否预测未来 realized volatility？**
 
-当前代码已经完成以下研究级升级路径：
+现有证据支持样本外波动率预测，不支持将项目表述为已经发现正式可交易的股票收益 alpha。
 
-1. 项目脚手架
-2. Config 与 Pydantic schema
-3. Run manager 与状态机
-4. 固定 universe manifest 校验
-5. SEC EDGAR 10-K 元数据工具
-6. SEC 10-K section parser
-7. 价格数据与 label builder
-8. Rolling-year split 与 leakage checks
-9. Dictionary tone 与 train-window TF-IDF feature layer
-10. 模型层：`historical_mean`、`industry_mean`、`ridge`、可选 `xgboost`
-11. 样本外评估：RMSE、MAE、R2、directional accuracy、Pearson IC、rank IC
-12. Event-based long-short backtest 与 audit gate
-13. Report Agent：`report.md`、`report_summary.json` 与结论等级
-14. 本地 MVP 部署：配置化输入路径、本地 raw 10-K 解析编排、复现文档、GitHub Actions CI
-15. 研究级事件日对齐：NYSE 交易日历、节假日、提前收盘和 manifest 审计字段
-16. 组合变体：equal-weight、value-weight、sector-neutral equal-weight、sector-neutral value-weight
-17. 多重检验：tested-specification registry、Holm adjustment、Benjamini-Hochberg FDR
-18. 实证报告：`empirical_report.md`、`factor_card.md`、`appendix_tables.md`
-19. 研究级 universe schema：security master、dated membership intervals、entity link history
-20. 当价格面板可用时，生成日频价格驱动的 portfolio return series
-21. 日频持仓漂移会计：记录日初和日末 exposure，避免固定权重收益口径
+## 最突出成果
 
-## 关键命令
+| Target | 最优模型 | ALL_SPLITS Rank IC | Rank IC NW t-stat |
+| --- | --- | ---: | ---: |
+| `CAR_1_20` | industry mean | 0.1698 | 3.539 |
+| `CAR_1_5` | industry mean | 0.1834 | 4.524 |
+| `realized_volatility_1_20` | **XGBoost** | **0.3899** | **21.32** |
 
-```bash
-python -m text_factor_lab run --config configs/text_factor_lab/mvp_v0.yaml
-python -m text_factor_lab run --config configs/text_factor_lab/mvp_v0.yaml --execute
-python -m text_factor_lab run --config configs/text_factor_lab/e2e_smoke.yaml --execute
-make smoke-run
-python -m pytest
-python -m ruff check .
-python -m text_factor_lab build-features --help
-python -m text_factor_lab build-models --help
-python -m text_factor_lab evaluate-models --help
-python -m text_factor_lab audit --help
-python -m text_factor_lab report --help
-```
+预注册的主要预测规则也通过检验：
+`realized_volatility_1_20 / Ridge`，Rank IC `0.3335`，p 值约为 `6.85e-11`。
 
-## 主要产物
+预注册的主要组合规则在交易成本、行业中性、ALL_SPLITS 聚合和多重检验控制后没有通过：
+Sharpe `-0.3602`，p 值 `0.4598`。
 
-MVP pipeline 围绕以下 artifact 工作：
-
-- `document_manifest.jsonl`
-- `parsed_sections.jsonl`
-- `labels.jsonl`
-- `split_assignments.jsonl`
-- `split_leakage.jsonl`
-- `features.jsonl`
-- `feature_manifest.json`
-- `predictions.jsonl`
-- `model_manifest.json`
-- `tuning_log.json`
-- `evaluation_metrics.json`
-- `backtest_results.json`
-- `portfolio_weights.jsonl`
-- `portfolio_returns.jsonl`
-- `portfolio_metrics.json`
-- `tested_specifications.jsonl`
-- `multiple_testing_report.json`
-- `audit_report.json`
-- `report.md`
-- `report_summary.json`
-- `empirical_report.md`
-- `factor_card.md`
-- `appendix_tables.md`
-- `orchestrator_report.json`
-
-## 部署与复现
-
-部署说明见 [docs/deployment.md](docs/deployment.md)。该文档说明本地环境、
-配置化输入路径、artifact 保留策略，以及 GitHub CI 的职责边界。
-
-## 验证方式
-
-```bash
-python -m pytest
-python -m ruff check .
-```
-
-当前本地验收结果：
+## 研究链路
 
 ```text
-99 tests pass
-ruff passes
+SEC 10-K 年报
+  -> 事件时间 manifest 与 parser
+  -> 防泄漏 label 与 rolling split
+  -> dictionary tone、TF-IDF/SVD、metadata features
+  -> historical mean、industry mean、Ridge、XGBoost
+  -> 样本外 IC 与 portfolio diagnostics
+  -> 多重检验报告、审计报告、实证报告
 ```
 
-## 当前边界
+## 核心特点
 
-这仍然是 MVP / research framework，不是完整 production research system。
-后续仍需补充 SEC 下载调度、真实 survivorship-free universe、CRSP/WRDS 或等价数据、
-delisting returns、overlapping sub-portfolios、borrow costs、capacity / slippage diagnostics、
-Deflated Sharpe、CPCV/PBO、云端 dashboard、FinBERT / LLM embedding、earnings-call
-transcript ingestion，以及 credit-risk targets。
+- 审计 `available_time_utc`，并使用市场交易日历对齐事件日。
+- TF-IDF 词表只允许在训练窗口拟合。
+- 支持交易成本、行业中性、等权和市值加权组合诊断。
+- 使用预注册主要规则和多重检验校正，降低结果挑选风险。
+- 明确披露 public、licensed 和退市收益数据边界。
 
-## 许可与声明
+## 验证
 
-本项目使用 [MIT License](LICENSE) 发布。
+```bash
+python -m pip install -e ".[dev]"
+python -m text_factor_lab run --config configs/text_factor_lab/e2e_smoke.yaml --execute
+python -m pytest -q
+python -m ruff check src scripts tests
+```
 
-本仓库仅用于研究、教学与可复现实验工程，不构成投资建议、交易建议、法律建议、
-会计建议或税务建议，也不构成买入或卖出任何证券的推荐。
+## 研究边界
 
-数据权限由使用者自行负责。使用 SEC filings、earnings-call transcripts、价格数据、
-基本面数据、评级数据、指数成分或商业 vendor 数据时，应遵守对应来源的许可、
-缓存、再分发和引用规则。本仓库不包含 CRSP、Compustat、WRDS、商业 transcript、
-rating agency 或 market-data vendor 的授权数据集。
+公开的 90-company 实验属于 exploratory / applied-grade。要完成 formal replication，仍需要 licensed survivorship-free universe、历史 entity links、delisting returns 和更严格的市场数据控制。
+
+更多信息见 [working paper 定位](docs/working_paper_positioning.md) 与
+[精炼结果摘要](docs/results/README.md)。
+
+## 许可
+
+本项目使用 [MIT License](LICENSE)。仓库仅用于研究和教学，不构成投资、交易、法律、会计或税务建议。
