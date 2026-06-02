@@ -58,7 +58,8 @@ python -m ruff check src scripts tests
 公开的 90-company 实验属于 exploratory / applied-grade。要完成 formal replication，仍需要 licensed survivorship-free universe、历史 entity links、delisting returns 和更严格的市场数据控制。
 
 更多信息见 [working paper 定位](docs/working_paper_positioning.md) 与
-[精炼结果摘要](docs/results/README.md)。
+[精炼结果摘要](docs/results/README.md)。[系统架构与路线图](docs/system_architecture_and_roadmap.md)
+说明了算法链路、Agent 分工、研究关卡与受审计的 Prompt 优化策略。
 
 ## 许可
 
