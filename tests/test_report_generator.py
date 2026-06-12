@@ -30,6 +30,44 @@ def write_config_and_status(run_dir: Path, *, run_type: str = "exploratory_run")
     payload["run"]["run_id"] = "report_test_run"
     payload["run"]["run_type"] = run_type
     payload["run"]["output_dir"] = str(run_dir)
+    if run_type == "formal_run":
+        manifest_path = run_dir / "licensed_data_manifest.json"
+        payload["data_provider"] = {
+            "market_data_provider": "crsp_wrds",
+            "filing_provider": "sec_edgar",
+            "price_source": "crsp_daily_stock",
+            "return_source": "crsp_total_return",
+            "delisting_return_source": "crsp_delisting",
+            "link_source": "crsp_compustat_ccm",
+            "allow_public_yahoo_fallback": False,
+            "data_license_manifest_file": str(manifest_path),
+        }
+        payload["text_source"]["require_available_time"] = True
+        payload["text_source"]["require_license_note"] = True
+        payload["text_source"]["sec_user_agent"] = "test@example.com"
+        payload["audit"]["require_available_time"] = True
+        payload["audit"]["require_license_note"] = True
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    "data_stack": "mock_crsp_wrds",
+                    "market_data_provider": "crsp_wrds",
+                    "filing_provider": "sec_edgar",
+                    "price_source": "crsp_daily_stock",
+                    "return_source": "crsp_total_return",
+                    "delisting_return_source": "crsp_delisting",
+                    "link_source": "crsp_compustat_ccm",
+                    "data_rights_scope": "local research use only",
+                    "license_note": "Mock licensed-data manifest.",
+                    "raw_data_committed": False,
+                    "allow_public_yahoo_fallback": False,
+                    "created_at_utc": "2026-05-25T00:00:00Z",
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
     (run_dir / "config_snapshot.yaml").write_text(
         yaml.safe_dump(payload, sort_keys=False),
         encoding="utf-8",
@@ -294,3 +332,18 @@ def test_report_blocks_failed_audit_by_default(tmp_path: Path) -> None:
         allow_failed_audit=True,
     )
     assert result.conclusion_level == "diagnostic_only"
+
+
+def test_formal_report_includes_licensed_data_stack(tmp_path: Path) -> None:
+    run_dir = tmp_path / "runs" / "report_test_run"
+    write_report_artifacts(run_dir)
+    write_config_and_status(run_dir, run_type="formal_run")
+
+    result = generate_run_report(run_id="report_test_run", run_dir=run_dir)
+    markdown = result.report_markdown_path.read_text(encoding="utf-8")
+    summary = json.loads(result.report_summary_path.read_text(encoding="utf-8"))
+
+    assert "Licensed Data Stack" in markdown
+    assert "`crsp_wrds`" in markdown
+    assert summary["data_provider"]["license_manifest_available"] is True
+    assert summary["data_provider"]["license_manifest"]["raw_data_committed"] is False

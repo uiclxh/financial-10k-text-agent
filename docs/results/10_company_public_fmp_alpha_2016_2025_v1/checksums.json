@@ -1,0 +1,182 @@
+﻿[
+    {
+        "file":  "appendix_tables.md",
+        "sha256":  "517e3d2743a1ac73626b60075a171aa9a00aafa9033b82e534d6567b44c55964",
+        "bytes":  14179
+    },
+    {
+        "file":  "audit_report.json",
+        "sha256":  "2c82559ed94d4470f3fdbd187136b518b6354626528b2a69c5b7ce74932215d1",
+        "bytes":  17466
+    },
+    {
+        "file":  "config_snapshot.yaml",
+        "sha256":  "247126740cb679a38e4d08c4a339d5b7539e2816a52a5fc1ac478c8ec1612cda",
+        "bytes":  3337
+    },
+    {
+        "file":  "coverage_by_model.csv",
+        "sha256":  "554ff988232348d895261dfc7bfa38f8094aa7ecf578e5928be43f3263db1945",
+        "bytes":  4965
+    },
+    {
+        "file":  "coverage_by_split.csv",
+        "sha256":  "5476d1c9d1a6a5167e52d1e2270238a084cf74fec0f796558841548846de41ad",
+        "bytes":  429
+    },
+    {
+        "file":  "coverage_by_target.csv",
+        "sha256":  "2674eecf08914f91f7a6dccd99d5d71aae425a85e33fe8d0280f755c5d21fa2a",
+        "bytes":  320
+    },
+    {
+        "file":  "coverage_by_ticker.csv",
+        "sha256":  "411ec17a880a7658ce573a02bc99d8f6453579cdeee1e196a5000eda540e927c",
+        "bytes":  608
+    },
+    {
+        "file":  "coverage_failures.jsonl",
+        "sha256":  "c4b7f9fb5a4407f06a379b61b937152975bae926674ffbfc80e9a675b41305ca",
+        "bytes":  10470
+    },
+    {
+        "file":  "coverage_waterfall.json",
+        "sha256":  "06923a5d7555105e558f4c73fb73d27bbeb749d6f1d206cd165acb58a268dfc2",
+        "bytes":  1283
+    },
+    {
+        "file":  "delisting_application_report.json",
+        "sha256":  "b5b5a9b0c58b2334ad95af589659bdee01d5f480ac00875d1cb85e4ee6c61945",
+        "bytes":  349
+    },
+    {
+        "file":  "document_manifest.jsonl",
+        "sha256":  "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+        "bytes":  108855
+    },
+    {
+        "file":  "empirical_report.md",
+        "sha256":  "907d732d22c523a5520c29e3a73cbf0c6eefd783ccb969eaf97a5df0f633dbca",
+        "bytes":  16269
+    },
+    {
+        "file":  "evaluation_metrics.json",
+        "sha256":  "e560712bce418066b9a2b1e1a906bf8288597f1d1c5e19bbfcd31fdb5209c108",
+        "bytes":  108166
+    },
+    {
+        "file":  "factor_card.md",
+        "sha256":  "0b0e40ebaceb4a84894ead83f8083ce8f0ddb2d34764913b24d305c3d7346f87",
+        "bytes":  2696
+    },
+    {
+        "file":  "feature_manifest.json",
+        "sha256":  "f03707e9aa2f0dd598af215f81f309177e4010d9ed00df1d7b8f358cb946c0c2",
+        "bytes":  49460
+    },
+    {
+        "file":  "labels.jsonl",
+        "sha256":  "631f16421d84a18d2acee2c1aef4f884cb7d05be27fc9749729b15a7ed53eaa2",
+        "bytes":  162722
+    },
+    {
+        "file":  "model_manifest.json",
+        "sha256":  "e22041ea62c41ef7c98113f50e1a7b04bb3ff9c88423b738c695f48266a97573",
+        "bytes":  49991
+    },
+    {
+        "file":  "model_prediction_failures.jsonl",
+        "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes":  0
+    },
+    {
+        "file":  "multiple_testing_report.json",
+        "sha256":  "ed1ecfc5c472146d7f9ab65d463e257ed7b1d0ae02c4231ba88c99daaffd8a8a",
+        "bytes":  59929
+    },
+    {
+        "file":  "orchestrator_report.json",
+        "sha256":  "c1600705f4e257dd0a4c1ef3a32ef79d99d8edb962c989ac9ea837c54f4ba6e5",
+        "bytes":  5705
+    },
+    {
+        "file":  "parsing_quality_report.json",
+        "sha256":  "fb3134b8415a8594195dfc6b07f1035716cbfe9478e5e3af5b626962ee416fe9",
+        "bytes":  185
+    },
+    {
+        "file":  "pipeline_contract.json",
+        "sha256":  "c63be2de8abafbb306a8da61bc289cbb11b1af3518d898fd2e22590fe63bdbda",
+        "bytes":  1092
+    },
+    {
+        "file":  "portfolio_metrics.json",
+        "sha256":  "0895dacd68bbddcf3d8706d655a8afd0f83488ad3c67b80d206606bf1b7b44b6",
+        "bytes":  114265
+    },
+    {
+        "file":  "prediction_distribution_report.json",
+        "sha256":  "7f6ed8fc8c50ced3fc6049f9924513d25d9a9aadd5e05a5cf983cea394634e3a",
+        "bytes":  19422
+    },
+    {
+        "file":  "predictions.jsonl",
+        "sha256":  "adce7debb92a6de1b47a18fd81b9428b32bba9a81a4a82b90e417145ccf99bbe",
+        "bytes":  721288
+    },
+    {
+        "file":  "report.md",
+        "sha256":  "80b6b83c46ac739662b854b9f2d8f67da41630c2fca4e9ac2b57757848f9b44e",
+        "bytes":  20011
+    },
+    {
+        "file":  "report_summary.json",
+        "sha256":  "35192e75a4fd48be681fc0d68f865fed855b9418c2d1fafc7b514d7475a458e4",
+        "bytes":  87254
+    },
+    {
+        "file":  "run_status.json",
+        "sha256":  "642aeb2cffa89bd95b20122ae46be44ce68c536d0fefe65587643d15d93e9f21",
+        "bytes":  550
+    },
+    {
+        "file":  "section_length_quality_report.json",
+        "sha256":  "9718e316194500fe6096910b9fae1f41f4131b6f1d5f52b783a8ff8e5371ca2e",
+        "bytes":  161063
+    },
+    {
+        "file":  "specification_registry.json",
+        "sha256":  "f62fee2c3c2a418367de53d6615c867c5802c1ed22f5d85fa12f83d8e75e4608",
+        "bytes":  22225
+    },
+    {
+        "file":  "split_leakage.jsonl",
+        "sha256":  "b7c57a8369acb6ea23b6ea193bebf76da91eacd339cb67bee6a1cebe70105544",
+        "bytes":  15952
+    },
+    {
+        "file":  "tested_specifications.jsonl",
+        "sha256":  "e3078a50580af35f95062f3d71f2fd7a03a694e8a43a0a15ba929ec76711b5e3",
+        "bytes":  516409
+    },
+    {
+        "file":  "tuning_log.json",
+        "sha256":  "19207abace073e9c276d768a53029d82bafbbaf1baaffc70602ce7a421ded4cb",
+        "bytes":  43261
+    },
+    {
+        "file":  "universe_quality_report.json",
+        "sha256":  "63ba060ee4e236f74943b0db8f2020395b298a02a46e7be656b0f2ce7e60c66e",
+        "bytes":  1370
+    },
+    {
+        "file":  "vocabulary.json",
+        "sha256":  "f514f6270c71b1b24ecef5b4a1a57835f6d3886ca0ea0a5c78aefd7132bbf564",
+        "bytes":  298
+    },
+    {
+        "file":  "vocabulary_manifest.json",
+        "sha256":  "6d726bed1aa909ae846e48972489a6518106fde1667f40f2dc9fe25f10888c00",
+        "bytes":  25106
+    }
+]

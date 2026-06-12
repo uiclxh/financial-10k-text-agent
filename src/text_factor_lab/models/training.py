@@ -16,6 +16,7 @@ from text_factor_lab.schemas import (
     FeatureRecord,
     LabelRecord,
     ModelManifestRecord,
+    ModelPredictionFailureRecord,
     PredictionRecord,
     SplitAssignmentRecord,
     TuningLogRecord,
@@ -36,6 +37,7 @@ class ModelBuildResult:
     predictions: list[PredictionRecord]
     model_manifests: list[ModelManifestRecord]
     tuning_logs: list[TuningLogRecord]
+    prediction_failures: list[ModelPredictionFailureRecord]
 
 
 @dataclass(frozen=True)
@@ -96,6 +98,7 @@ def build_model_artifacts(
     predictions: list[PredictionRecord] = []
     manifests: list[ModelManifestRecord] = []
     tuning_logs: list[TuningLogRecord] = []
+    prediction_failures: list[ModelPredictionFailureRecord] = []
 
     split_targets = sorted(
         {
@@ -110,6 +113,24 @@ def build_model_artifacts(
         validation_rows = role_map.get("validation", [])
         test_rows = role_map.get("test", [])
         if not train_rows:
+            for model_name in models:
+                prediction_failures.extend(
+                    _prediction_failures(
+                        run_id=run_id,
+                        model_name=model_name,
+                        split_id=split_id,
+                        target_name=target_name,
+                        rows=[*validation_rows, *test_rows],
+                        failure_stage="missing_train_rows",
+                        failure_reason=(
+                            "No training rows are available for this split and target."
+                        ),
+                        recommended_fix=(
+                            "Rebuild rolling splits with enough training history or remove "
+                            "the split/target from formal coverage expectations."
+                        ),
+                    )
+                )
             continue
         feature_names = _feature_names_from_train_rows(train_rows)
         window_payload = _window_payload(train_rows[0].assignment)
@@ -149,13 +170,29 @@ def build_model_artifacts(
             tuning_logs.append(tuning_log)
 
         if "ridge" in models and feature_names:
+            ridge_validation_rows, ridge_validation_failures = _split_feature_valid_rows(
+                run_id=run_id,
+                model_name="ridge",
+                split_id=split_id,
+                target_name=target_name,
+                rows=validation_rows,
+            )
+            ridge_test_rows, ridge_test_failures = _split_feature_valid_rows(
+                run_id=run_id,
+                model_name="ridge",
+                split_id=split_id,
+                target_name=target_name,
+                rows=test_rows,
+            )
+            prediction_failures.extend(ridge_validation_failures)
+            prediction_failures.extend(ridge_test_failures)
             model_predictions, manifest, tuning_log = _fit_ridge(
                 run_id=run_id,
                 split_id=split_id,
                 target_name=target_name,
                 train_rows=train_rows,
-                validation_rows=validation_rows,
-                test_rows=test_rows,
+                validation_rows=ridge_validation_rows,
+                test_rows=ridge_test_rows,
                 feature_names=feature_names,
                 alpha_grid=alpha_grid,
                 random_seed=random_seed,
@@ -164,15 +201,46 @@ def build_model_artifacts(
             predictions.extend(model_predictions)
             manifests.append(manifest)
             tuning_logs.append(tuning_log)
+        elif "ridge" in models:
+            prediction_failures.extend(
+                _prediction_failures(
+                    run_id=run_id,
+                    model_name="ridge",
+                    split_id=split_id,
+                    target_name=target_name,
+                    rows=[*validation_rows, *test_rows],
+                    failure_stage="missing_train_features",
+                    failure_reason=(
+                        "No numeric train-window feature names are available for Ridge."
+                    ),
+                    recommended_fix="Rebuild feature artifacts for the train window.",
+                )
+            )
 
         if "xgboost" in models and feature_names:
+            xgb_validation_rows, xgb_validation_failures = _split_feature_valid_rows(
+                run_id=run_id,
+                model_name="xgboost",
+                split_id=split_id,
+                target_name=target_name,
+                rows=validation_rows,
+            )
+            xgb_test_rows, xgb_test_failures = _split_feature_valid_rows(
+                run_id=run_id,
+                model_name="xgboost",
+                split_id=split_id,
+                target_name=target_name,
+                rows=test_rows,
+            )
+            prediction_failures.extend(xgb_validation_failures)
+            prediction_failures.extend(xgb_test_failures)
             model_predictions, manifest, tuning_log = _fit_xgboost(
                 run_id=run_id,
                 split_id=split_id,
                 target_name=target_name,
                 train_rows=train_rows,
-                validation_rows=validation_rows,
-                test_rows=test_rows,
+                validation_rows=xgb_validation_rows,
+                test_rows=xgb_test_rows,
                 feature_names=feature_names,
                 random_seed=random_seed,
                 window_payload=window_payload,
@@ -180,11 +248,27 @@ def build_model_artifacts(
             predictions.extend(model_predictions)
             manifests.append(manifest)
             tuning_logs.append(tuning_log)
+        elif "xgboost" in models:
+            prediction_failures.extend(
+                _prediction_failures(
+                    run_id=run_id,
+                    model_name="xgboost",
+                    split_id=split_id,
+                    target_name=target_name,
+                    rows=[*validation_rows, *test_rows],
+                    failure_stage="missing_train_features",
+                    failure_reason=(
+                        "No numeric train-window feature names are available for XGBoost."
+                    ),
+                    recommended_fix="Rebuild feature artifacts for the train window.",
+                )
+            )
 
     return ModelBuildResult(
         predictions=predictions,
         model_manifests=manifests,
         tuning_logs=tuning_logs,
+        prediction_failures=prediction_failures,
     )
 
 
@@ -439,6 +523,66 @@ def _industry_means(train_rows: list[ModelRow]) -> dict[str, float]:
     for row in train_rows:
         grouped[row.industry].append(row.label.target_value)
     return {industry: float(np.mean(values)) for industry, values in grouped.items()}
+
+
+def _split_feature_valid_rows(
+    *,
+    run_id: str,
+    model_name: str,
+    split_id: str,
+    target_name: str,
+    rows: list[ModelRow],
+) -> tuple[list[ModelRow], list[ModelPredictionFailureRecord]]:
+    valid_rows = [row for row in rows if row.features]
+    missing_rows = [row for row in rows if not row.features]
+    failures = _prediction_failures(
+        run_id=run_id,
+        model_name=model_name,
+        split_id=split_id,
+        target_name=target_name,
+        rows=missing_rows,
+        failure_stage="missing_feature",
+        failure_reason="No numeric feature vector is available for this OOS label.",
+        recommended_fix=(
+            "Rebuild parsed sections and feature artifacts for the source document, "
+            "or rely on baseline models for coverage."
+        ),
+    )
+    return valid_rows, failures
+
+
+def _prediction_failures(
+    *,
+    run_id: str,
+    model_name: ModelName,
+    split_id: str,
+    target_name: str,
+    rows: list[ModelRow],
+    failure_stage: str,
+    failure_reason: str,
+    recommended_fix: str,
+) -> list[ModelPredictionFailureRecord]:
+    model_id = f"{model_name}::{target_name}::{split_id}"
+    return [
+        ModelPredictionFailureRecord(
+            run_id=run_id,
+            model_id=model_id,
+            model_name=model_name,
+            split_id=split_id,
+            label_id=row.label.label_id,
+            role="validation" if row.assignment.role == "validation" else "test",
+            ticker=row.label.ticker,
+            event_date=row.assignment.event_date,
+            target_name=target_name,
+            failure_stage=failure_stage,
+            failure_reason=failure_reason,
+            model_expected=True,
+            recommended_fix=recommended_fix,
+            created_at_utc=datetime.now(UTC),
+        )
+        for row in rows
+        if row.assignment.role in {"validation", "test"}
+    ]
 
 
 def _fit_ridge(
@@ -719,6 +863,7 @@ def _array_predictions(
                 split_id=split_id,
                 label_id=row.label.label_id,
                 role="validation" if row.assignment.role == "validation" else "test",
+                model_expected=True,
                 ticker=row.label.ticker,
                 event_date=row.assignment.event_date,
                 target_name=target_name,
@@ -811,3 +956,15 @@ def write_tuning_log_json(records: list[TuningLogRecord], path: str | Path) -> N
     with output.open("w", encoding="utf-8") as file:
         json.dump([record.model_dump(mode="json") for record in records], file, indent=2)
         file.write("\n")
+
+
+def write_model_prediction_failures_jsonl(
+    records: list[ModelPredictionFailureRecord],
+    path: str | Path,
+) -> None:
+    output = Path(path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", encoding="utf-8") as file:
+        for record in records:
+            file.write(record.model_dump_json())
+            file.write("\n")

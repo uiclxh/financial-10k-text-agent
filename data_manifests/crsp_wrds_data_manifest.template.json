@@ -1,0 +1,30 @@
+{
+  "allow_public_yahoo_fallback": false,
+  "created_at_utc": "2026-05-25T00:00:00Z",
+  "data_owner": "replace-with-licensed-institution-or-user",
+  "data_rights_scope": "local research use only; do not redistribute raw CRSP/WRDS data",
+  "data_stack": "licensed_formal_run_template",
+  "delisting_return_source": "crsp_delisting",
+  "filing_provider": "sec_edgar",
+  "input_files": {
+    "crsp_daily_returns_file": "data_private/crsp/daily_returns.csv",
+    "crsp_delisting_returns_file": "data_private/crsp/delisting_returns.csv",
+    "entity_link_history_file": "data_private/universe/entity_link_history.csv",
+    "membership_file": "data_private/universe/universe_membership.csv",
+    "prices_with_dlret_file": "data_private/crsp/prices_with_dlret.csv",
+    "security_master_file": "data_private/universe/security_master.csv"
+  },
+  "license_note": "Template only. CRSP/WRDS raw data is licensed and must not be committed.",
+  "link_source": "crsp_compustat_ccm",
+  "market_data_provider": "crsp_wrds",
+  "permitted_public_outputs": [
+    "aggregate metrics",
+    "coverage diagnostics",
+    "audit summaries",
+    "factor cards",
+    "compact empirical reports"
+  ],
+  "price_source": "crsp_daily_stock",
+  "raw_data_committed": false,
+  "return_source": "crsp_total_return"
+}

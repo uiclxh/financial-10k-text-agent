@@ -1,0 +1,45 @@
+{
+  "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+  "current_scope": "complete_local_mvp_orchestrator",
+  "implemented_cli_stages": [
+    "run",
+    "parse-10k",
+    "build-labels",
+    "build-splits",
+    "build-features",
+    "build-models",
+    "evaluate-models",
+    "audit",
+    "report"
+  ],
+  "artifact_aware_orchestrator": {
+    "enabled": true,
+    "entrypoint": "python -m text_factor_lab run --config <config> --execute",
+    "configured_input_paths": [
+      "inputs.document_manifest_path",
+      "inputs.prices_path",
+      "inputs.parsed_sections_path",
+      "inputs.raw_filings_dir"
+    ],
+    "standard_run_dir_inputs": [
+      "document_manifest.jsonl",
+      "prices.csv",
+      "parsed_sections.jsonl",
+      "labels.jsonl",
+      "split_assignments.jsonl",
+      "features.jsonl"
+    ]
+  },
+  "full_orchestrator_sequence": [
+    "Data",
+    "Parsing",
+    "Label",
+    "Split",
+    "Feature",
+    "Model",
+    "Backtest",
+    "Audit",
+    "Report"
+  ],
+  "orchestrator_status": "artifact_aware_pipeline_controller"
+}

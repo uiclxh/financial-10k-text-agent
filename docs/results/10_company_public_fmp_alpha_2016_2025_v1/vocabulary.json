@@ -1,0 +1,5 @@
+{
+  "full_vocabulary_committed": false,
+  "manifest_path": "vocabulary_manifest.json",
+  "note": "Full train-window vocabulary is stored in feature matrix feature_names.json files and summarized in vocabulary_manifest.json. This run does not write a full long-form vocabulary payload here."
+}

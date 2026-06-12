@@ -5,6 +5,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 
 from text_factor_lab.features import (
+    DEFAULT_FINANCIAL_DICTIONARIES,
     build_dictionary_feature_manifests,
     build_dictionary_tone_features,
     build_feature_input_hashes,
@@ -172,7 +173,10 @@ def test_dictionary_tone_features_include_section_and_full_text(tmp_path: Path) 
         parsed_sections=read_parsed_sections_jsonl(parsed_path),
     )
 
-    features = build_dictionary_tone_features(document_texts)
+    features = build_dictionary_tone_features(
+        document_texts,
+        dictionaries=DEFAULT_FINANCIAL_DICTIONARIES,
+    )
     train_features = {
         feature.feature_name: feature.feature_value
         for feature in features

@@ -6,8 +6,10 @@ from math import isclose, log
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
+import pytest
 
-from text_factor_lab.data.prices import load_price_panel_csv
+from text_factor_lab.data.prices import build_price_panel, load_price_panel_csv
 from text_factor_lab.labels import (
     build_labels_for_document,
     build_labels_for_documents,
@@ -120,6 +122,39 @@ def test_realized_volatility_requires_at_least_two_returns() -> None:
     assert result.labels == []
     assert result.failures[0].failure_type == "label_window_unavailable"
     assert "at least two returns" in result.failures[0].failure_message
+
+
+def test_labels_apply_delisting_return_to_car() -> None:
+    panel = build_price_panel(
+        pd.DataFrame(
+            [
+                ("2023-11-02", "AAPL", "", "", ""),
+                ("2023-11-03", "AAPL", "0.10", "", ""),
+                ("2023-11-06", "AAPL", "-0.20", "-0.50", "500"),
+                ("2023-11-02", "SPY", "", "", ""),
+                ("2023-11-03", "SPY", "0.01", "", ""),
+                ("2023-11-06", "SPY", "0.02", "", ""),
+            ],
+            columns=["date", "ticker", "ret", "dlret", "dlstcd"],
+        )
+    )
+
+    result = build_labels_for_document(
+        document=sample_document(),
+        price_panel=panel,
+        target_names=["CAR_1_2"],
+        benchmark_ticker="SPY",
+        return_type="simple",
+        adjustment_method="crsp_ret_with_dlret",
+        annualization_days=252,
+    )
+
+    assert result.failures == []
+    label = result.labels[0]
+    assert label.delisting_return_applied is True
+    assert label.delisting_code == "500"
+    assert label.return_quality_flag == "delisting_return_applied"
+    assert label.target_value == pytest.approx((0.10 - 0.6) - (0.01 + 0.02))
 
 
 def test_write_label_artifacts_round_trips_jsonl(tmp_path: Path) -> None:

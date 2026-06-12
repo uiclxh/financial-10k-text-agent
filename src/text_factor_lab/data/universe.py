@@ -68,6 +68,11 @@ def build_universe_quality_report(
     missing_market_cap_rows = sum(
         1 for record in records if record.market_cap_at_selection is None
     )
+    estimated_market_cap_rows = sum(
+        1
+        for record in records
+        if _market_cap_is_applied_estimate(record.market_cap_quality_flag)
+    )
     delisted_rows = sum(1 for record in records if record.delisting_date is not None)
     selection_after_sample_rows = sum(
         1 for record in records if record.selection_date > config.sample.start_date
@@ -89,6 +94,11 @@ def build_universe_quality_report(
     )
     membership_missing_market_cap_rows = sum(
         1 for record in membership if record.market_cap_at_selection is None
+    )
+    membership_estimated_market_cap_rows = sum(
+        1
+        for record in membership
+        if _market_cap_is_applied_estimate(record.market_cap_quality_flag)
     )
     membership_delisted_rows = sum(
         1 for record in membership if record.delisting_date is not None
@@ -125,6 +135,11 @@ def build_universe_quality_report(
         warnings.append("Some membership rows have selection_date after sample.start_date.")
     if membership_missing_market_cap_rows:
         warnings.append("Some membership rows are missing market_cap_at_selection.")
+    if estimated_market_cap_rows or membership_estimated_market_cap_rows:
+        warnings.append(
+            "Market-cap selection metadata includes applied-grade estimates; do not "
+            "treat these as CRSP/WRDS research-grade market caps."
+        )
 
     invalid_rows = selection_after_sample_rows
     coverage = 0.0 if not records else (len(records) - invalid_rows) / len(records)
@@ -157,6 +172,13 @@ def build_universe_quality_report(
         if config.universe.allow_delisted_firms and membership_delisted_rows == 0:
             formal_run_blockers.append("membership_no_delisted_firms")
 
+    is_research_grade = (
+        config.universe.universe_data_level == "research_grade"
+        and not formal_run_blockers
+        and estimated_market_cap_rows == 0
+        and membership_estimated_market_cap_rows == 0
+    )
+
     return UniverseQualityReport(
         universe_name=config.universe.name,
         universe_data_level=config.universe.universe_data_level,
@@ -186,6 +208,7 @@ def build_universe_quality_report(
         duplicate_tickers=find_duplicates(tickers),
         placeholder_mapping_rows=placeholder_rows,
         missing_market_cap_rows=missing_market_cap_rows,
+        estimated_market_cap_rows=estimated_market_cap_rows,
         delisted_rows=delisted_rows,
         selection_date_after_sample_start_rows=selection_after_sample_rows,
         mapping_available_after_selection_rows=mapping_after_selection_rows,
@@ -196,11 +219,12 @@ def build_universe_quality_report(
             membership_selection_after_sample_start_rows
         ),
         membership_missing_market_cap_rows=membership_missing_market_cap_rows,
+        membership_estimated_market_cap_rows=membership_estimated_market_cap_rows,
         membership_delisted_rows=membership_delisted_rows,
         coverage=coverage,
         warnings=warnings,
         formal_run_blockers=formal_run_blockers,
-        is_research_grade=not formal_run_blockers,
+        is_research_grade=is_research_grade,
     )
 
 
@@ -232,3 +256,8 @@ def load_and_report_universe(
         entity_links=entity_links,
     )
     return records, report
+
+
+def _market_cap_is_applied_estimate(flag: str | None) -> bool:
+    normalized = (flag or "").lower()
+    return "not_crsp" in normalized or "estimate" in normalized or "proxy" in normalized

@@ -1,174 +1,119 @@
-# From SEC 10-K Filings to Volatility Signals
+# Financial 10-K Text Agent
 
-**An auditable, leakage-safe agentic pipeline for out-of-sample financial text
-factor research.**
+An auditable research pipeline that turns SEC 10-K filings into text factors,
+out-of-sample forecasts, portfolio diagnostics, and empirical-finance reports.
 
-> Research question: **Can 10-K textual information forecast future realized
-> volatility?**
+The project is **not** a financial RAG demo and does **not** claim a proven
+trading alpha. Its strongest contribution is a leakage-aware, reproducible
+agentic workflow for testing whether financial text contains forecasting
+information.
 
-This repository turns SEC 10-K filings into audited text factors and evaluates
-them under rolling out-of-sample splits. Its strongest current result is
-volatility forecasting evidence, not formal trading alpha. The framework is
-designed for empirical finance experiments, not financial RAG.
+## Latest Public Result
 
-## Headline Result
+The latest committed result package is:
 
-In the public 90-company experiment, `realized_volatility_1_20` is the clearest
-out-of-sample target.
+[docs/results/10_company_public_fmp_alpha_2016_2025_v1](docs/results/10_company_public_fmp_alpha_2016_2025_v1/README.md)
 
-| Target | Best model | ALL_SPLITS Rank IC | Rank IC NW t-stat |
+It is a fixed 10-company U.S. 10-K pilot using:
+
+- SEC EDGAR annual filings and filing timestamps.
+- FMP adjusted prices, with Yahoo fallback only for selected gaps.
+- Loughran-McDonald dictionary tone features.
+- Train-window-only TF-IDF/SVD text representations.
+- Rolling out-of-sample splits, audit gates, and multiple-testing disclosure.
+
+Headline run status:
+
+| Item | Value |
+| --- | ---: |
+| 10-K filings | 100 |
+| Labels | 300 |
+| OOS predictions | 896 |
+| Eligible OOS coverage | 100% |
+| Audit failures | 0 |
+| Audit warnings | 2 |
+| Tested specifications | 472 |
+| Primary portfolio result | Diagnostic only |
+
+Best observed prediction metric in the public artifact:
+
+| Target | Best model | ALL_SPLITS Rank IC | NW t-stat |
 | --- | --- | ---: | ---: |
-| `CAR_1_20` | industry mean | 0.1698 | 3.539 |
-| `CAR_1_5` | industry mean | 0.1834 | 4.524 |
-| `realized_volatility_1_20` | **XGBoost** | **0.3899** | **21.32** |
+| `CAR_1_5` | XGBoost | 0.3212 | 4.1481 |
+| `realized_volatility_1_20` | industry mean | 0.2545 | 4.1049 |
 
-The preregistered primary prediction specification also passes:
-`realized_volatility_1_20 / Ridge`, Rank IC `0.3335`, p about `6.85e-11`.
+Preregistered primary rules are deliberately stricter:
 
-The preregistered primary portfolio specification does **not** pass after
-transaction costs, sector neutrality, ALL_SPLITS aggregation, and
-multiple-testing control: Sharpe `-0.3602`, p `0.4598`.
+- Primary prediction: Ridge on `realized_volatility_1_20`, ALL_SPLITS Rank IC
+  `-0.2788`, raw p-value `0.0815`.
+- Primary portfolio: monthly sector-neutral equal-weight volatility portfolio,
+  Sharpe `-0.3028`, raw p-value `0.6263`.
 
-**Interpretation:** the current evidence supports leakage-controlled
-out-of-sample volatility forecasting. It does not support a formal claim of
-tradable alpha.
+Interpretation: the public pilot validates the pipeline and shows exploratory
+forecasting evidence, but it does **not** establish formal tradable alpha.
 
-## Current Release
-
-`v0.15.0` adds target-aware portfolio construction, ALL_SPLITS monthly portfolio
-aggregation, preregistered primary specification rules, and compact results from
-a public 90-company SEC 10-K experiment.
-
-## What It Does
+## Pipeline
 
 ```text
 SEC 10-K filings
-  -> manifest / parser
-  -> labels and rolling splits
+  -> document manifest and event-time alignment
+  -> 10-K section parsing
+  -> labels: realized volatility and CAR windows
+  -> rolling train / validation / test splits
   -> dictionary tone, TF-IDF/SVD, metadata features
-  -> historical_mean, industry_mean, Ridge, XGBoost
-  -> OOS IC metrics and portfolio returns
-  -> multiple-testing report, audit report, empirical report
+  -> historical mean, industry mean, Ridge, XGBoost
+  -> OOS IC metrics and portfolio diagnostics
+  -> audit report, multiple-testing report, empirical report
 ```
 
-## Evidence Snapshot
+## What Is Included
 
-Selected summaries are in [docs/results](docs/results/README.md).
+- Config-driven local orchestrator.
+- Pydantic-style artifact schemas and audit gates.
+- SEC 10-K parser for Business, Risk Factors, Legal Proceedings, and MD&A.
+- Event-date handling with trading-calendar aware metadata.
+- Leakage controls for available time, label windows, splits, and TF-IDF fitting.
+- Model comparison across baselines, Ridge, and optional XGBoost.
+- Event-based and monthly portfolio diagnostics.
+- Multiple-testing registry with primary, robustness, and exploratory specs.
+- Compact public result artifacts under `docs/results/`.
 
-- Sample: 90 companies, 883 10-K filings, 2,649 labels, 8,236 predictions.
-- Feature ablation: TF-IDF/SVD is the strongest current text feature block for
-  volatility prediction.
-- Model comparison: XGBoost has the highest volatility Rank IC; Ridge provides
-  the preregistered primary result.
-- Return prediction remains weaker: CAR targets are often led by
-  `industry_mean`, so they are not clean textual-alpha evidence.
-- Portfolio evidence remains exploratory after costs and statistical controls.
+## What Is Not Claimed
 
-## Why This Repository Is Different
+- No CRSP/WRDS survivorship-free universe in the public pilot.
+- No formal delisting-return research claim.
+- No production trading system.
+- No investment advice.
+- Portfolio outputs are diagnostics, not deployable strategy evidence.
 
-- Leakage-safe event-time alignment with auditable `available_time_utc`.
-- Train-window-only TF-IDF fitting and rolling-year out-of-sample splits.
-- Dictionary tone, TF-IDF/SVD, Ridge, XGBoost, and baseline comparison.
-- Cost-aware, sector-neutral, value-weighted portfolio diagnostics.
-- Preregistered primary specifications and multiple-testing adjustment.
-- Explicit public-data, licensed-data, and delisting-return boundaries.
-
-## Architecture And Roadmap
-
-See [System Architecture And Roadmap](docs/system_architecture_and_roadmap.md)
-for the SEC-to-report algorithm flow, agent responsibilities, research gates,
-and the planned prompt-governed LLM feature strategy.
-
-## Install And Smoke Run
+## Quick Start
 
 ```bash
 python -m pip install -e ".[dev]"
 python -m text_factor_lab run --config configs/text_factor_lab/e2e_smoke.yaml --execute
+python -m pytest -q
 ```
 
-Optional Make targets:
+Useful entry points:
 
 ```bash
-make install
-make test
-make smoke-run
-```
-
-## Useful Commands
-
-```bash
-python -m text_factor_lab build-features --help
-python -m text_factor_lab build-models --help
-python -m text_factor_lab evaluate-models --help
+python -m text_factor_lab run --help
 python -m text_factor_lab audit --help
 python -m text_factor_lab report --help
 ```
 
-## Main Artifacts
+## Documentation
 
-- `evaluation_metrics.json`
-- `portfolio_weights.jsonl`
-- `portfolio_returns.jsonl`
-- `portfolio_metrics.json`
-- `monthly_portfolio_metrics.json`
-- `tested_specifications.jsonl`
-- `multiple_testing_report.json`
-- `specification_registry.json`
-- `audit_report.json`
-- `empirical_report.md`
-- `factor_card.md`
+- [Global workflow rules](FINANCIAL_TEXT_FACTOR_LAB_GLOBAL_WORKFLOW.md)
+- [Architecture and roadmap](docs/system_architecture_and_roadmap.md)
+- [10-company data stack](docs/data_sources_10_company_fmp_alpha.md)
+- [Working paper positioning](docs/working_paper_positioning.md)
+- [Public result artifacts](docs/results/README.md)
 
-Large raw/generated artifacts are intentionally ignored by git. Compact result
-summaries live in `docs/results/`.
+## License
 
-## Formal CRSP/WRDS Replication Profile
+Code is released under the [MIT License](LICENSE).
 
-The formal profile is scaffolded in
-`configs/text_factor_lab/real_10k_large_universe_crsp_wrds.yaml`. It expects
-private local CRSP/WRDS exports under `data_private/`, a licensed data manifest
-at `data_manifests/crsp_wrds_data_manifest.template.json`, CRSP delisting
-returns, survivorship-free membership intervals, and historical entity links.
-
-```bash
-python -m text_factor_lab run --config configs/text_factor_lab/real_10k_large_universe_crsp_wrds.yaml --execute
-```
-
-The command is designed to block with a clear missing-input report when private
-licensed data is absent. Public GitHub outputs should use only compact templates
-and summaries in `docs/results/`, never raw licensed data.
-
-## Faster Licensed Alternative: Nasdaq Data Link / Sharadar
-
-If WRDS approval is pending, use the Nasdaq Data Link / Sharadar profile:
-
-```bash
-$env:NASDAQ_DATA_LINK_API_KEY="your-api-key"
-python scripts\extract_nasdaq_sharadar_company_panel.py --tickers MSFT NFLX NKE MCD META SBUX SONY V XOM LLY
-python -m text_factor_lab run --config configs/text_factor_lab/real_10k_company_panel_nasdaq_sharadar.yaml --execute
-```
-
-This route is quicker to provision than WRDS and can include active and delisted
-tickers, but it does not provide CRSP `DLRET`. Treat it as a licensed
-applied-grade run unless a broader survivorship-free universe and delisting
-return policy are documented.
-
-## Release Notes
-
-- [v0.15.0](docs/releases/v0.15.0.md): preregistered portfolio inference and
-  90-company results
-- [v0.14.0](docs/releases/v0.14.0.md): drifted daily portfolio accounting
-- [Earlier releases](docs/releases): pipeline foundation through research
-  universe, calendar, portfolio, inference, and reporting layers
-
-## Boundaries
-
-The public 90-company run is exploratory/applied-grade because it uses public
-data and has incomplete formal coverage. Formal replication still requires a
-survivorship-free licensed universe, delisting returns, and stricter market data
-controls.
-
-## License And Notices
-
-MIT License. This repository is for research and education only. It is not
-investment, trading, legal, accounting, or tax advice. Users are responsible for
-all data licenses and redistribution limits.
+Public result summaries are provided for research demonstration only. Raw SEC
+filings, licensed market data, API keys, and private intermediate datasets are
+not committed.

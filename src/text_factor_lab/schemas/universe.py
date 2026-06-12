@@ -17,6 +17,9 @@ class UniverseRecord(StrictBaseModel):
     industry: str = Field(min_length=1)
     selection_date: date
     market_cap_at_selection: float | None = None
+    market_cap_source: str | None = None
+    market_cap_available_time_utc: datetime | None = None
+    market_cap_quality_flag: str | None = None
     entry_date: date | None = None
     exit_date: date | None = None
     delisting_date: date | None = None
@@ -38,16 +41,24 @@ class UniverseRecord(StrictBaseModel):
             raise ValueError("cik must not exceed 10 digits")
         return cleaned.zfill(10)
 
-    @field_validator("mapping_available_time_utc")
+    @field_validator("mapping_available_time_utc", "market_cap_available_time_utc")
     @classmethod
-    def validate_aware_datetime(cls, value: datetime) -> datetime:
+    def validate_aware_datetime(cls, value: datetime | None) -> datetime | None:
+        if value is None:
+            return value
         if not is_timezone_aware(value):
-            raise ValueError("mapping_available_time_utc must be timezone-aware")
+            raise ValueError("datetime fields must be timezone-aware")
         return value
 
-    @field_validator("market_cap_at_selection", mode="before")
+    @field_validator(
+        "market_cap_at_selection",
+        "market_cap_source",
+        "market_cap_available_time_utc",
+        "market_cap_quality_flag",
+        mode="before",
+    )
     @classmethod
-    def parse_optional_market_cap(cls, value: object) -> object:
+    def parse_optional_market_cap_values(cls, value: object) -> object:
         if value == "":
             return None
         return value
@@ -84,6 +95,9 @@ class SecurityMasterRecord(StrictBaseModel):
     exchange: str = Field(min_length=1)
     share_class: str = Field(min_length=1)
     security_type: str = Field(min_length=1)
+    exchcd: int | None = None
+    shrcd: int | None = None
+    siccd: str | None = None
     sic: str | None = None
     naics: str | None = None
     gics_sector: str | None = None
@@ -115,6 +129,9 @@ class SecurityMasterRecord(StrictBaseModel):
         "naics",
         "gics_sector",
         "gics_industry",
+        "exchcd",
+        "shrcd",
+        "siccd",
         "name_start_date",
         "name_end_date",
         mode="before",
@@ -153,6 +170,9 @@ class UniverseMembershipRecord(StrictBaseModel):
     delisting_date: date | None = None
     selection_rank: int | None = Field(default=None, gt=0)
     market_cap_at_selection: float | None = Field(default=None, gt=0)
+    market_cap_source: str | None = None
+    market_cap_available_time_utc: datetime | None = None
+    market_cap_quality_flag: str | None = None
     price_at_selection: float | None = Field(default=None, gt=0)
     shares_outstanding_at_selection: float | None = Field(default=None, gt=0)
     liquidity_filter_pass: bool
@@ -169,6 +189,9 @@ class UniverseMembershipRecord(StrictBaseModel):
         "delisting_date",
         "selection_rank",
         "market_cap_at_selection",
+        "market_cap_source",
+        "market_cap_available_time_utc",
+        "market_cap_quality_flag",
         "price_at_selection",
         "shares_outstanding_at_selection",
         mode="before",
@@ -177,6 +200,15 @@ class UniverseMembershipRecord(StrictBaseModel):
     def parse_optional_values(cls, value: object) -> object:
         if value == "":
             return None
+        return value
+
+    @field_validator("market_cap_available_time_utc")
+    @classmethod
+    def validate_market_cap_available_time(cls, value: datetime | None) -> datetime | None:
+        if value is None:
+            return value
+        if not is_timezone_aware(value):
+            raise ValueError("market_cap_available_time_utc must be timezone-aware")
         return value
 
     @field_validator("liquidity_filter_pass", mode="before")
@@ -257,6 +289,7 @@ class UniverseQualityReport(StrictBaseModel):
     duplicate_tickers: list[str]
     placeholder_mapping_rows: int
     missing_market_cap_rows: int
+    estimated_market_cap_rows: int = 0
     delisted_rows: int
     selection_date_after_sample_start_rows: int
     mapping_available_after_selection_rows: int
@@ -265,6 +298,7 @@ class UniverseQualityReport(StrictBaseModel):
     low_confidence_link_rows: int = 0
     membership_selection_after_sample_start_rows: int = 0
     membership_missing_market_cap_rows: int = 0
+    membership_estimated_market_cap_rows: int = 0
     membership_delisted_rows: int = 0
     coverage: float = Field(ge=0, le=1)
     warnings: list[str]

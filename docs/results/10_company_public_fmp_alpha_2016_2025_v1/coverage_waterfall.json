@@ -1,0 +1,37 @@
+{
+  "counts": {
+    "eligible_oos_labels": 146,
+    "labels_total": 300,
+    "model_expected_label_pairs": 896,
+    "model_predicted_label_pairs": 896,
+    "portfolio_eligible_labels": 120,
+    "predicted_eligible_oos_labels": 146,
+    "predicted_portfolio_eligible_labels": 120,
+    "predicted_unique_labels": 146,
+    "primary_covered_specifications": 2,
+    "primary_expected_label_pairs": 2,
+    "primary_expected_specifications": 2,
+    "primary_portfolio_covered_specifications": 1,
+    "primary_portfolio_expected_specifications": 1,
+    "primary_predicted_label_pairs": 2,
+    "primary_prediction_covered_specifications": 1,
+    "primary_prediction_expected_specifications": 1
+  },
+  "eligible_oos_coverage": 1.0,
+  "failure_counts": {
+    "outside_configured_split_window": 18
+  },
+  "model_expected_prediction_coverage": 1.0,
+  "portfolio_eligible_coverage": 1.0,
+  "primary_portfolio_coverage": 1.0,
+  "primary_prediction_coverage": 1.0,
+  "primary_spec_coverage": 1.0,
+  "raw_label_coverage": 0.4866666666666667,
+  "top_failure_reasons": [
+    {
+      "count": 18,
+      "failure_reason": "Label event date is outside the configured validation/test split window.",
+      "failure_stage": "outside_configured_split_window"
+    }
+  ]
+}

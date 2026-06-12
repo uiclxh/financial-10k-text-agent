@@ -1,0 +1,11 @@
+ticker,labels_total,eligible_oos_labels,predicted_unique_labels,predicted_eligible_oos_labels,raw_label_coverage,eligible_oos_coverage,top_failure_stage
+JPM,30,15,15,15,0.5,1.0,not_oos_expected
+LLY,30,15,15,15,0.5,1.0,not_oos_expected
+MCD,30,15,15,15,0.5,1.0,not_oos_expected
+META,30,15,15,15,0.5,1.0,not_oos_expected
+MSFT,30,15,15,15,0.5,1.0,not_oos_expected
+NFLX,30,15,15,15,0.5,1.0,not_oos_expected
+NKE,30,15,15,15,0.5,1.0,not_oos_expected
+SBUX,30,13,13,13,0.43333333333333335,1.0,not_oos_expected
+V,30,13,13,13,0.43333333333333335,1.0,not_oos_expected
+XOM,30,15,15,15,0.5,1.0,not_oos_expected

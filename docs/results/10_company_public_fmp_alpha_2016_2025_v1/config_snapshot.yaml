@@ -1,0 +1,120 @@
+run:
+  run_id: "10_company_public_fmp_alpha_2016_2025_v1"
+  run_type: "exploratory_run"
+  random_seed: 42
+  output_dir: "runs/text_factor_lab/10_company_public_fmp_alpha_2016_2025_v1"
+
+inputs:
+  document_manifest_path: "data_private/sec/document_manifest.jsonl"
+  prices_path: "data_private/market/prices_with_returns.csv"
+  parsed_sections_path: null
+  raw_filings_dir: "data_private/sec/raw_filings"
+  copy_inputs_to_run_dir: true
+
+data_provider:
+  market_data_provider: "fmp_alpha"
+  filing_provider: "sec_edgar"
+  price_source: "mixed_fmp_yahoo_adjusted_close"
+  return_source: "mixed_fmp_yahoo_closeadj_log_return"
+  delisting_return_source: "fmp_alpha_listing_status_no_crsp_dlret"
+  link_source: "sec_cik_fmp_symbol_change_manual_fb_meta"
+  allow_public_yahoo_fallback: true
+  fmp_prices_file: "data_private/market/prices_with_returns.csv"
+  fmp_marketcap_file: "data_private/market/daily_marketcap.csv"
+  fmp_profile_file: "data_private/metadata/security_master.csv"
+  alpha_listing_status_file: "data_private/metadata/listing_status.csv"
+  data_license_manifest_file: "data_private/metadata/license_manifest.json"
+
+universe:
+  name: "fixed_10_company_us_10k_fmp_alpha_pilot"
+  selection_date: "2016-01-01"
+  tickers_file: "data_private/metadata/tickers.csv"
+  security_master_file: "data_private/metadata/security_master.csv"
+  membership_file: "data_private/metadata/universe_membership.csv"
+  entity_link_history_file: "data_private/metadata/entity_link_history.csv"
+  universe_data_level: "applied"
+  survivorship_bias_control: false
+  allow_delisted_firms: false
+  historical_ticker_mapping: true
+
+sample:
+  start_date: "2016-01-01"
+  end_date: "2025-12-31"
+  timezone: "America/New_York"
+
+text_source:
+  document_type: "10-K"
+  source: "SEC_EDGAR"
+  sections:
+    - "Business"
+    - "Risk Factors"
+    - "Legal Proceedings"
+    - "MD&A"
+  require_available_time: true
+  require_license_note: true
+  sec_user_agent: null
+
+labels:
+  targets:
+    - "realized_volatility_1_20"
+    - "CAR_1_5"
+    - "CAR_1_20"
+  return_type: "log"
+  portfolio_return_type: "simple"
+  price_field: "closeadj"
+  market_benchmark: "SPY"
+  annualization_days: 252
+
+split:
+  method: "rolling_year"
+  train_years_min: 5
+  validation_years: 1
+  test_years: 1
+  embargo_days: 20
+
+features:
+  methods:
+    - "dictionary_tone"
+    - "tfidf"
+  dictionary_tone:
+    dictionaries:
+      - "loughran_mcdonald"
+      - "risk_uncertainty"
+  tfidf:
+    max_features: 5000
+    ngram_range: [1, 2]
+    min_df: 2
+    max_df: 0.95
+    fit_scope: "train_window_only"
+    write_long_features: false
+    matrix_store_dir: "feature_matrices"
+    matrix_index_file: "feature_matrix_index.json"
+    svd_components: 32
+
+models:
+  enabled:
+    - "historical_mean"
+    - "industry_mean"
+    - "ridge"
+    - "xgboost"
+  tuning:
+    selection_metric: "validation_rank_ic"
+    save_tuning_log: true
+
+backtest:
+  rebalance_frequency: "monthly"
+  portfolio_method: "top_bottom_quintile"
+  weighting: "equal_weight"
+  holding_window_days: 20
+  transaction_cost_bps_one_way: 10
+  sector_neutral: true
+  newey_west_lag: 19
+  portfolio_signal_direction: "validation_selected"
+  target_aware_portfolio_policy: "long_low_vol"
+
+audit:
+  coverage_threshold: 0.9
+  require_license_note: true
+  require_available_time: true
+  reject_on_lookahead: true
+  reject_on_train_test_leakage: true

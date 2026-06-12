@@ -179,6 +179,13 @@ def build_parser() -> argparse.ArgumentParser:
     model_parser.add_argument("--features", required=True)
     model_parser.add_argument("--split-assignments", required=True)
     model_parser.add_argument("--predictions-output", required=True)
+    model_parser.add_argument(
+        "--prediction-failures-output",
+        help=(
+            "Output JSONL model prediction failures path. Defaults to "
+            "model_prediction_failures.jsonl beside predictions."
+        ),
+    )
     model_parser.add_argument("--model-manifest-output", required=True)
     model_parser.add_argument("--tuning-log-output", required=True)
     model_parser.add_argument(
@@ -217,6 +224,7 @@ def build_parser() -> argparse.ArgumentParser:
     eval_parser.add_argument("--monthly-portfolio-weights-output")
     eval_parser.add_argument("--monthly-portfolio-returns-output")
     eval_parser.add_argument("--monthly-portfolio-metrics-output")
+    eval_parser.add_argument("--delisting-application-report-output")
     eval_parser.add_argument("--tested-specifications-output")
     eval_parser.add_argument("--multiple-testing-output")
     eval_parser.add_argument("--specification-registry-output")
@@ -513,6 +521,7 @@ def main(argv: list[str] | None = None) -> int:
             read_labels_jsonl,
             read_split_assignments_jsonl,
             write_model_manifest_json,
+            write_model_prediction_failures_jsonl,
             write_predictions_jsonl,
             write_tuning_log_json,
         )
@@ -527,11 +536,21 @@ def main(argv: list[str] | None = None) -> int:
             ridge_alpha_grid=args.ridge_alpha,
         )
         write_predictions_jsonl(result.predictions, args.predictions_output)
+        prediction_failures_output = (
+            Path(args.prediction_failures_output)
+            if args.prediction_failures_output
+            else Path(args.predictions_output).with_name("model_prediction_failures.jsonl")
+        )
+        write_model_prediction_failures_jsonl(
+            result.prediction_failures,
+            prediction_failures_output,
+        )
         write_model_manifest_json(result.model_manifests, args.model_manifest_output)
         write_tuning_log_json(result.tuning_logs, args.tuning_log_output)
         print(
             "Built model artifacts. "
             f"predictions={len(result.predictions)} "
+            f"prediction_failures={len(result.prediction_failures)} "
             f"models={len(result.model_manifests)} "
             f"tuning_logs={len(result.tuning_logs)}"
         )
@@ -543,6 +562,7 @@ def main(argv: list[str] | None = None) -> int:
             read_labels_jsonl,
             read_predictions_jsonl,
             write_backtest_results_json,
+            write_delisting_application_report_json,
             write_evaluation_metrics_json,
             write_factor_panel_jsonl,
             write_portfolio_metrics_json,
@@ -592,6 +612,11 @@ def main(argv: list[str] | None = None) -> int:
             write_portfolio_metrics_json(
                 result.monthly_portfolio_metrics,
                 args.monthly_portfolio_metrics_output,
+            )
+        if args.delisting_application_report_output:
+            write_delisting_application_report_json(
+                result.delisting_application_report,
+                args.delisting_application_report_output,
             )
         if (
             args.tested_specifications_output

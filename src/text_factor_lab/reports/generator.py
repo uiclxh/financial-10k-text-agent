@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -10,6 +11,7 @@ import yaml
 
 from text_factor_lab.schemas import (
     AuditReportRecord,
+    DataLicenseManifestRecord,
     EvaluationMetricRecord,
     FeatureManifestRecord,
     ModelManifestRecord,
@@ -32,13 +34,22 @@ class ReportArtifactPaths:
     audit_report: Path
     evaluation_metrics: Path
     backtest_results: Path
+    delisting_application_report: Path
     model_manifest: Path
     tuning_log: Path
     feature_manifest: Path
+    vocabulary_manifest: Path
+    section_length_quality_report: Path
+    prediction_distribution_report: Path
     portfolio_metrics: Path
     monthly_portfolio_metrics: Path
     multiple_testing_report: Path
     specification_registry: Path
+    coverage_waterfall: Path
+    coverage_by_target: Path
+    coverage_by_split: Path
+    coverage_by_ticker: Path
+    coverage_by_model: Path
     report_markdown: Path
     empirical_report: Path
     factor_card: Path
@@ -62,13 +73,22 @@ class ReportArtifactPaths:
             audit_report=base / "audit_report.json",
             evaluation_metrics=base / "evaluation_metrics.json",
             backtest_results=base / "backtest_results.json",
+            delisting_application_report=base / "delisting_application_report.json",
             model_manifest=base / "model_manifest.json",
             tuning_log=base / "tuning_log.json",
             feature_manifest=base / "feature_manifest.json",
+            vocabulary_manifest=base / "vocabulary_manifest.json",
+            section_length_quality_report=base / "section_length_quality_report.json",
+            prediction_distribution_report=base / "prediction_distribution_report.json",
             portfolio_metrics=base / "portfolio_metrics.json",
             monthly_portfolio_metrics=base / "monthly_portfolio_metrics.json",
             multiple_testing_report=base / "multiple_testing_report.json",
             specification_registry=base / "specification_registry.json",
+            coverage_waterfall=base / "coverage_waterfall.json",
+            coverage_by_target=base / "coverage_by_target.csv",
+            coverage_by_split=base / "coverage_by_split.csv",
+            coverage_by_ticker=base / "coverage_by_ticker.csv",
+            coverage_by_model=base / "coverage_by_model.csv",
             report_markdown=output / "report.md",
             empirical_report=output / "empirical_report.md",
             factor_card=output / "factor_card.md",
@@ -181,6 +201,9 @@ def _load_report_artifacts(paths: ReportArtifactPaths) -> dict[str, Any]:
             PortfolioBacktestRecord.model_validate(item)
             for item in _read_json_array(paths.backtest_results)
         ],
+        "delisting_application_report": _read_optional_json_object(
+            paths.delisting_application_report
+        ),
         "model_manifest": [
             ModelManifestRecord.model_validate(item)
             for item in _read_json_array(paths.model_manifest)
@@ -193,6 +216,13 @@ def _load_report_artifacts(paths: ReportArtifactPaths) -> dict[str, Any]:
             FeatureManifestRecord.model_validate(item)
             for item in _read_optional_json_array(paths.feature_manifest)
         ],
+        "vocabulary_manifest": _read_optional_json_array(paths.vocabulary_manifest),
+        "section_length_quality_report": _read_optional_json_object(
+            paths.section_length_quality_report
+        ),
+        "prediction_distribution_report": _read_optional_json_object(
+            paths.prediction_distribution_report
+        ),
         "portfolio_metrics": [
             PortfolioMetricRecord.model_validate(item)
             for item in _read_optional_json_array(paths.portfolio_metrics)
@@ -227,6 +257,14 @@ def _load_report_artifacts(paths: ReportArtifactPaths) -> dict[str, Any]:
             paths.multiple_testing_report
         ),
         "specification_registry": _read_optional_json_object(paths.specification_registry),
+        "coverage_waterfall": _read_optional_json_object(paths.coverage_waterfall),
+        "coverage_tables": {
+            "by_target": _read_optional_csv_rows(paths.coverage_by_target),
+            "by_split": _read_optional_csv_rows(paths.coverage_by_split),
+            "by_ticker": _read_optional_csv_rows(paths.coverage_by_ticker),
+            "by_model": _read_optional_csv_rows(paths.coverage_by_model),
+        },
+        "data_license_manifest": _read_data_license_manifest(paths.config),
         "document_count": _count_jsonl_records(paths.run_dir / "document_manifest.jsonl"),
         "label_count": _count_jsonl_records(paths.run_dir / "labels.jsonl"),
         "prediction_count": _count_jsonl_records(paths.run_dir / "predictions.jsonl"),
@@ -243,6 +281,7 @@ def _build_summary(
     allow_failed_audit: bool,
 ) -> dict[str, Any]:
     config = artifacts["config"]
+    run_status: RunStatusRecord = artifacts["run_status"]
     audit: AuditReportRecord = artifacts["audit_report"]
     metrics: list[EvaluationMetricRecord] = artifacts["evaluation_metrics"]
     backtests: list[PortfolioBacktestRecord] = artifacts["backtest_results"]
@@ -250,10 +289,19 @@ def _build_summary(
     feature_manifest: list[FeatureManifestRecord] = artifacts["feature_manifest"]
     tuning_log: list[TuningLogRecord] = artifacts["tuning_log"]
     portfolio_metrics: list[PortfolioMetricRecord] = artifacts["portfolio_metrics"]
+    delisting_application_report = artifacts["delisting_application_report"] or {}
+    data_license_manifest: DataLicenseManifestRecord | None = artifacts[
+        "data_license_manifest"
+    ]
     multiple_testing_report: MultipleTestingReportRecord | None = artifacts[
         "multiple_testing_report"
     ]
     specification_registry = artifacts["specification_registry"] or {}
+    coverage_waterfall = artifacts["coverage_waterfall"] or {}
+    coverage_tables = artifacts["coverage_tables"]
+    vocabulary_manifest = artifacts["vocabulary_manifest"]
+    section_length_quality_report = artifacts["section_length_quality_report"] or {}
+    prediction_distribution_report = artifacts["prediction_distribution_report"] or {}
 
     best_prediction = _best_prediction_metric(metrics)
     best_backtest = _best_backtest(backtests)
@@ -271,6 +319,10 @@ def _build_summary(
         "audit": {
             "status": audit.audit_status,
             "coverage": audit.coverage,
+            "coverage_diagnosis": _coverage_diagnosis_summary(
+                coverage_waterfall,
+                coverage_tables,
+            ),
             "check_count": audit.check_count,
             "fail_count": audit.fail_count,
             "warn_count": audit.warn_count,
@@ -291,6 +343,29 @@ def _build_summary(
             "prediction_count": artifacts["prediction_count"],
             "feature_count": artifacts["feature_count"],
         },
+        "data_provider": {
+            "market_data_provider": config.data_provider.market_data_provider,
+            "filing_provider": config.data_provider.filing_provider,
+            "price_source": config.data_provider.price_source,
+            "return_source": config.data_provider.return_source,
+            "delisting_return_source": config.data_provider.delisting_return_source,
+            "link_source": config.data_provider.link_source,
+            "allow_public_yahoo_fallback": config.data_provider.allow_public_yahoo_fallback,
+            "license_manifest_available": data_license_manifest is not None,
+            "license_manifest": (
+                {
+                    "data_stack": data_license_manifest.data_stack,
+                    "license_note": data_license_manifest.license_note,
+                    "raw_data_committed": data_license_manifest.raw_data_committed,
+                    "data_rights_scope": data_license_manifest.data_rights_scope,
+                    "permitted_public_outputs": (
+                        data_license_manifest.permitted_public_outputs
+                    ),
+                }
+                if data_license_manifest is not None
+                else None
+            ),
+        },
         "labels": {
             "targets": config.labels.targets,
             "return_type": config.labels.return_type,
@@ -303,6 +378,8 @@ def _build_summary(
             "feature_manifest_count": len(feature_manifest),
             "feature_versions": sorted({record.feature_version for record in feature_manifest}),
             "text_scopes": sorted({record.text_scope for record in feature_manifest}),
+            "vocabulary_manifest_count": len(vocabulary_manifest),
+            "vocabulary_manifest_sample": vocabulary_manifest[:6],
         },
         "models": {
             "enabled": config.models.enabled,
@@ -332,6 +409,7 @@ def _build_summary(
                 _portfolio_metric_summary(record)
                 for record in _top_portfolio_metrics(portfolio_metrics)
             ],
+            "delisting_application_report": delisting_application_report,
         },
         "multiple_testing": _multiple_testing_summary(multiple_testing_report),
         "specification_registry": {
@@ -348,6 +426,35 @@ def _build_summary(
                 "primary_specifications",
                 [],
             ),
+            "signal_direction_policy": _primary_signal_direction_policy(
+                specification_registry.get("primary_specifications", [])
+            ),
+        },
+        "quality_diagnostics": {
+            "section_length": {
+                "available": bool(section_length_quality_report),
+                "section_count": section_length_quality_report.get("section_count", 0),
+                "flag_counts": section_length_quality_report.get("flag_counts", {}),
+                "section_level_feature_exclusion_count": (
+                    section_length_quality_report.get(
+                        "section_level_feature_exclusion_count",
+                        0,
+                    )
+                ),
+                "rules": section_length_quality_report.get("rules", {}),
+            },
+            "prediction_distribution": {
+                "available": bool(prediction_distribution_report),
+                "ranking_policy": prediction_distribution_report.get("ranking_policy"),
+                "outlier_rule": prediction_distribution_report.get("outlier_rule"),
+                "prediction_scale_guard": prediction_distribution_report.get(
+                    "prediction_scale_guard",
+                    {},
+                ),
+                "top_outlier_rows": _top_prediction_outlier_rows(
+                    prediction_distribution_report.get("rows", [])
+                ),
+            },
         },
         "interpretation": _interpretation_policy(
             audit=audit,
@@ -358,6 +465,9 @@ def _build_summary(
         ),
         "reproducibility": {
             "config_path": str(paths.config),
+            "git_commit_sha": run_status.git_commit_sha,
+            "package_version": run_status.package_version,
+            "dirty_worktree_flag": run_status.dirty_worktree_flag,
             "report_markdown_path": str(paths.report_markdown),
             "empirical_report_path": str(paths.empirical_report),
             "factor_card_path": str(paths.factor_card),
@@ -414,6 +524,14 @@ def _render_markdown(summary: dict[str, Any]) -> str:
         f"- Labels: {summary['sample']['label_count']}.",
         f"- Predictions: {summary['sample']['prediction_count']}.",
         "",
+        "## Licensed Data Stack",
+        "",
+        _licensed_data_stack_section(summary["data_provider"]),
+        "",
+        "## Coverage And Audit Diagnosis",
+        "",
+        _coverage_diagnosis_section(summary["audit"]["coverage_diagnosis"]),
+        "",
         "## Label Construction",
         "",
         f"- Targets: {', '.join(f'`{target}`' for target in summary['labels']['targets'])}.",
@@ -429,6 +547,13 @@ def _render_markdown(summary: dict[str, Any]) -> str:
         f"- Feature manifests: {summary['features']['feature_manifest_count']}.",
         f"- Feature versions: {_inline_list(summary['features']['feature_versions'])}.",
         f"- Text scopes: {_inline_list(summary['features']['text_scopes'])}.",
+        f"- Vocabulary manifest rows: {summary['features']['vocabulary_manifest_count']}.",
+        "",
+        _vocabulary_manifest_section(summary["features"]["vocabulary_manifest_sample"]),
+        "",
+        "## Parser Section Length Quality",
+        "",
+        _section_length_quality_section(summary["quality_diagnostics"]["section_length"]),
         "",
         "## Model Setup",
         "",
@@ -440,16 +565,40 @@ def _render_markdown(summary: dict[str, Any]) -> str:
         "",
         "## Out-Of-Sample Prediction Results",
         "",
+        _primary_signal_policy_section(
+            summary["specification_registry"]["signal_direction_policy"]
+        ),
+        "",
         _metrics_table(summary["evaluation"]["test_metrics"]),
         "",
+        "## Prediction Distribution Diagnostics",
+        "",
+        _prediction_distribution_section(
+            summary["quality_diagnostics"]["prediction_distribution"]
+        ),
+        "",
         "## Factor Backtest",
+        "",
+        (
+            "Portfolio results are diagnostic only in the current applied-grade run; "
+            "the evidence supports exploratory prediction signals, not formal trading alpha."
+        ),
         "",
         f"- Portfolio method: `{summary['backtest']['portfolio_method']}`.",
         f"- Weighting: `{summary['backtest']['weighting']}`.",
         f"- One-way transaction cost: {summary['backtest']['transaction_cost_bps_one_way']} bps.",
         f"- Newey-West lag: {summary['backtest']['newey_west_lag']}.",
+        (
+            "- Portfolio ranking uses `factor_score` ordering to form ranks and "
+            "quantiles; raw prediction magnitude is diagnostic, not the equal-weight "
+            "ranking weight."
+        ),
         "",
         _backtest_table(summary["backtest"]["top_backtests"]),
+        "",
+        "## Delisting Return Handling",
+        "",
+        _delisting_report_section(summary["backtest"]["delisting_application_report"]),
         "",
         "## Multiple Testing Adjustment",
         "",
@@ -480,6 +629,10 @@ def _render_markdown(summary: dict[str, Any]) -> str:
         _conclusion_text(summary),
         "",
         "## Reproducible Commands",
+        "",
+        f"- Git commit SHA: `{summary['reproducibility'].get('git_commit_sha')}`.",
+        f"- Package version: `{summary['reproducibility'].get('package_version')}`.",
+        f"- Dirty worktree flag: `{summary['reproducibility'].get('dirty_worktree_flag')}`.",
         "",
         "```bash",
         *summary["reproducibility"]["commands"],
@@ -514,6 +667,14 @@ def _render_empirical_report(summary: dict[str, Any]) -> str:
         ),
         f"- Documents: {summary['sample']['document_count']}.",
         f"- Labels: {summary['sample']['label_count']}.",
+        "",
+        "## 2.1 Licensed Data Stack",
+        "",
+        _licensed_data_stack_section(summary["data_provider"]),
+        "",
+        "## 2.2 Coverage And Audit Diagnosis",
+        "",
+        _coverage_diagnosis_section(summary["audit"]["coverage_diagnosis"]),
         "",
         "## 3. Event-Time Alignment",
         "",
@@ -551,6 +712,8 @@ def _render_empirical_report(summary: dict[str, Any]) -> str:
             f"The backtest uses `{summary['backtest']['portfolio_method']}` with "
             f"`{summary['backtest']['weighting']}` weighting in the configured summary "
             "backtest. Portfolio variant diagnostics are reported when available. "
+            "These portfolio outputs are diagnostic only and should not be presented as "
+            "formal trading-alpha evidence. "
             "Portfolio return sources: "
             f"{_inline_list(summary['backtest']['portfolio_return_sources'])}. "
             "Position accounting: "
@@ -565,27 +728,31 @@ def _render_empirical_report(summary: dict[str, Any]) -> str:
         "",
         _portfolio_metric_table(summary["backtest"]["portfolio_metrics"]),
         "",
-        "## 11. Multiple Testing Adjustment",
+        "## 11. Delisting Return Handling",
+        "",
+        _delisting_report_section(summary["backtest"]["delisting_application_report"]),
+        "",
+        "## 12. Multiple Testing Adjustment",
         "",
         _multiple_testing_section(summary["multiple_testing"]),
         "",
-        "## 12. Specification Registry",
+        "## 13. Specification Registry",
         "",
         _specification_registry_section(summary["specification_registry"]),
         "",
-        "## 13. Failure Cases And Audit Results",
+        "## 14. Failure Cases And Audit Results",
         "",
         _audit_table(summary["audit"]["failed_checks"], summary["audit"]["warning_checks"]),
         "",
-        "## 14. Economic Interpretation",
+        "## 15. Economic Interpretation",
         "",
         summary["interpretation"]["economic_interpretation"],
         "",
-        "## 15. Limitations",
+        "## 16. Limitations",
         "",
         _limitations_text(summary),
         "",
-        "## 16. Conclusion",
+        "## 17. Conclusion",
         "",
         summary["interpretation"]["conclusion_text"],
         "",
@@ -596,6 +763,7 @@ def _render_empirical_report(summary: dict[str, Any]) -> str:
 def _render_factor_card(summary: dict[str, Any]) -> str:
     best_metric = summary["evaluation"]["best_prediction_metric"]
     best_backtest = summary["backtest"]["best_backtest"]
+    signal_policy = summary["specification_registry"]["signal_direction_policy"]
     lines = [
         f"# Factor Card - {summary['run_id']}",
         "",
@@ -605,12 +773,39 @@ def _render_factor_card(summary: dict[str, Any]) -> str:
         f"| Formal result allowed | `{summary['formal_result_allowed']}` |",
         f"| Audit status | `{summary['audit']['status']}` |",
         f"| Coverage | `{summary['audit']['coverage']:.3f}` |",
+        (
+            "| Eligible OOS coverage | "
+            f"`{_fmt(summary['audit']['coverage_diagnosis']['eligible_oos_coverage'])}` |"
+        ),
+        (
+            "| Primary spec coverage | "
+            f"`{_fmt(summary['audit']['coverage_diagnosis']['primary_spec_coverage'])}` |"
+        ),
+        (
+            "| Primary prediction coverage | "
+            f"`{_fmt(summary['audit']['coverage_diagnosis']['primary_prediction_coverage'])}` |"
+        ),
+        (
+            "| Primary portfolio coverage | "
+            f"`{_fmt(summary['audit']['coverage_diagnosis']['primary_portfolio_coverage'])}` |"
+        ),
+        (
+            "| Signal direction policy | "
+            f"`{signal_policy['policy']}` |"
+        ),
+        (
+            "| Primary prediction sign | "
+            f"`{signal_policy['primary_prediction_sign']}` |"
+        ),
         f"| Universe | `{summary['sample']['universe']}` |",
         f"| Sample | `{summary['sample']['sample_start']}..{summary['sample']['sample_end']}` |",
         f"| Targets | {_inline_list(summary['labels']['targets'])} |",
         f"| Features | {_inline_list(summary['features']['methods'])} |",
         f"| Models | {_inline_list(summary['models']['enabled'])} |",
         f"| Multiple-testing families | `{summary['multiple_testing']['family_count']}` |",
+        f"| Git commit SHA | `{summary['reproducibility'].get('git_commit_sha')}` |",
+        f"| Package version | `{summary['reproducibility'].get('package_version')}` |",
+        f"| Dirty worktree flag | `{summary['reproducibility'].get('dirty_worktree_flag')}` |",
         (
             "| Portfolio return sources | "
             f"{_inline_list(summary['backtest']['portfolio_return_sources'])} |"
@@ -632,6 +827,33 @@ def _render_factor_card(summary: dict[str, Any]) -> str:
         "",
         summary["interpretation"]["evidence_level"],
         "",
+        "## Primary Sign Convention",
+        "",
+        signal_policy["explanation"],
+        "",
+        "## Diagnostics",
+        "",
+        (
+            "- Vocabulary manifest rows: "
+            f"`{summary['features']['vocabulary_manifest_count']}`."
+        ),
+        (
+            "- Section length flags: "
+            f"`{summary['quality_diagnostics']['section_length']['flag_counts']}`."
+        ),
+        (
+            "- Section-level feature exclusions: "
+            f"`{_section_exclusion_count(summary)}`."
+        ),
+        (
+            "- Prediction ranking policy: "
+            f"{summary['quality_diagnostics']['prediction_distribution']['ranking_policy']}"
+        ),
+        (
+            "- Portfolio interpretation: diagnostic only; current evidence does not "
+            "establish formal trading alpha."
+        ),
+        "",
         "## Usage Boundary",
         "",
         summary["interpretation"]["usage_boundary"],
@@ -652,6 +874,10 @@ def _render_appendix_tables(summary: dict[str, Any]) -> str:
         f"| Labels | {summary['sample']['label_count']} |",
         f"| Predictions | {summary['sample']['prediction_count']} |",
         f"| Features | {summary['sample']['feature_count']} |",
+        "",
+        "## Table 1B Coverage Waterfall",
+        "",
+        _coverage_diagnosis_section(summary["audit"]["coverage_diagnosis"]),
         "",
         "## Table 2 Feature Summary",
         "",
@@ -686,6 +912,106 @@ def _render_appendix_tables(summary: dict[str, Any]) -> str:
         _audit_table(summary["audit"]["failed_checks"], summary["audit"]["warning_checks"]),
         "",
     ]
+    return "\n".join(lines)
+
+
+def _vocabulary_manifest_section(rows: list[dict[str, Any]]) -> str:
+    if not rows:
+        return "No vocabulary manifest artifact was available."
+    lines = [
+        "| Split | Scope | Fit Scope | Vocabulary Size | Hash | Sample Terms |",
+        "| --- | --- | --- | ---: | --- | --- |",
+    ]
+    for row in rows[:8]:
+        sample = ", ".join(f"`{term}`" for term in row.get("top_terms_sample", [])[:8])
+        lines.append(
+            "| "
+            f"`{row.get('split_id')}` | "
+            f"`{row.get('text_scope')}` | "
+            f"`{row.get('fit_scope')}` | "
+            f"{row.get('vocabulary_size')} | "
+            f"`{str(row.get('vocabulary_hash', ''))[:12]}` | "
+            f"{sample} |"
+        )
+    return "\n".join(lines)
+
+
+def _section_length_quality_section(summary: dict[str, Any]) -> str:
+    if not summary.get("available"):
+        return "No section length quality artifact was available."
+    return "\n".join(
+        [
+            f"- Section rows checked: `{summary.get('section_count', 0)}`.",
+            f"- Flag counts: `{summary.get('flag_counts', {})}`.",
+            (
+                "- Section-level feature exclusions: "
+                f"`{summary.get('section_level_feature_exclusion_count', 0)}`."
+            ),
+            (
+                "- Core section rule: `item_1a` / `item_7` below 500 words is a "
+                "warning; below 100 words requires manual review."
+            ),
+            (
+                "- Feature policy: `item_1a` / `item_7` sections below 100 words "
+                "are excluded from section-level features until manually reviewed; "
+                "other text scopes remain available."
+            ),
+        ]
+    )
+
+
+def _section_exclusion_count(summary: dict[str, Any]) -> int:
+    return int(
+        summary["quality_diagnostics"]["section_length"].get(
+            "section_level_feature_exclusion_count",
+            0,
+        )
+    )
+
+
+def _primary_signal_policy_section(policy: dict[str, Any]) -> str:
+    return "\n".join(
+        [
+            f"- Signal direction policy: `{policy.get('policy')}`.",
+            f"- Primary prediction sign: `{policy.get('primary_prediction_sign')}`.",
+            f"- Explanation: {policy.get('explanation')}",
+        ]
+    )
+
+
+def _prediction_distribution_section(summary: dict[str, Any]) -> str:
+    if not summary.get("available"):
+        return "No prediction distribution artifact was available."
+    lines = [
+        f"- Ranking policy: {summary.get('ranking_policy')}",
+        f"- Outlier rule: {summary.get('outlier_rule')}",
+        (
+            "- Prediction scale guard: "
+            f"{summary.get('prediction_scale_guard', {}).get('warning_row_count', 0)} "
+            "model/target/role rows exceed warning thresholds."
+        ),
+        (
+            "- Scale guard policy: "
+            f"{summary.get('prediction_scale_guard', {}).get('policy')}"
+        ),
+        "",
+        "| Model | Target | Role | N | Scale Ratio | Guard | Outliers | "
+        "Prediction Range | Target Range |",
+        "| --- | --- | --- | ---: | ---: | --- | ---: | --- | --- |",
+    ]
+    for row in summary.get("top_outlier_rows", [])[:10]:
+        lines.append(
+            "| "
+            f"`{row.get('model_name')}` | "
+            f"`{row.get('target_name')}` | "
+            f"`{row.get('role')}` | "
+            f"{row.get('observation_count')} | "
+            f"{_fmt(row.get('scale_ratio'))} | "
+            f"`{row.get('prediction_scale_guard_status')}` | "
+            f"{row.get('outlier_count')} | "
+            f"[{_fmt(row.get('prediction_min'))}, {_fmt(row.get('prediction_max'))}] | "
+            f"[{_fmt(row.get('target_min'))}, {_fmt(row.get('target_max'))}] |"
+        )
     return "\n".join(lines)
 
 
@@ -864,6 +1190,55 @@ def _multiple_testing_summary(
     }
 
 
+def _coverage_diagnosis_summary(
+    waterfall: dict[str, Any],
+    tables: dict[str, list[dict[str, str]]],
+) -> dict[str, Any]:
+    counts = waterfall.get("counts", {}) if waterfall else {}
+    failure_counts = waterfall.get("failure_counts", {}) if waterfall else {}
+    return {
+        "available": bool(waterfall),
+        "raw_label_coverage": float(waterfall.get("raw_label_coverage", 0.0))
+        if waterfall
+        else 0.0,
+        "eligible_oos_coverage": float(waterfall.get("eligible_oos_coverage", 0.0))
+        if waterfall
+        else 0.0,
+        "model_expected_prediction_coverage": float(
+            waterfall.get("model_expected_prediction_coverage", 0.0)
+        )
+        if waterfall
+        else 0.0,
+        "portfolio_eligible_coverage": float(
+            waterfall.get("portfolio_eligible_coverage", 0.0)
+        )
+        if waterfall
+        else 0.0,
+        "primary_prediction_coverage": float(
+            waterfall.get("primary_prediction_coverage", 0.0)
+        )
+        if waterfall
+        else 0.0,
+        "primary_portfolio_coverage": float(
+            waterfall.get("primary_portfolio_coverage", 0.0)
+        )
+        if waterfall
+        else 0.0,
+        "primary_spec_coverage": float(waterfall.get("primary_spec_coverage", 0.0))
+        if waterfall
+        else 0.0,
+        "counts": counts,
+        "failure_counts": failure_counts,
+        "top_failure_reasons": waterfall.get("top_failure_reasons", [])
+        if waterfall
+        else [],
+        "by_target": tables.get("by_target", [])[:12],
+        "by_split": tables.get("by_split", [])[:12],
+        "by_model": tables.get("by_model", [])[:12],
+        "by_ticker": tables.get("by_ticker", [])[:12],
+    }
+
+
 def _interpretation_policy(
     *,
     audit: AuditReportRecord,
@@ -889,6 +1264,47 @@ def _interpretation_policy(
     backtest_positive = (
         best_backtest is not None and best_backtest.net_long_short_return > 0
     )
+    best_prediction_model = (
+        best_prediction.model_id.split("::", 1)[0] if best_prediction is not None else ""
+    )
+    if prediction_positive and not audit.formal_result_allowed:
+        if best_prediction_model in {"historical_mean", "industry_mean"}:
+            return {
+                "evidence_level": (
+                    "applied_pipeline_validated_with_positive_baseline_predictive_evidence"
+                ),
+                "economic_interpretation": (
+                    "The applied pipeline is validated end-to-end and the best "
+                    "out-of-sample prediction result is positive, but it is driven by "
+                    f"the `{best_prediction_model}` baseline rather than a text model. "
+                    "This is workflow and baseline evidence, not formal text alpha."
+                ),
+                "usage_boundary": (
+                    "Report as an applied-grade pilot. Do not describe the result as "
+                    "formal trading alpha; disclose mixed-source market data, the small "
+                    "10-company panel, and that industry structure dominates the best "
+                    "prediction result."
+                ),
+                "conclusion_text": (
+                    "The pipeline works and baseline predictive evidence is positive, "
+                    "but formal text-factor and trading-alpha claims are not supported."
+                ),
+            }
+        return {
+            "evidence_level": "exploratory_prediction_evidence_not_formal_trading_alpha",
+            "economic_interpretation": (
+                "The run shows positive out-of-sample prediction evidence, but audit "
+                "or data-source boundaries prevent a formal trading-alpha conclusion."
+            ),
+            "usage_boundary": (
+                "Report as exploratory prediction evidence and disclose tested "
+                "specifications, data-source boundaries, and portfolio limitations."
+            ),
+            "conclusion_text": (
+                "Exploratory prediction evidence is present, but formal trading-alpha "
+                "evidence is not established."
+            ),
+        }
     if prediction_positive and backtest_positive and adjusted_discovery:
         return {
             "evidence_level": "research_evidence_positive",
@@ -935,6 +1351,64 @@ def _interpretation_policy(
         "usage_boundary": "Use as a reproducible experiment log rather than a factor claim.",
         "conclusion_text": "Evidence is weak or incomplete under the current setup.",
     }
+
+
+def _primary_signal_direction_policy(primary_specs: list[dict[str, Any]]) -> dict[str, Any]:
+    prediction_specs = [
+        spec for spec in primary_specs if spec.get("portfolio_method") == "prediction_metric"
+    ]
+    primary_prediction = prediction_specs[0] if prediction_specs else None
+    raw_metric = (
+        float(primary_prediction.get("raw_metric", 0.0))
+        if primary_prediction is not None
+        else 0.0
+    )
+    raw_p_value = primary_prediction.get("raw_p_value") if primary_prediction else None
+    if raw_metric < 0:
+        sign = "negative"
+        explanation = (
+            "The preregistered volatility prediction specification contains ranking "
+            "information, but the Rank IC sign is negative under the current score "
+            "convention. This must not be post-hoc inverted or described as a positive "
+            "volatility forecast."
+        )
+    elif raw_metric > 0:
+        sign = "positive"
+        explanation = (
+            "The preregistered prediction specification has a positive Rank IC under "
+            "the current score convention."
+        )
+    else:
+        sign = "zero_or_missing"
+        explanation = (
+            "The preregistered prediction specification is missing or has zero Rank IC "
+            "under the current score convention."
+        )
+    return {
+        "policy": "pre_registered_score_convention_no_post_hoc_sign_flip",
+        "primary_prediction_sign": sign,
+        "primary_prediction_model_id": (
+            primary_prediction.get("model_id") if primary_prediction else None
+        ),
+        "primary_prediction_metric": raw_metric,
+        "primary_prediction_p_value": raw_p_value,
+        "explanation": explanation,
+    }
+
+
+def _top_prediction_outlier_rows(
+    rows: list[dict[str, Any]],
+    limit: int = 12,
+) -> list[dict[str, Any]]:
+    return sorted(
+        rows,
+        key=lambda row: (
+            -int(row.get("outlier_count", 0) or 0),
+            -float(row.get("scale_ratio", 0.0) or 0.0),
+            str(row.get("target_name", "")),
+            str(row.get("model_name", "")),
+        ),
+    )[:limit]
 
 
 def _has_adjusted_discovery(report: MultipleTestingReportRecord | None) -> bool:
@@ -1053,6 +1527,180 @@ def _multiple_testing_section(summary: dict[str, Any]) -> str:
             f"{family['discoveries_at_5pct']} | {family['discoveries_at_10pct']} |"
         )
     return "\n".join(lines)
+
+
+def _coverage_diagnosis_section(summary: dict[str, Any]) -> str:
+    if not summary["available"]:
+        return "No coverage waterfall artifact was available."
+    counts = summary["counts"]
+    lines = [
+        (
+            f"- Raw label coverage: `{_fmt(summary['raw_label_coverage'])}` "
+            f"({counts.get('predicted_unique_labels', 0)} / "
+            f"{counts.get('labels_total', 0)} labels)."
+        ),
+        (
+            "- Raw label coverage includes train-window labels that are not expected "
+            "to receive out-of-sample predictions; eligible OOS coverage is the "
+            "prediction-completeness metric for validation/test labels."
+        ),
+        (
+            f"- Eligible OOS coverage: `{_fmt(summary['eligible_oos_coverage'])}` "
+            f"({counts.get('predicted_eligible_oos_labels', 0)} / "
+            f"{counts.get('eligible_oos_labels', 0)} validation/test labels)."
+        ),
+        (
+            "- Model-expected prediction coverage: "
+            f"`{_fmt(summary['model_expected_prediction_coverage'])}` "
+            f"({counts.get('model_predicted_label_pairs', 0)} / "
+            f"{counts.get('model_expected_label_pairs', 0)} model-label pairs)."
+        ),
+        (
+            f"- Primary spec coverage: `{_fmt(summary['primary_spec_coverage'])}` "
+            f"({counts.get('primary_covered_specifications', 0)} / "
+            f"{counts.get('primary_expected_specifications', 0)} primary specifications)."
+        ),
+        (
+            "- Primary prediction coverage: "
+            f"`{_fmt(summary['primary_prediction_coverage'])}` "
+            f"({counts.get('primary_prediction_covered_specifications', 0)} / "
+            f"{counts.get('primary_prediction_expected_specifications', 0)})."
+        ),
+        (
+            "- Primary portfolio coverage: "
+            f"`{_fmt(summary['primary_portfolio_coverage'])}` "
+            f"({counts.get('primary_portfolio_covered_specifications', 0)} / "
+            f"{counts.get('primary_portfolio_expected_specifications', 0)})."
+        ),
+        (
+            "- Portfolio-eligible coverage: "
+            f"`{_fmt(summary['portfolio_eligible_coverage'])}` "
+            f"({counts.get('predicted_portfolio_eligible_labels', 0)} / "
+            f"{counts.get('portfolio_eligible_labels', 0)} test labels)."
+        ),
+        "",
+        "### Coverage By Target",
+        "",
+        _coverage_table(
+            summary["by_target"],
+            ["target_name", "labels_total", "eligible_oos_labels", "eligible_oos_coverage"],
+        ),
+        "",
+        "### Coverage By Split",
+        "",
+        _coverage_table(
+            summary["by_split"],
+            [
+                "split_id",
+                "eligible_oos_labels",
+                "predicted_eligible_oos_labels",
+                "eligible_oos_coverage",
+            ],
+        ),
+        "",
+        "### Coverage By Model",
+        "",
+        _coverage_table(
+            summary["by_model"],
+            [
+                "model_name",
+                "expected_label_pairs",
+                "predicted_label_pairs",
+                "model_expected_prediction_coverage",
+            ],
+        ),
+        "",
+        "### Top Failure Reasons",
+        "",
+        _coverage_failure_table(summary["top_failure_reasons"]),
+    ]
+    return "\n".join(lines)
+
+
+def _licensed_data_stack_section(summary: dict[str, Any]) -> str:
+    manifest = summary.get("license_manifest")
+    lines = [
+        f"- Market data provider: `{summary['market_data_provider']}`.",
+        f"- Filing provider: `{summary['filing_provider']}`.",
+        f"- Price source: `{summary['price_source']}`.",
+        f"- Return source: `{summary['return_source']}`.",
+        f"- Delisting return source: `{summary.get('delisting_return_source')}`.",
+        f"- Link source: `{summary.get('link_source')}`.",
+        (
+            "- Public Yahoo fallback allowed: "
+            f"`{summary['allow_public_yahoo_fallback']}`."
+        ),
+    ]
+    if not manifest:
+        lines.append("- Licensed data manifest: `missing`.")
+        return "\n".join(lines)
+    lines.extend(
+        [
+            f"- Licensed data manifest: `{manifest['data_stack']}`.",
+            f"- Raw licensed data committed: `{manifest['raw_data_committed']}`.",
+            f"- Data rights scope: `{manifest.get('data_rights_scope') or 'unspecified'}`.",
+            f"- License note: {manifest['license_note']}",
+        ]
+    )
+    public_outputs = manifest.get("permitted_public_outputs", [])
+    if public_outputs:
+        lines.append(f"- Permitted public outputs: {_inline_list(public_outputs)}.")
+    return "\n".join(lines)
+
+
+def _coverage_table(rows: list[dict[str, Any]], columns: list[str]) -> str:
+    if not rows:
+        return "No rows available."
+    lines = [
+        "| " + " | ".join(columns) + " |",
+        "| " + " | ".join("---" for _ in columns) + " |",
+    ]
+    for row in rows:
+        lines.append("| " + " | ".join(str(row.get(column, "")) for column in columns) + " |")
+    return "\n".join(lines)
+
+
+def _coverage_failure_table(rows: list[dict[str, Any]]) -> str:
+    if not rows:
+        return "No coverage failure reasons were recorded."
+    lines = [
+        "| Stage | Reason | Count |",
+        "| --- | --- | ---: |",
+    ]
+    for row in rows[:10]:
+        lines.append(
+            "| "
+            f"{row.get('failure_stage', '')} | "
+            f"{row.get('failure_reason', '')} | "
+            f"{row.get('count', 0)} |"
+        )
+    return "\n".join(lines)
+
+
+def _delisting_report_section(report: dict[str, Any]) -> str:
+    if not report:
+        return "No delisting application report was available."
+    return "\n".join(
+        [
+            f"- Status: `{report.get('status', 'unknown')}`.",
+            (
+                "- Labels with delisting return applied: "
+                f"`{report.get('labels_with_delisting_return_applied', 0)}`."
+            ),
+            (
+                "- Portfolio positions affected by delisting: "
+                f"`{report.get('positions_affected_by_delisting', 0)}`."
+            ),
+            (
+                "- Delisting returns applied in portfolio rows: "
+                f"`{report.get('delisting_returns_applied', 0)}`."
+            ),
+            (
+                "- Missing delisting returns: "
+                f"`{report.get('missing_delisting_returns', 0)}`."
+            ),
+        ]
+    )
 
 
 def _specification_registry_section(summary: dict[str, Any]) -> str:
@@ -1228,10 +1876,28 @@ def _read_optional_jsonl_objects(path: Path) -> list[dict[str, Any]]:
     return records
 
 
+def _read_optional_csv_rows(path: Path) -> list[dict[str, str]]:
+    if not path.exists() or path.stat().st_size == 0:
+        return []
+    with path.open("r", newline="", encoding="utf-8") as file:
+        return list(csv.DictReader(file))
+
+
 def _read_optional_multiple_testing_report(path: Path) -> MultipleTestingReportRecord | None:
     if not path.exists():
         return None
     return MultipleTestingReportRecord.model_validate(_read_json_object(path))
+
+
+def _read_data_license_manifest(config_path: Path) -> DataLicenseManifestRecord | None:
+    config = load_experiment_config(config_path)
+    manifest_path = config.data_provider.data_license_manifest_file
+    if manifest_path is None:
+        return None
+    path = Path(manifest_path)
+    if not path.exists():
+        return None
+    return DataLicenseManifestRecord.model_validate(_read_json_object(path))
 
 
 def _count_jsonl_records(path: Path) -> int:

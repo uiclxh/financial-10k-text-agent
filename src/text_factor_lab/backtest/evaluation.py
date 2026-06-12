@@ -54,6 +54,7 @@ class EvaluationBuildResult:
     monthly_portfolio_weights: list[PortfolioWeightRecord]
     monthly_portfolio_returns: list[PortfolioReturnRecord]
     monthly_portfolio_metrics: list[PortfolioMetricRecord]
+    delisting_application_report: dict[str, int | float | str]
 
 
 @dataclass(frozen=True)
@@ -195,6 +196,10 @@ def build_evaluation_artifacts(
         monthly_portfolio_weights=monthly_portfolio_weights,
         monthly_portfolio_returns=monthly_portfolio_returns,
         monthly_portfolio_metrics=monthly_portfolio_metrics,
+        delisting_application_report=_delisting_application_report(
+            labels=labels,
+            portfolio_returns=portfolio_returns + monthly_portfolio_returns,
+        ),
     )
 
 
@@ -415,6 +420,44 @@ def _aggregate_model_id(model_id: str, target_name: str) -> str:
     if len(parts) >= 1:
         return f"{parts[0]}::{target_name}::ALL_SPLITS"
     return f"{model_id}::{target_name}::ALL_SPLITS"
+
+
+def _delisting_application_report(
+    *,
+    labels: list[LabelRecord],
+    portfolio_returns: list[PortfolioReturnRecord],
+) -> dict[str, int | float | str]:
+    labels_with_delisting = sum(label.delisting_return_applied for label in labels)
+    labels_missing_delisting_return = sum(
+        label.return_quality_flag == "missing_delisting_return" for label in labels
+    )
+    positions_affected = sum(
+        record.positions_affected_by_delisting for record in portfolio_returns
+    )
+    delisting_returns_applied = sum(
+        record.delisting_returns_applied for record in portfolio_returns
+    )
+    missing_delisting_returns = sum(
+        record.missing_delisting_returns for record in portfolio_returns
+    ) + labels_missing_delisting_return
+    status = (
+        "fail"
+        if missing_delisting_returns
+        else "pass"
+        if labels_with_delisting or delisting_returns_applied
+        else "not_applicable"
+    )
+    return {
+        "report_version": "delisting-application-report-v0",
+        "status": status,
+        "labels_total": len(labels),
+        "labels_with_delisting_return_applied": labels_with_delisting,
+        "labels_missing_delisting_return": labels_missing_delisting_return,
+        "portfolio_return_rows": len(portfolio_returns),
+        "positions_affected_by_delisting": positions_affected,
+        "delisting_returns_applied": delisting_returns_applied,
+        "missing_delisting_returns": missing_delisting_returns,
+    }
 
 
 def _ic_diagnostic_series(
@@ -972,6 +1015,9 @@ def _portfolio_return_for_rebalance(
     gross_return = long_return + short_return
     transaction_cost = turnover * transaction_cost_bps_one_way / 10_000.0
     long_exposure, short_exposure, gross_exposure, net_exposure = _weight_exposures(weights)
+    affected_by_delisting = sum(
+        1 for ticker in weights if label_by_ticker[ticker].delisting_return_applied
+    )
     return PortfolioReturnRecord(
         run_id=run_id,
         model_id=model_id,
@@ -1001,6 +1047,8 @@ def _portfolio_return_for_rebalance(
         ending_net_exposure=net_exposure,
         turnover=float(turnover),
         active_position_count=len(weights),
+        positions_affected_by_delisting=affected_by_delisting,
+        delisting_returns_applied=affected_by_delisting,
         created_at_utc=created_at_utc,
     )
 
@@ -1044,6 +1092,16 @@ def _daily_portfolio_returns_for_rebalance(
             for row in day_rows.itertuples(index=False)
             if not np.isnan(float(getattr(row, return_column)))
         }
+        delisted_tickers = {
+            str(row.ticker)
+            for row in day_rows.itertuples(index=False)
+            if bool(getattr(row, "delisting_return_applied", False))
+        }
+        missing_delisting_tickers = {
+            str(row.ticker)
+            for row in day_rows.itertuples(index=False)
+            if bool(getattr(row, "missing_delisting_return", False))
+        }
         usable_weights = {
             ticker: weight for ticker, weight in current_weights.items() if ticker in ticker_returns
         }
@@ -1070,6 +1128,11 @@ def _daily_portfolio_returns_for_rebalance(
             ticker_returns=ticker_returns,
             portfolio_return=gross_return,
         )
+        next_weights = {
+            ticker: weight
+            for ticker, weight in next_weights.items()
+            if ticker not in delisted_tickers
+        }
         (
             ending_long_exposure,
             ending_short_exposure,
@@ -1106,6 +1169,9 @@ def _daily_portfolio_returns_for_rebalance(
                 ending_net_exposure=ending_net_exposure,
                 turnover=float(row_turnover),
                 active_position_count=len(usable_weights),
+                positions_affected_by_delisting=len(delisted_tickers & set(usable_weights)),
+                delisting_returns_applied=len(delisted_tickers & set(usable_weights)),
+                missing_delisting_returns=len(missing_delisting_tickers & set(usable_weights)),
                 created_at_utc=created_at_utc,
             )
         )
@@ -1273,3 +1339,12 @@ def write_factor_panel_jsonl(records: list[FactorPanelRecord], path: str | Path)
     from text_factor_lab.backtest.monthly import write_factor_panel_jsonl as _write
 
     _write(records, path)
+
+
+def write_delisting_application_report_json(
+    report: dict[str, int | float | str],
+    path: str | Path,
+) -> None:
+    output = Path(path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")

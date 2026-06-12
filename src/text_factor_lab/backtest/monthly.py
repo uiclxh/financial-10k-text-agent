@@ -540,6 +540,16 @@ def _daily_returns_for_monthly_weights(
             for row in day_rows.itertuples(index=False)
             if not np.isnan(float(getattr(row, return_column)))
         }
+        delisted_tickers = {
+            str(row.ticker)
+            for row in day_rows.itertuples(index=False)
+            if bool(getattr(row, "delisting_return_applied", False))
+        }
+        missing_delisting_tickers = {
+            str(row.ticker)
+            for row in day_rows.itertuples(index=False)
+            if bool(getattr(row, "missing_delisting_return", False))
+        }
         usable_weights = {
             ticker: weight for ticker, weight in current_weights.items() if ticker in ticker_returns
         }
@@ -566,6 +576,11 @@ def _daily_returns_for_monthly_weights(
             ticker_returns=ticker_returns,
             portfolio_return=gross_return,
         )
+        next_weights = {
+            ticker: weight
+            for ticker, weight in next_weights.items()
+            if ticker not in delisted_tickers
+        }
         (
             ending_long_exposure,
             ending_short_exposure,
@@ -602,6 +617,9 @@ def _daily_returns_for_monthly_weights(
                 ending_net_exposure=ending_net_exposure,
                 turnover=float(row_turnover),
                 active_position_count=len(usable_weights),
+                positions_affected_by_delisting=len(delisted_tickers & set(usable_weights)),
+                delisting_returns_applied=len(delisted_tickers & set(usable_weights)),
+                missing_delisting_returns=len(missing_delisting_tickers & set(usable_weights)),
                 created_at_utc=created_at_utc,
             )
         )

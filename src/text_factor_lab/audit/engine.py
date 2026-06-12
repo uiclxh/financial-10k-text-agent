@@ -8,19 +8,28 @@ from typing import TypeVar
 
 from pydantic import ValidationError
 
+from text_factor_lab.audit.coverage import (
+    OUTSIDE_CONFIGURED_SPLIT_STAGE,
+    CoverageDiagnostics,
+    build_coverage_diagnostics,
+    write_coverage_diagnostics,
+)
 from text_factor_lab.schemas import (
     AuditCheckRecord,
     AuditReportRecord,
+    DataLicenseManifestRecord,
     DocumentManifestRecord,
     EvaluationMetricRecord,
     FeatureManifestRecord,
     FeatureRecord,
     LabelRecord,
     ModelManifestRecord,
+    ModelPredictionFailureRecord,
     MultipleTestingReportRecord,
     PortfolioBacktestRecord,
     PredictionRecord,
     RunStatusRecord,
+    SplitAssignmentRecord,
     SplitLeakageRecord,
     TestedSpecificationRecord,
     TuningLogRecord,
@@ -37,18 +46,27 @@ class AuditArtifactPaths:
     run_dir: Path
     document_manifest: Path
     labels: Path
+    split_assignments: Path
     split_leakage: Path
     features: Path
     feature_manifest: Path
     vocabulary: Path
     predictions: Path
+    model_prediction_failures: Path
     model_manifest: Path
     tuning_log: Path
     evaluation_metrics: Path
     backtest_results: Path
+    delisting_application_report: Path
     tested_specifications: Path
     multiple_testing_report: Path
     specification_registry: Path
+    coverage_waterfall: Path
+    coverage_failures: Path
+    coverage_by_target: Path
+    coverage_by_split: Path
+    coverage_by_ticker: Path
+    coverage_by_model: Path
     audit_report: Path
 
     @classmethod
@@ -58,18 +76,27 @@ class AuditArtifactPaths:
             run_dir=base,
             document_manifest=base / "document_manifest.jsonl",
             labels=base / "labels.jsonl",
+            split_assignments=base / "split_assignments.jsonl",
             split_leakage=base / "split_leakage.jsonl",
             features=base / "features.jsonl",
             feature_manifest=base / "feature_manifest.json",
             vocabulary=base / "vocabulary.json",
             predictions=base / "predictions.jsonl",
+            model_prediction_failures=base / "model_prediction_failures.jsonl",
             model_manifest=base / "model_manifest.json",
             tuning_log=base / "tuning_log.json",
             evaluation_metrics=base / "evaluation_metrics.json",
             backtest_results=base / "backtest_results.json",
+            delisting_application_report=base / "delisting_application_report.json",
             tested_specifications=base / "tested_specifications.jsonl",
             multiple_testing_report=base / "multiple_testing_report.json",
             specification_registry=base / "specification_registry.json",
+            coverage_waterfall=base / "coverage_waterfall.json",
+            coverage_failures=base / "coverage_failures.jsonl",
+            coverage_by_target=base / "coverage_by_target.csv",
+            coverage_by_split=base / "coverage_by_split.csv",
+            coverage_by_ticker=base / "coverage_by_ticker.csv",
+            coverage_by_model=base / "coverage_by_model.csv",
             audit_report=base / "audit_report.json",
         )
 
@@ -78,15 +105,18 @@ class AuditArtifactPaths:
 class LoadedAuditArtifacts:
     document_manifest: list[DocumentManifestRecord]
     labels: list[LabelRecord]
+    split_assignments: list[SplitAssignmentRecord]
     split_leakage: list[SplitLeakageRecord]
     features: list[FeatureRecord]
     feature_manifest: list[FeatureManifestRecord]
     vocabulary: dict[str, dict[str, dict[str, int]]] | None
     predictions: list[PredictionRecord]
+    model_prediction_failures: list[ModelPredictionFailureRecord]
     model_manifest: list[ModelManifestRecord]
     tuning_log: list[TuningLogRecord]
     evaluation_metrics: list[EvaluationMetricRecord]
     backtest_results: list[PortfolioBacktestRecord]
+    delisting_application_report: dict[str, object] | None
     tested_specifications: list[TestedSpecificationRecord]
     multiple_testing_report: MultipleTestingReportRecord | None
     specification_registry: dict[str, object] | None
@@ -116,10 +146,42 @@ def audit_run(
         checks=checks,
         formal=config.run.run_type,
     )
+    coverage_diagnostics = build_coverage_diagnostics(
+        labels=artifacts.labels,
+        split_assignments=artifacts.split_assignments,
+        features=artifacts.features,
+        model_manifest=artifacts.model_manifest,
+        predictions=artifacts.predictions,
+        tested_specifications=artifacts.tested_specifications,
+    )
+    write_coverage_diagnostics(
+        coverage_diagnostics,
+        waterfall_path=paths.coverage_waterfall,
+        failures_path=paths.coverage_failures,
+        by_target_path=paths.coverage_by_target,
+        by_split_path=paths.coverage_by_split,
+        by_ticker_path=paths.coverage_by_ticker,
+        by_model_path=paths.coverage_by_model,
+    )
 
     checks.extend(
         [
-            _coverage_check(run_id, artifacts.labels, artifacts.predictions, threshold),
+            _coverage_check(
+                run_id,
+                coverage_diagnostics,
+                threshold,
+                formal=config.run.run_type == "formal_run",
+            ),
+            _baseline_prediction_coverage_check(
+                run_id,
+                coverage_diagnostics,
+                enabled_models=config.models.enabled,
+            ),
+            _primary_spec_coverage_check(
+                run_id,
+                coverage_diagnostics,
+                formal=config.run.run_type == "formal_run",
+            ),
             _prediction_alignment_check(run_id, artifacts.labels, artifacts.predictions),
             _split_leakage_check(run_id, artifacts.split_leakage),
             _feature_lookahead_check(run_id, artifacts.features),
@@ -132,6 +194,17 @@ def audit_run(
             _model_manifest_check(run_id, artifacts.model_manifest),
             _model_selection_leakage_check(run_id, artifacts.tuning_log),
             _evaluation_check(run_id, artifacts.evaluation_metrics, artifacts.backtest_results),
+            _delisting_application_check(
+                run_id,
+                artifacts.delisting_application_report,
+                formal=config.run.run_type == "formal_run",
+            ),
+            _licensed_data_manifest_check(
+                run_id=run_id,
+                config=config,
+                formal=config.run.run_type == "formal_run",
+            ),
+            _mixed_market_data_source_check(run_id=run_id, config=config),
             _tested_specifications_check(
                 run_id,
                 artifacts.tested_specifications,
@@ -151,7 +224,7 @@ def audit_run(
         ]
     )
 
-    coverage = _coverage(artifacts.labels, artifacts.predictions)
+    coverage = float(coverage_diagnostics.waterfall["raw_label_coverage"])
     audit_status = _audit_status(checks)
     report = AuditReportRecord(
         run_id=run_id,
@@ -202,6 +275,13 @@ def _load_artifacts(
         required=formal == "formal_run",
     )
     labels = _load_jsonl_artifact(run_id, paths.labels, LabelRecord, checks, required=True)
+    split_assignments = _load_jsonl_artifact(
+        run_id,
+        paths.split_assignments,
+        SplitAssignmentRecord,
+        checks,
+        required=True,
+    )
     split_leakage = _load_jsonl_artifact(
         run_id, paths.split_leakage, SplitLeakageRecord, checks, required=False
     )
@@ -219,6 +299,13 @@ def _load_artifacts(
     predictions = _load_jsonl_artifact(
         run_id, paths.predictions, PredictionRecord, checks, required=True
     )
+    model_prediction_failures = _load_jsonl_artifact(
+        run_id,
+        paths.model_prediction_failures,
+        ModelPredictionFailureRecord,
+        checks,
+        required=False,
+    )
     model_manifest = _load_json_array_artifact(
         run_id, paths.model_manifest, ModelManifestRecord, checks, required=True
     )
@@ -230,6 +317,12 @@ def _load_artifacts(
     )
     backtest_results = _load_json_array_artifact(
         run_id, paths.backtest_results, PortfolioBacktestRecord, checks, required=True
+    )
+    delisting_application_report = _load_optional_json_object(
+        run_id,
+        paths.delisting_application_report,
+        checks,
+        required=False,
     )
     tested_specifications = _load_jsonl_artifact(
         run_id,
@@ -254,15 +347,18 @@ def _load_artifacts(
     return LoadedAuditArtifacts(
         document_manifest=document_manifest,
         labels=labels,
+        split_assignments=split_assignments,
         split_leakage=split_leakage,
         features=features,
         feature_manifest=feature_manifest,
         vocabulary=vocabulary,
         predictions=predictions,
+        model_prediction_failures=model_prediction_failures,
         model_manifest=model_manifest,
         tuning_log=tuning_log,
         evaluation_metrics=evaluation_metrics,
         backtest_results=backtest_results,
+        delisting_application_report=delisting_application_report,
         tested_specifications=tested_specifications,
         multiple_testing_report=multiple_testing_report,
         specification_registry=specification_registry,
@@ -488,21 +584,156 @@ def _load_vocabulary_json(path: Path) -> dict[str, dict[str, dict[str, int]]] | 
 
 def _coverage_check(
     run_id: str,
-    labels: list[LabelRecord],
-    predictions: list[PredictionRecord],
+    diagnostics: CoverageDiagnostics,
     threshold: float,
+    *,
+    formal: bool,
 ) -> AuditCheckRecord:
-    observed = _coverage(labels, predictions)
-    status = "pass" if observed >= threshold else "fail"
+    raw = float(diagnostics.waterfall["raw_label_coverage"])
+    eligible = float(diagnostics.waterfall["eligible_oos_coverage"])
+    primary = float(diagnostics.waterfall["primary_spec_coverage"])
+    primary_prediction = float(diagnostics.waterfall["primary_prediction_coverage"])
+    primary_portfolio = float(diagnostics.waterfall["primary_portfolio_coverage"])
+    counts = diagnostics.waterfall["counts"]
+    missing_split = int(diagnostics.waterfall["failure_counts"].get("missing_split_assignment", 0))
+    outside_split = int(
+        diagnostics.waterfall["failure_counts"].get(OUTSIDE_CONFIGURED_SPLIT_STAGE, 0)
+    )
+    if formal:
+        eligible_threshold = max(0.90, threshold)
+        primary_threshold = 0.95
+        status = (
+            "fail"
+            if eligible < eligible_threshold
+            or primary < primary_threshold
+            or missing_split > 0
+            else "pass"
+        )
+        threshold_message = (
+            f"formal eligible_oos>={eligible_threshold:.3f}, "
+            f"primary_spec>={primary_threshold:.3f}"
+        )
+    else:
+        eligible_threshold = max(0.80, min(threshold, 0.90))
+        primary_threshold = 0.95
+        status = "pass" if eligible >= eligible_threshold and missing_split == 0 else "warn"
+        threshold_message = (
+            f"exploratory eligible_oos>={eligible_threshold:.3f}; raw coverage is "
+            f"reported; outside_split_window_labels={outside_split}"
+        )
     return _check(
         run_id,
-        "coverage_threshold",
+        "coverage_waterfall_threshold",
         "audit",
         status,
-        f"Prediction-label coverage is {observed:.3f}; threshold is {threshold:.3f}",
-        ["labels.jsonl", "predictions.jsonl"],
-        observed_value=observed,
-        threshold=threshold,
+        (
+            f"Raw={raw:.3f}; eligible_oos={eligible:.3f}; "
+            f"primary_spec={primary:.3f}; "
+            f"primary_prediction={primary_prediction:.3f}; "
+            f"primary_portfolio={primary_portfolio:.3f}; "
+            f"eligible_oos_labels={counts['eligible_oos_labels']}; "
+            f"primary_specs={counts['primary_covered_specifications']}/"
+            f"{counts['primary_expected_specifications']}; "
+            f"{threshold_message}"
+        ),
+        [
+            "coverage_waterfall.json",
+            "coverage_failures.jsonl",
+            "coverage_by_target.csv",
+            "coverage_by_split.csv",
+            "coverage_by_ticker.csv",
+            "coverage_by_model.csv",
+        ],
+        observed_value=(
+            f"raw={raw:.3f}, eligible_oos={eligible:.3f}, primary={primary:.3f}, "
+            f"primary_prediction={primary_prediction:.3f}, "
+            f"primary_portfolio={primary_portfolio:.3f}"
+        ),
+        threshold=f"eligible_oos={eligible_threshold:.3f}, primary={primary_threshold:.3f}",
+    )
+
+
+def _baseline_prediction_coverage_check(
+    run_id: str,
+    diagnostics: CoverageDiagnostics,
+    *,
+    enabled_models: list[str],
+) -> AuditCheckRecord:
+    if "historical_mean" not in enabled_models:
+        return _check(
+            run_id,
+            "historical_mean_oos_coverage",
+            "model",
+            "warn",
+            "historical_mean is not enabled; baseline OOS coverage cannot be guaranteed",
+            ["model_manifest.json", "predictions.jsonl"],
+        )
+    historical_rows = [
+        row for row in diagnostics.by_model if row.get("model_name") == "historical_mean"
+    ]
+    if not historical_rows:
+        return _check(
+            run_id,
+            "historical_mean_oos_coverage",
+            "model",
+            "fail",
+            "historical_mean is enabled but no model coverage row was produced",
+            ["model_manifest.json", "predictions.jsonl"],
+            observed_value=0,
+            threshold=1,
+        )
+    missing = [
+        row
+        for row in historical_rows
+        if float(row.get("model_expected_prediction_coverage", 0.0)) < 1.0
+    ]
+    return _check(
+        run_id,
+        "historical_mean_oos_coverage",
+        "model",
+        "fail" if missing else "pass",
+        (
+            "historical_mean must cover every eligible validation/test label; "
+            f"{len(missing)} split-target rows are incomplete"
+        ),
+        ["coverage_by_model.csv", "predictions.jsonl"],
+        observed_value=len(missing),
+        threshold=0,
+    )
+
+
+def _primary_spec_coverage_check(
+    run_id: str,
+    diagnostics: CoverageDiagnostics,
+    *,
+    formal: bool,
+) -> AuditCheckRecord:
+    primary = float(diagnostics.waterfall["primary_spec_coverage"])
+    expected = int(diagnostics.waterfall["counts"]["primary_expected_specifications"])
+    covered = int(diagnostics.waterfall["counts"]["primary_covered_specifications"])
+    if expected == 0:
+        return _check(
+            run_id,
+            "primary_model_expected_coverage",
+            "audit",
+            "warn",
+            "No primary model-label pairs were registered for coverage audit",
+            ["tested_specifications.jsonl", "coverage_waterfall.json"],
+            observed_value=0,
+        )
+    status = "pass" if primary >= 0.95 else "fail" if formal else "warn"
+    return _check(
+        run_id,
+        "primary_model_expected_coverage",
+        "audit",
+        status,
+        (
+            f"Primary spec coverage is {primary:.3f} ({covered}/{expected}); "
+            "threshold is 0.950"
+        ),
+        ["coverage_waterfall.json", "tested_specifications.jsonl", "predictions.jsonl"],
+        observed_value=primary,
+        threshold=0.95,
     )
 
 
@@ -743,6 +974,170 @@ def _evaluation_check(
         "Evaluation metrics and backtest results are present",
         ["evaluation_metrics.json", "backtest_results.json"],
         observed_value=f"metrics={len(metrics)}, backtests={len(backtests)}",
+    )
+
+
+def _delisting_application_check(
+    run_id: str,
+    report: dict[str, object] | None,
+    *,
+    formal: bool,
+) -> AuditCheckRecord:
+    if report is None:
+        return _check(
+            run_id,
+            "delisting_application_report",
+            "evaluation",
+            "warn",
+            "delisting_application_report.json is missing",
+            ["delisting_application_report.json"],
+        )
+    missing = int(report.get("missing_delisting_returns", 0) or 0)
+    status = "pass"
+    if missing:
+        status = "fail" if formal else "warn"
+    return _check(
+        run_id,
+        "delisting_application_report",
+        "evaluation",
+        status,
+        (
+            "Delisting return handling checked; "
+            f"applied={report.get('delisting_returns_applied', 0)}, "
+            f"missing={missing}"
+        ),
+        ["delisting_application_report.json"],
+        observed_value=missing,
+        threshold=0,
+    )
+
+
+def _licensed_data_manifest_check(
+    *,
+    run_id: str,
+    config,
+    formal: bool,
+) -> AuditCheckRecord:
+    if not formal:
+        return _check(
+            run_id,
+            "licensed_data_manifest",
+            "data",
+            "pass",
+            "Exploratory run does not require a licensed data manifest.",
+            ["data_provider.data_license_manifest_file"],
+        )
+
+    manifest_path = config.data_provider.data_license_manifest_file
+    if manifest_path is None:
+        return _check(
+            run_id,
+            "licensed_data_manifest",
+            "data",
+            "fail",
+            "Formal CRSP/WRDS runs require data_provider.data_license_manifest_file.",
+            ["config_snapshot.yaml"],
+        )
+
+    path = Path(manifest_path)
+    if not path.exists():
+        return _check(
+            run_id,
+            "licensed_data_manifest",
+            "data",
+            "fail",
+            f"Licensed data manifest is missing: {path}",
+            [str(path)],
+        )
+
+    try:
+        manifest = DataLicenseManifestRecord.model_validate(
+            json.loads(path.read_text(encoding="utf-8"))
+        )
+    except (json.JSONDecodeError, OSError, ValidationError) as exc:
+        return _check(
+            run_id,
+            "licensed_data_manifest",
+            "data",
+            "fail",
+            f"Licensed data manifest failed validation: {exc}",
+            [str(path)],
+        )
+
+    mismatches: list[str] = []
+    expected_pairs = {
+        "market_data_provider": config.data_provider.market_data_provider,
+        "filing_provider": config.data_provider.filing_provider,
+        "price_source": config.data_provider.price_source,
+        "return_source": config.data_provider.return_source,
+        "delisting_return_source": config.data_provider.delisting_return_source,
+        "link_source": config.data_provider.link_source,
+    }
+    for field_name, expected in expected_pairs.items():
+        observed = getattr(manifest, field_name)
+        if expected is not None and observed != expected:
+            mismatches.append(f"{field_name}: expected={expected}, observed={observed}")
+    if manifest.raw_data_committed:
+        mismatches.append("raw_data_committed must be false")
+    if manifest.allow_public_yahoo_fallback:
+        mismatches.append("allow_public_yahoo_fallback must be false")
+    if not manifest.delisting_return_source:
+        mismatches.append("delisting_return_source is required")
+    if not manifest.link_source:
+        mismatches.append("link_source is required")
+
+    return _check(
+        run_id,
+        "licensed_data_manifest",
+        "data",
+        "fail" if mismatches else "pass",
+        (
+            "Licensed CRSP/WRDS data manifest checked. "
+            + ("; ".join(mismatches) if mismatches else "No blockers found.")
+        ),
+        [str(path)],
+        observed_value=len(mismatches),
+        threshold=0,
+    )
+
+
+def _mixed_market_data_source_check(*, run_id: str, config) -> AuditCheckRecord:
+    price_source = str(config.data_provider.price_source).lower()
+    return_source = str(config.data_provider.return_source).lower()
+    provider = str(config.data_provider.market_data_provider).lower()
+    allow_yahoo = bool(config.data_provider.allow_public_yahoo_fallback)
+    uses_declared_mixed_source = (
+        "mixed" in price_source
+        or "mixed" in return_source
+        or "yahoo_fallback" in price_source
+        or (provider == "fmp_alpha" and allow_yahoo)
+    )
+    if not uses_declared_mixed_source:
+        return _check(
+            run_id,
+            "mixed_market_data_source_boundary",
+            "data",
+            "pass",
+            "Market data source boundary is single-provider or no public fallback is enabled.",
+            ["config_snapshot.yaml"],
+        )
+    return _check(
+        run_id,
+        "mixed_market_data_source_boundary",
+        "data",
+        "warn",
+        (
+            "Mixed market data source detected. Treat the run as an applied-grade "
+            "pilot; do not present market-data-dependent portfolio evidence as a "
+            "CRSP/WRDS-equivalent formal result."
+        ),
+        ["config_snapshot.yaml", "license_manifest.json"],
+        observed_value=(
+            f"provider={config.data_provider.market_data_provider}, "
+            f"price_source={config.data_provider.price_source}, "
+            f"return_source={config.data_provider.return_source}, "
+            f"allow_public_yahoo_fallback={allow_yahoo}"
+        ),
     )
 
 

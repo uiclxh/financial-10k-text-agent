@@ -10,6 +10,7 @@ from text_factor_lab.models.training import (
     read_labels_jsonl,
     read_split_assignments_jsonl,
     write_model_manifest_json,
+    write_model_prediction_failures_jsonl,
     write_predictions_jsonl,
     write_tuning_log_json,
 )
@@ -24,6 +25,7 @@ __all__ = [
     "read_labels_jsonl",
     "read_split_assignments_jsonl",
     "write_model_manifest_json",
+    "write_model_prediction_failures_jsonl",
     "write_predictions_jsonl",
     "write_tuning_log_json",
 ]

@@ -21,6 +21,9 @@ class ModelManifestRecord(StrictBaseModel):
     feature_version: str = Field(min_length=1)
     label_version: str = Field(min_length=1)
     code_commit: str | None = None
+    git_commit_sha: str | None = None
+    package_version: str | None = None
+    dirty_worktree_flag: bool | None = None
     train_observation_count: int | None = Field(default=None, ge=0)
     validation_observation_count: int | None = Field(default=None, ge=0)
     test_observation_count: int | None = Field(default=None, ge=0)

@@ -1,0 +1,20 @@
+{
+  "allow_public_yahoo_fallback": true,
+  "created_at_utc": "2026-05-25T00:00:00Z",
+  "data_stack": "public_applied_run",
+  "delisting_return_source": null,
+  "filing_provider": "sec_edgar",
+  "license_note": "Public SEC EDGAR filings and public price data. This stack is reproducible for GitHub demonstration but is exploratory/applied-grade, not formal CRSP/WRDS replication.",
+  "link_source": "public_curated_ticker_cik_mapping",
+  "market_data_provider": "public_yahoo",
+  "permitted_public_outputs": [
+    "aggregate metrics",
+    "coverage diagnostics",
+    "audit summaries",
+    "factor cards",
+    "compact empirical reports"
+  ],
+  "price_source": "public_yahoo_adjusted_close",
+  "raw_data_committed": false,
+  "return_source": "public_yahoo_simple_return"
+}

@@ -139,6 +139,9 @@ def build_labels_for_document(
                     return_type=return_type,
                     adjustment_method=adjustment_method,
                     label_version=label_version,
+                    delisting_return_applied=stock_window.delisting_return_applied,
+                    delisting_code=stock_window.delisting_code,
+                    return_quality_flag=stock_window.return_quality_flag,
                 )
             )
         except PriceDataError as exc:

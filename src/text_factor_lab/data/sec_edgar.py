@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gzip
 import hashlib
 import json
 import time
@@ -62,7 +63,10 @@ def build_headers(user_agent: str) -> dict[str, str]:
 def fetch_json(url: str, *, user_agent: str, timeout_seconds: int = 30) -> dict[str, Any]:
     request = Request(url, headers=build_headers(user_agent))
     with urlopen(request, timeout=timeout_seconds) as response:
-        return json.loads(response.read().decode("utf-8"))
+        payload = response.read()
+        if response.headers.get("Content-Encoding", "").lower() == "gzip":
+            payload = gzip.decompress(payload)
+        return json.loads(payload.decode("utf-8"))
 
 
 def fetch_bytes(url: str, *, user_agent: str, timeout_seconds: int = 30) -> bytes:
@@ -71,7 +75,10 @@ def fetch_bytes(url: str, *, user_agent: str, timeout_seconds: int = 30) -> byte
         headers["Host"] = "www.sec.gov"
     request = Request(url, headers=headers)
     with urlopen(request, timeout=timeout_seconds) as response:
-        return response.read()
+        payload = response.read()
+        if response.headers.get("Content-Encoding", "").lower() == "gzip":
+            payload = gzip.decompress(payload)
+        return payload
 
 
 def sha256_bytes(payload: bytes) -> str:

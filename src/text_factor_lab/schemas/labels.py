@@ -25,6 +25,9 @@ class LabelRecord(StrictBaseModel):
     return_type: ReturnType
     adjustment_method: str = Field(min_length=1)
     label_version: str = Field(min_length=1)
+    delisting_return_applied: bool = False
+    delisting_code: str | None = None
+    return_quality_flag: str = "complete"
 
     @field_validator("event_time_utc", "prediction_time_utc")
     @classmethod

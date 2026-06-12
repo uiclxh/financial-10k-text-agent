@@ -1,0 +1,14 @@
+{
+  "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+  "run_type": "exploratory_run",
+  "status": "reported",
+  "created_at_utc": "2026-06-12T13:00:37.337769Z",
+  "updated_at_utc": "2026-06-12T13:03:10.188219Z",
+  "config_path": "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\config_snapshot.yaml",
+  "failure_reason": null,
+  "audit_status": "warn",
+  "coverage": 0.4866666666666667,
+  "git_commit_sha": "48e48ef6a2c1f18cc8c3aab3678491eb97c9d9f2",
+  "package_version": "0.15.0",
+  "dirty_worktree_flag": true
+}

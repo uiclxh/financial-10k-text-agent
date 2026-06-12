@@ -1,0 +1,1502 @@
+[
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "target_name": "CAR_1_20",
+    "model_id": "historical_mean::CAR_1_20::train_2016_2020__val_2021_2021__test_2022_2022",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_mean"
+    },
+    "selection_reason": "Baseline uses the training-window target mean.",
+    "created_at_utc": "2026-06-12T13:01:21.222914Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "target_name": "CAR_1_20",
+    "model_id": "industry_mean::CAR_1_20::train_2016_2020__val_2021_2021__test_2022_2022",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_industry_mean"
+    },
+    "selection_reason": "Baseline uses training-window industry means and falls back to the training global mean for unseen industries.",
+    "created_at_utc": "2026-06-12T13:01:21.222914Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "target_name": "CAR_1_20",
+    "model_id": "ridge::CAR_1_20::train_2016_2020__val_2021_2021__test_2022_2022",
+    "parameter_grid": {
+      "alpha": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ]
+    },
+    "searched_parameters": [
+      {
+        "alpha": 0.01
+      },
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      -0.023809523809523815,
+      -0.023809523809523815,
+      -0.023809523809523815,
+      -0.023809523809523815,
+      -0.023809523809523815
+    ],
+    "selected_parameters": {
+      "alpha": 0.01
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:29.832263Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "target_name": "CAR_1_20",
+    "model_id": "xgboost::CAR_1_20::train_2016_2020__val_2021_2021__test_2022_2022",
+    "parameter_grid": {
+      "n_estimators": [
+        50,
+        100
+      ],
+      "max_depth": [
+        2,
+        3
+      ],
+      "learning_rate": [
+        0.03,
+        0.05
+      ]
+    },
+    "searched_parameters": [
+      {
+        "n_estimators": 50,
+        "max_depth": 2,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 50,
+        "max_depth": 3,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 100,
+        "max_depth": 2,
+        "learning_rate": 0.03
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      -0.07142857142857144,
+      0.023809523809523815,
+      -0.07142857142857144
+    ],
+    "selected_parameters": {
+      "n_estimators": 50,
+      "max_depth": 3,
+      "learning_rate": 0.05
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:30.202077Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "target_name": "CAR_1_5",
+    "model_id": "historical_mean::CAR_1_5::train_2016_2020__val_2021_2021__test_2022_2022",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_mean"
+    },
+    "selection_reason": "Baseline uses the training-window target mean.",
+    "created_at_utc": "2026-06-12T13:01:30.202077Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "target_name": "CAR_1_5",
+    "model_id": "industry_mean::CAR_1_5::train_2016_2020__val_2021_2021__test_2022_2022",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_industry_mean"
+    },
+    "selection_reason": "Baseline uses training-window industry means and falls back to the training global mean for unseen industries.",
+    "created_at_utc": "2026-06-12T13:01:30.203099Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "target_name": "CAR_1_5",
+    "model_id": "ridge::CAR_1_5::train_2016_2020__val_2021_2021__test_2022_2022",
+    "parameter_grid": {
+      "alpha": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ]
+    },
+    "searched_parameters": [
+      {
+        "alpha": 0.01
+      },
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      0.34545454545454546,
+      0.34545454545454546,
+      0.34545454545454546,
+      0.34545454545454546,
+      0.34545454545454546
+    ],
+    "selected_parameters": {
+      "alpha": 0.01
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:30.211684Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "target_name": "CAR_1_5",
+    "model_id": "xgboost::CAR_1_5::train_2016_2020__val_2021_2021__test_2022_2022",
+    "parameter_grid": {
+      "n_estimators": [
+        50,
+        100
+      ],
+      "max_depth": [
+        2,
+        3
+      ],
+      "learning_rate": [
+        0.03,
+        0.05
+      ]
+    },
+    "searched_parameters": [
+      {
+        "n_estimators": 50,
+        "max_depth": 2,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 50,
+        "max_depth": 3,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 100,
+        "max_depth": 2,
+        "learning_rate": 0.03
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      -0.5151515151515151,
+      -0.4545454545454545,
+      -0.5757575757575757
+    ],
+    "selected_parameters": {
+      "n_estimators": 50,
+      "max_depth": 3,
+      "learning_rate": 0.05
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:30.388190Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "historical_mean::realized_volatility_1_20::train_2016_2020__val_2021_2021__test_2022_2022",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_mean"
+    },
+    "selection_reason": "Baseline uses the training-window target mean.",
+    "created_at_utc": "2026-06-12T13:01:30.388190Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "industry_mean::realized_volatility_1_20::train_2016_2020__val_2021_2021__test_2022_2022",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_industry_mean"
+    },
+    "selection_reason": "Baseline uses training-window industry means and falls back to the training global mean for unseen industries.",
+    "created_at_utc": "2026-06-12T13:01:30.388190Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "ridge::realized_volatility_1_20::train_2016_2020__val_2021_2021__test_2022_2022",
+    "parameter_grid": {
+      "alpha": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ]
+    },
+    "searched_parameters": [
+      {
+        "alpha": 0.01
+      },
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      0.4761904761904762,
+      0.4761904761904762,
+      0.4761904761904762,
+      0.4761904761904762,
+      0.4761904761904762
+    ],
+    "selected_parameters": {
+      "alpha": 0.01
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:30.397164Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "xgboost::realized_volatility_1_20::train_2016_2020__val_2021_2021__test_2022_2022",
+    "parameter_grid": {
+      "n_estimators": [
+        50,
+        100
+      ],
+      "max_depth": [
+        2,
+        3
+      ],
+      "learning_rate": [
+        0.03,
+        0.05
+      ]
+    },
+    "searched_parameters": [
+      {
+        "n_estimators": 50,
+        "max_depth": 2,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 50,
+        "max_depth": 3,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 100,
+        "max_depth": 2,
+        "learning_rate": 0.03
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      0.14285714285714288,
+      -0.09523809523809526,
+      0.14285714285714288
+    ],
+    "selected_parameters": {
+      "n_estimators": 50,
+      "max_depth": 2,
+      "learning_rate": 0.05
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:30.527512Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "target_name": "CAR_1_20",
+    "model_id": "historical_mean::CAR_1_20::train_2016_2021__val_2022_2022__test_2023_2023",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_mean"
+    },
+    "selection_reason": "Baseline uses the training-window target mean.",
+    "created_at_utc": "2026-06-12T13:01:30.527512Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "target_name": "CAR_1_20",
+    "model_id": "industry_mean::CAR_1_20::train_2016_2021__val_2022_2022__test_2023_2023",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_industry_mean"
+    },
+    "selection_reason": "Baseline uses training-window industry means and falls back to the training global mean for unseen industries.",
+    "created_at_utc": "2026-06-12T13:01:30.528495Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "target_name": "CAR_1_20",
+    "model_id": "ridge::CAR_1_20::train_2016_2021__val_2022_2022__test_2023_2023",
+    "parameter_grid": {
+      "alpha": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ]
+    },
+    "searched_parameters": [
+      {
+        "alpha": 0.01
+      },
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      -0.261904761904762,
+      -0.261904761904762,
+      -0.261904761904762,
+      -0.04761904761904763,
+      -0.04761904761904763
+    ],
+    "selected_parameters": {
+      "alpha": 10.0
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:30.540514Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "target_name": "CAR_1_20",
+    "model_id": "xgboost::CAR_1_20::train_2016_2021__val_2022_2022__test_2023_2023",
+    "parameter_grid": {
+      "n_estimators": [
+        50,
+        100
+      ],
+      "max_depth": [
+        2,
+        3
+      ],
+      "learning_rate": [
+        0.03,
+        0.05
+      ]
+    },
+    "searched_parameters": [
+      {
+        "n_estimators": 50,
+        "max_depth": 2,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 50,
+        "max_depth": 3,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 100,
+        "max_depth": 2,
+        "learning_rate": 0.03
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      -0.3571428571428572,
+      -0.3571428571428572,
+      -0.3571428571428572
+    ],
+    "selected_parameters": {
+      "n_estimators": 50,
+      "max_depth": 2,
+      "learning_rate": 0.05
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:30.687574Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "target_name": "CAR_1_5",
+    "model_id": "historical_mean::CAR_1_5::train_2016_2021__val_2022_2022__test_2023_2023",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_mean"
+    },
+    "selection_reason": "Baseline uses the training-window target mean.",
+    "created_at_utc": "2026-06-12T13:01:30.688133Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "target_name": "CAR_1_5",
+    "model_id": "industry_mean::CAR_1_5::train_2016_2021__val_2022_2022__test_2023_2023",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_industry_mean"
+    },
+    "selection_reason": "Baseline uses training-window industry means and falls back to the training global mean for unseen industries.",
+    "created_at_utc": "2026-06-12T13:01:30.688133Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "target_name": "CAR_1_5",
+    "model_id": "ridge::CAR_1_5::train_2016_2021__val_2022_2022__test_2023_2023",
+    "parameter_grid": {
+      "alpha": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ]
+    },
+    "searched_parameters": [
+      {
+        "alpha": 0.01
+      },
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      0.34545454545454546,
+      0.34545454545454546,
+      0.34545454545454546,
+      0.34545454545454546,
+      0.6606060606060605
+    ],
+    "selected_parameters": {
+      "alpha": 100.0
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:30.699140Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "target_name": "CAR_1_5",
+    "model_id": "xgboost::CAR_1_5::train_2016_2021__val_2022_2022__test_2023_2023",
+    "parameter_grid": {
+      "n_estimators": [
+        50,
+        100
+      ],
+      "max_depth": [
+        2,
+        3
+      ],
+      "learning_rate": [
+        0.03,
+        0.05
+      ]
+    },
+    "searched_parameters": [
+      {
+        "n_estimators": 50,
+        "max_depth": 2,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 50,
+        "max_depth": 3,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 100,
+        "max_depth": 2,
+        "learning_rate": 0.03
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      0.32121212121212117,
+      0.32121212121212117,
+      0.2606060606060606
+    ],
+    "selected_parameters": {
+      "n_estimators": 50,
+      "max_depth": 2,
+      "learning_rate": 0.05
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:30.870963Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "historical_mean::realized_volatility_1_20::train_2016_2021__val_2022_2022__test_2023_2023",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_mean"
+    },
+    "selection_reason": "Baseline uses the training-window target mean.",
+    "created_at_utc": "2026-06-12T13:01:30.871965Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "industry_mean::realized_volatility_1_20::train_2016_2021__val_2022_2022__test_2023_2023",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_industry_mean"
+    },
+    "selection_reason": "Baseline uses training-window industry means and falls back to the training global mean for unseen industries.",
+    "created_at_utc": "2026-06-12T13:01:30.871965Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "ridge::realized_volatility_1_20::train_2016_2021__val_2022_2022__test_2023_2023",
+    "parameter_grid": {
+      "alpha": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ]
+    },
+    "searched_parameters": [
+      {
+        "alpha": 0.01
+      },
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      0.0,
+      0.0,
+      0.04761904761904763,
+      0.09523809523809526,
+      0.04761904761904763
+    ],
+    "selected_parameters": {
+      "alpha": 10.0
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:30.882962Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "xgboost::realized_volatility_1_20::train_2016_2021__val_2022_2022__test_2023_2023",
+    "parameter_grid": {
+      "n_estimators": [
+        50,
+        100
+      ],
+      "max_depth": [
+        2,
+        3
+      ],
+      "learning_rate": [
+        0.03,
+        0.05
+      ]
+    },
+    "searched_parameters": [
+      {
+        "n_estimators": 50,
+        "max_depth": 2,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 50,
+        "max_depth": 3,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 100,
+        "max_depth": 2,
+        "learning_rate": 0.03
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      -0.4761904761904762,
+      -0.4761904761904762,
+      -0.4761904761904762
+    ],
+    "selected_parameters": {
+      "n_estimators": 50,
+      "max_depth": 2,
+      "learning_rate": 0.05
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:31.049634Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "target_name": "CAR_1_20",
+    "model_id": "historical_mean::CAR_1_20::train_2016_2022__val_2023_2023__test_2024_2024",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_mean"
+    },
+    "selection_reason": "Baseline uses the training-window target mean.",
+    "created_at_utc": "2026-06-12T13:01:31.049634Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "target_name": "CAR_1_20",
+    "model_id": "industry_mean::CAR_1_20::train_2016_2022__val_2023_2023__test_2024_2024",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_industry_mean"
+    },
+    "selection_reason": "Baseline uses training-window industry means and falls back to the training global mean for unseen industries.",
+    "created_at_utc": "2026-06-12T13:01:31.050634Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "target_name": "CAR_1_20",
+    "model_id": "ridge::CAR_1_20::train_2016_2022__val_2023_2023__test_2024_2024",
+    "parameter_grid": {
+      "alpha": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ]
+    },
+    "searched_parameters": [
+      {
+        "alpha": 0.01
+      },
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      0.04761904761904763,
+      0.04761904761904763,
+      0.04761904761904763,
+      0.2380952380952381,
+      0.07142857142857144
+    ],
+    "selected_parameters": {
+      "alpha": 10.0
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:31.063143Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "target_name": "CAR_1_20",
+    "model_id": "xgboost::CAR_1_20::train_2016_2022__val_2023_2023__test_2024_2024",
+    "parameter_grid": {
+      "n_estimators": [
+        50,
+        100
+      ],
+      "max_depth": [
+        2,
+        3
+      ],
+      "learning_rate": [
+        0.03,
+        0.05
+      ]
+    },
+    "searched_parameters": [
+      {
+        "n_estimators": 50,
+        "max_depth": 2,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 50,
+        "max_depth": 3,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 100,
+        "max_depth": 2,
+        "learning_rate": 0.03
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      -0.023809523809523815,
+      0.11904761904761905,
+      -0.023809523809523815
+    ],
+    "selected_parameters": {
+      "n_estimators": 50,
+      "max_depth": 3,
+      "learning_rate": 0.05
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:31.278408Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "target_name": "CAR_1_5",
+    "model_id": "historical_mean::CAR_1_5::train_2016_2022__val_2023_2023__test_2024_2024",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_mean"
+    },
+    "selection_reason": "Baseline uses the training-window target mean.",
+    "created_at_utc": "2026-06-12T13:01:31.279411Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "target_name": "CAR_1_5",
+    "model_id": "industry_mean::CAR_1_5::train_2016_2022__val_2023_2023__test_2024_2024",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_industry_mean"
+    },
+    "selection_reason": "Baseline uses training-window industry means and falls back to the training global mean for unseen industries.",
+    "created_at_utc": "2026-06-12T13:01:31.279411Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "target_name": "CAR_1_5",
+    "model_id": "ridge::CAR_1_5::train_2016_2022__val_2023_2023__test_2024_2024",
+    "parameter_grid": {
+      "alpha": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ]
+    },
+    "searched_parameters": [
+      {
+        "alpha": 0.01
+      },
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      -0.05454545454545454,
+      -0.05454545454545454,
+      -0.1515151515151515,
+      -0.12727272727272726,
+      -0.13939393939393938
+    ],
+    "selected_parameters": {
+      "alpha": 0.01
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:31.291408Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "target_name": "CAR_1_5",
+    "model_id": "xgboost::CAR_1_5::train_2016_2022__val_2023_2023__test_2024_2024",
+    "parameter_grid": {
+      "n_estimators": [
+        50,
+        100
+      ],
+      "max_depth": [
+        2,
+        3
+      ],
+      "learning_rate": [
+        0.03,
+        0.05
+      ]
+    },
+    "searched_parameters": [
+      {
+        "n_estimators": 50,
+        "max_depth": 2,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 50,
+        "max_depth": 3,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 100,
+        "max_depth": 2,
+        "learning_rate": 0.03
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      -0.2121212121212121,
+      -0.5030303030303029,
+      -0.23636363636363633
+    ],
+    "selected_parameters": {
+      "n_estimators": 50,
+      "max_depth": 2,
+      "learning_rate": 0.05
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:31.464861Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "historical_mean::realized_volatility_1_20::train_2016_2022__val_2023_2023__test_2024_2024",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_mean"
+    },
+    "selection_reason": "Baseline uses the training-window target mean.",
+    "created_at_utc": "2026-06-12T13:01:31.464861Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "industry_mean::realized_volatility_1_20::train_2016_2022__val_2023_2023__test_2024_2024",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_industry_mean"
+    },
+    "selection_reason": "Baseline uses training-window industry means and falls back to the training global mean for unseen industries.",
+    "created_at_utc": "2026-06-12T13:01:31.464861Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "ridge::realized_volatility_1_20::train_2016_2022__val_2023_2023__test_2024_2024",
+    "parameter_grid": {
+      "alpha": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ]
+    },
+    "searched_parameters": [
+      {
+        "alpha": 0.01
+      },
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      -0.5952380952380953,
+      -0.5000000000000001,
+      -0.30952380952380953,
+      -0.07142857142857144,
+      0.1666666666666667
+    ],
+    "selected_parameters": {
+      "alpha": 100.0
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:31.478505Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "xgboost::realized_volatility_1_20::train_2016_2022__val_2023_2023__test_2024_2024",
+    "parameter_grid": {
+      "n_estimators": [
+        50,
+        100
+      ],
+      "max_depth": [
+        2,
+        3
+      ],
+      "learning_rate": [
+        0.03,
+        0.05
+      ]
+    },
+    "searched_parameters": [
+      {
+        "n_estimators": 50,
+        "max_depth": 2,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 50,
+        "max_depth": 3,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 100,
+        "max_depth": 2,
+        "learning_rate": 0.03
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      0.04761904761904763,
+      0.07142857142857144,
+      0.04761904761904763
+    ],
+    "selected_parameters": {
+      "n_estimators": 50,
+      "max_depth": 3,
+      "learning_rate": 0.05
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:31.679546Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "target_name": "CAR_1_20",
+    "model_id": "historical_mean::CAR_1_20::train_2016_2023__val_2024_2024__test_2025_2025",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_mean"
+    },
+    "selection_reason": "Baseline uses the training-window target mean.",
+    "created_at_utc": "2026-06-12T13:01:31.680554Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "target_name": "CAR_1_20",
+    "model_id": "industry_mean::CAR_1_20::train_2016_2023__val_2024_2024__test_2025_2025",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_industry_mean"
+    },
+    "selection_reason": "Baseline uses training-window industry means and falls back to the training global mean for unseen industries.",
+    "created_at_utc": "2026-06-12T13:01:31.681535Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "target_name": "CAR_1_20",
+    "model_id": "ridge::CAR_1_20::train_2016_2023__val_2024_2024__test_2025_2025",
+    "parameter_grid": {
+      "alpha": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ]
+    },
+    "searched_parameters": [
+      {
+        "alpha": 0.01
+      },
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      0.0,
+      0.0,
+      -0.19047619047619052,
+      -0.14285714285714288,
+      -0.3571428571428572
+    ],
+    "selected_parameters": {
+      "alpha": 0.01
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:31.695539Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "target_name": "CAR_1_20",
+    "model_id": "xgboost::CAR_1_20::train_2016_2023__val_2024_2024__test_2025_2025",
+    "parameter_grid": {
+      "n_estimators": [
+        50,
+        100
+      ],
+      "max_depth": [
+        2,
+        3
+      ],
+      "learning_rate": [
+        0.03,
+        0.05
+      ]
+    },
+    "searched_parameters": [
+      {
+        "n_estimators": 50,
+        "max_depth": 2,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 50,
+        "max_depth": 3,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 100,
+        "max_depth": 2,
+        "learning_rate": 0.03
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      0.04761904761904763,
+      0.04761904761904763,
+      0.04761904761904763
+    ],
+    "selected_parameters": {
+      "n_estimators": 50,
+      "max_depth": 2,
+      "learning_rate": 0.05
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:31.873157Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "target_name": "CAR_1_5",
+    "model_id": "historical_mean::CAR_1_5::train_2016_2023__val_2024_2024__test_2025_2025",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_mean"
+    },
+    "selection_reason": "Baseline uses the training-window target mean.",
+    "created_at_utc": "2026-06-12T13:01:31.873157Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "target_name": "CAR_1_5",
+    "model_id": "industry_mean::CAR_1_5::train_2016_2023__val_2024_2024__test_2025_2025",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_industry_mean"
+    },
+    "selection_reason": "Baseline uses training-window industry means and falls back to the training global mean for unseen industries.",
+    "created_at_utc": "2026-06-12T13:01:31.873157Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "target_name": "CAR_1_5",
+    "model_id": "ridge::CAR_1_5::train_2016_2023__val_2024_2024__test_2025_2025",
+    "parameter_grid": {
+      "alpha": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ]
+    },
+    "searched_parameters": [
+      {
+        "alpha": 0.01
+      },
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      0.11515151515151514,
+      0.10303030303030303,
+      0.24848484848484845,
+      0.406060606060606,
+      0.3939393939393939
+    ],
+    "selected_parameters": {
+      "alpha": 10.0
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:31.887634Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "target_name": "CAR_1_5",
+    "model_id": "xgboost::CAR_1_5::train_2016_2023__val_2024_2024__test_2025_2025",
+    "parameter_grid": {
+      "n_estimators": [
+        50,
+        100
+      ],
+      "max_depth": [
+        2,
+        3
+      ],
+      "learning_rate": [
+        0.03,
+        0.05
+      ]
+    },
+    "searched_parameters": [
+      {
+        "n_estimators": 50,
+        "max_depth": 2,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 50,
+        "max_depth": 3,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 100,
+        "max_depth": 2,
+        "learning_rate": 0.03
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      0.4545454545454545,
+      0.32121212121212117,
+      0.406060606060606
+    ],
+    "selected_parameters": {
+      "n_estimators": 50,
+      "max_depth": 2,
+      "learning_rate": 0.05
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:32.087894Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "historical_mean::realized_volatility_1_20::train_2016_2023__val_2024_2024__test_2025_2025",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_mean"
+    },
+    "selection_reason": "Baseline uses the training-window target mean.",
+    "created_at_utc": "2026-06-12T13:01:32.087894Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "industry_mean::realized_volatility_1_20::train_2016_2023__val_2024_2024__test_2025_2025",
+    "parameter_grid": {},
+    "searched_parameters": [],
+    "validation_metric": "not_applicable",
+    "validation_scores": [],
+    "selected_parameters": {
+      "statistic": "train_industry_mean"
+    },
+    "selection_reason": "Baseline uses training-window industry means and falls back to the training global mean for unseen industries.",
+    "created_at_utc": "2026-06-12T13:01:32.088894Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "ridge::realized_volatility_1_20::train_2016_2023__val_2024_2024__test_2025_2025",
+    "parameter_grid": {
+      "alpha": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ]
+    },
+    "searched_parameters": [
+      {
+        "alpha": 0.01
+      },
+      {
+        "alpha": 0.1
+      },
+      {
+        "alpha": 1.0
+      },
+      {
+        "alpha": 10.0
+      },
+      {
+        "alpha": 100.0
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      -0.7142857142857144,
+      -0.7142857142857144,
+      -0.7380952380952381,
+      -0.523809523809524,
+      -0.6190476190476191
+    ],
+    "selected_parameters": {
+      "alpha": 10.0
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:32.100892Z"
+  },
+  {
+    "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "target_name": "realized_volatility_1_20",
+    "model_id": "xgboost::realized_volatility_1_20::train_2016_2023__val_2024_2024__test_2025_2025",
+    "parameter_grid": {
+      "n_estimators": [
+        50,
+        100
+      ],
+      "max_depth": [
+        2,
+        3
+      ],
+      "learning_rate": [
+        0.03,
+        0.05
+      ]
+    },
+    "searched_parameters": [
+      {
+        "n_estimators": 50,
+        "max_depth": 2,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 50,
+        "max_depth": 3,
+        "learning_rate": 0.05
+      },
+      {
+        "n_estimators": 100,
+        "max_depth": 2,
+        "learning_rate": 0.03
+      }
+    ],
+    "validation_metric": "validation_rank_ic",
+    "validation_scores": [
+      -0.2142857142857143,
+      -0.2142857142857143,
+      -0.2142857142857143
+    ],
+    "selected_parameters": {
+      "n_estimators": 50,
+      "max_depth": 2,
+      "learning_rate": 0.05
+    },
+    "selection_reason": "Selected highest validation rank IC; ties keep first grid value.",
+    "created_at_utc": "2026-06-12T13:01:32.284019Z"
+  }
+]

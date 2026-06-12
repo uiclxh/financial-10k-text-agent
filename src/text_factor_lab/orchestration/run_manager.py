@@ -3,7 +3,10 @@ from __future__ import annotations
 import json
 import re
 import shutil
+import subprocess
+import tomllib
 from datetime import UTC, datetime
+from importlib import metadata
 from pathlib import Path
 from typing import Any, Literal
 
@@ -65,10 +68,18 @@ class RunManager:
         self.split_leakage_path = self.run_dir / "split_leakage.jsonl"
         self.features_path = self.run_dir / "features.jsonl"
         self.vocabulary_path = self.run_dir / "vocabulary.json"
+        self.vocabulary_manifest_path = self.run_dir / "vocabulary_manifest.json"
         self.feature_manifest_path = self.run_dir / "feature_manifest.json"
         self.feature_matrix_dir = self.run_dir / "feature_matrices"
         self.feature_matrix_index_path = self.run_dir / "feature_matrix_index.json"
+        self.section_length_quality_report_path = (
+            self.run_dir / "section_length_quality_report.json"
+        )
         self.predictions_path = self.run_dir / "predictions.jsonl"
+        self.prediction_distribution_report_path = (
+            self.run_dir / "prediction_distribution_report.json"
+        )
+        self.model_prediction_failures_path = self.run_dir / "model_prediction_failures.jsonl"
         self.model_manifest_path = self.run_dir / "model_manifest.json"
         self.tuning_log_path = self.run_dir / "tuning_log.json"
         self.evaluation_metrics_path = self.run_dir / "evaluation_metrics.json"
@@ -80,6 +91,7 @@ class RunManager:
         self.monthly_portfolio_weights_path = self.run_dir / "monthly_portfolio_weights.jsonl"
         self.monthly_portfolio_returns_path = self.run_dir / "monthly_portfolio_returns.jsonl"
         self.monthly_portfolio_metrics_path = self.run_dir / "monthly_portfolio_metrics.json"
+        self.delisting_application_report_path = self.run_dir / "delisting_application_report.json"
         self.tested_specifications_path = self.run_dir / "tested_specifications.jsonl"
         self.multiple_testing_report_path = self.run_dir / "multiple_testing_report.json"
         self.specification_registry_path = self.run_dir / "specification_registry.json"
@@ -97,6 +109,7 @@ class RunManager:
         shutil.copy2(self.config_path, self.config_snapshot_path)
 
         now = datetime.now(UTC)
+        reproducibility = self._reproducibility_metadata()
         status = RunStatusRecord(
             run_id=self.config.run.run_id,
             run_type=self.config.run.run_type,
@@ -107,6 +120,7 @@ class RunManager:
             failure_reason=None,
             audit_status="not_run",
             coverage=0.0,
+            **reproducibility,
         )
         self.write_status(status)
         self.write_pipeline_contract()
@@ -128,6 +142,19 @@ class RunManager:
                     ),
                     rejected=True,
                 )
+        except FileNotFoundError as exc:
+            self.fail_run(
+                stage="universe",
+                failure_type="data_missing",
+                failure_message=f"Universe input is missing: {exc.filename or exc}",
+                affected_artifacts=[str(self.config.universe.tickers_file)],
+                recoverable=True,
+                recommended_action=(
+                    "Place the licensed/private universe files under data_private/ "
+                    "or update the formal config to point at local CRSP/WRDS exports."
+                ),
+                rejected=self.config.run.run_type == "formal_run",
+            )
         except Exception as exc:
             self.fail_run(
                 stage="universe",
@@ -137,7 +164,6 @@ class RunManager:
                 recoverable=True,
                 recommended_action="Fix universe manifest rows and rerun.",
             )
-            raise
         return self.read_status()
 
     def write_universe_quality_report(self):
@@ -465,6 +491,10 @@ class RunManager:
             )
             return False
 
+        from text_factor_lab.diagnostics import (
+            build_section_length_quality_report,
+            write_section_length_quality_report_json,
+        )
         from text_factor_lab.features import read_document_manifest_jsonl
         from text_factor_lab.parsing import parse_sec_10k_sections, write_section_artifacts
 
@@ -497,13 +527,22 @@ class RunManager:
         with self.parsing_quality_report_path.open("w", encoding="utf-8") as file:
             json.dump(quality_payload, file, indent=2)
             file.write("\n")
+        section_length_report = build_section_length_quality_report(parsed_records)
+        write_section_length_quality_report_json(
+            section_length_report,
+            self.section_length_quality_report_path,
+        )
         self.update_status("parsed")
         self._append_stage(
             records,
             stage="parsing",
             status="completed" if not missing_documents else "completed_with_warnings",
             inputs=[self.document_manifest_path, raw_filings_dir],
-            outputs=[self.parsed_sections_path, self.parsing_quality_report_path],
+            outputs=[
+                self.parsed_sections_path,
+                self.parsing_quality_report_path,
+                self.section_length_quality_report_path,
+            ],
             metrics=quality_payload,
         )
         return bool(parsed_records)
@@ -530,6 +569,10 @@ class RunManager:
             )
             return False
 
+        from text_factor_lab.diagnostics import (
+            build_vocabulary_manifest,
+            write_vocabulary_manifest_json,
+        )
         from text_factor_lab.features import (
             build_dictionary_feature_manifests,
             build_dictionary_tone_features,
@@ -549,6 +592,7 @@ class RunManager:
 
         manifest_by_document_id = read_document_manifest_jsonl(self.document_manifest_path)
         parsed_sections = read_parsed_sections_jsonl(self.parsed_sections_path)
+        parsed_sections = self._filter_section_level_feature_sections(parsed_sections)
         split_assignments = read_split_assignments_jsonl(self.split_assignments_path)
         document_texts = load_document_texts(
             manifest_by_document_id=manifest_by_document_id,
@@ -562,6 +606,7 @@ class RunManager:
         features = []
         feature_manifests = []
         vocabulary_by_split = {}
+        vocabulary_manifest_rows = []
         if "dictionary_tone" in self.config.features.methods:
             features.extend(build_dictionary_tone_features(document_texts))
             feature_manifests.extend(
@@ -630,15 +675,37 @@ class RunManager:
                     matrix_result.index_records,
                     matrix_index_path,
                 )
+                vocabulary_manifest_rows.extend(
+                    build_vocabulary_manifest(
+                        matrix_index_records=matrix_result.index_records,
+                        tfidf_params={
+                            "max_features": tfidf_config.max_features,
+                            "ngram_range": list(tfidf_config.ngram_range),
+                            "min_df": tfidf_config.min_df,
+                            "max_df": tfidf_config.max_df,
+                            "sublinear_tf": True,
+                            "token_pattern": r"(?u)\b[a-zA-Z][a-zA-Z\-']+\b",
+                        },
+                    )
+                )
         write_features_jsonl(features, self.features_path)
         write_vocabulary_json(vocabulary_by_split, self.vocabulary_path)
+        write_vocabulary_manifest_json(
+            vocabulary_manifest_rows,
+            self.vocabulary_manifest_path,
+        )
         write_feature_manifest_json(feature_manifests, self.feature_manifest_path)
         self.update_status("features_ready")
         self._append_stage(
             records,
             stage="features",
             status="completed",
-            outputs=[self.features_path, self.vocabulary_path, self.feature_manifest_path],
+            outputs=[
+                self.features_path,
+                self.vocabulary_path,
+                self.vocabulary_manifest_path,
+                self.feature_manifest_path,
+            ],
             metrics={"features": len(features), "feature_manifests": len(feature_manifests)},
         )
         return True
@@ -646,6 +713,7 @@ class RunManager:
     def _run_model_stage(self, records: list[dict[str, Any]]) -> bool:
         if (
             self.predictions_path.exists()
+            and self.model_prediction_failures_path.exists()
             and self.model_manifest_path.exists()
             and self.tuning_log_path.exists()
         ):
@@ -665,36 +733,68 @@ class RunManager:
             )
             return False
 
+        from text_factor_lab.diagnostics import (
+            build_prediction_distribution_report,
+            write_prediction_distribution_report_json,
+        )
         from text_factor_lab.models import (
             build_model_artifacts,
             read_features_jsonl,
             read_labels_jsonl,
             read_split_assignments_jsonl,
             write_model_manifest_json,
+            write_model_prediction_failures_jsonl,
             write_predictions_jsonl,
             write_tuning_log_json,
         )
 
+        labels = read_labels_jsonl(self.labels_path)
+
         result = build_model_artifacts(
             run_id=self.config.run.run_id,
-            labels=read_labels_jsonl(self.labels_path),
+            labels=labels,
             features=read_features_jsonl(self.features_path),
             split_assignments=read_split_assignments_jsonl(self.split_assignments_path),
             models=self.config.models.enabled,
             random_seed=self.config.run.random_seed,
         )
         write_predictions_jsonl(result.predictions, self.predictions_path)
-        write_model_manifest_json(result.model_manifests, self.model_manifest_path)
+        write_model_prediction_failures_jsonl(
+            result.prediction_failures,
+            self.model_prediction_failures_path,
+        )
+        write_prediction_distribution_report_json(
+            build_prediction_distribution_report(
+                predictions=result.predictions,
+                labels=labels,
+            ),
+            self.prediction_distribution_report_path,
+        )
+        model_reproducibility = self._reproducibility_metadata()
+        model_reproducibility["code_commit"] = model_reproducibility.get(
+            "git_commit_sha"
+        )
+        model_manifests = [
+            record.model_copy(update=model_reproducibility)
+            for record in result.model_manifests
+        ]
+        write_model_manifest_json(model_manifests, self.model_manifest_path)
         write_tuning_log_json(result.tuning_logs, self.tuning_log_path)
         self.update_status("trained")
         self._append_stage(
             records,
             stage="models",
             status="completed",
-            outputs=[self.predictions_path, self.model_manifest_path, self.tuning_log_path],
+            outputs=[
+                self.predictions_path,
+                self.prediction_distribution_report_path,
+                self.model_manifest_path,
+                self.tuning_log_path,
+            ],
             metrics={
                 "predictions": len(result.predictions),
-                "model_manifests": len(result.model_manifests),
+                "prediction_failures": len(result.prediction_failures),
+                "model_manifests": len(model_manifests),
             },
         )
         return True
@@ -710,6 +810,7 @@ class RunManager:
             and self.monthly_portfolio_weights_path.exists()
             and self.monthly_portfolio_returns_path.exists()
             and self.monthly_portfolio_metrics_path.exists()
+            and self.delisting_application_report_path.exists()
             and self.tested_specifications_path.exists()
             and self.multiple_testing_report_path.exists()
             and self.specification_registry_path.exists()
@@ -731,6 +832,7 @@ class RunManager:
             read_labels_jsonl,
             read_predictions_jsonl,
             write_backtest_results_json,
+            write_delisting_application_report_json,
             write_evaluation_metrics_json,
             write_factor_panel_jsonl,
             write_portfolio_metrics_json,
@@ -784,6 +886,10 @@ class RunManager:
             result.monthly_portfolio_metrics,
             self.monthly_portfolio_metrics_path,
         )
+        write_delisting_application_report_json(
+            result.delisting_application_report,
+            self.delisting_application_report_path,
+        )
         inference_result = build_inference_artifacts(
             run_id=self.config.run.run_id,
             metrics=result.metrics,
@@ -817,6 +923,7 @@ class RunManager:
                 self.monthly_portfolio_weights_path,
                 self.monthly_portfolio_returns_path,
                 self.monthly_portfolio_metrics_path,
+                self.delisting_application_report_path,
                 self.tested_specifications_path,
                 self.multiple_testing_report_path,
                 self.specification_registry_path,
@@ -831,6 +938,7 @@ class RunManager:
                 "monthly_portfolio_weights": len(result.monthly_portfolio_weights),
                 "monthly_portfolio_returns": len(result.monthly_portfolio_returns),
                 "monthly_portfolio_metrics": len(result.monthly_portfolio_metrics),
+                "delisting_status": result.delisting_application_report["status"],
                 "portfolio_return_source": (
                     "daily_price_panel" if price_panel is not None else "label_window"
                 ),
@@ -960,6 +1068,38 @@ class RunManager:
     def _safe_artifact_name(self, value: str) -> str:
         return re.sub(r"[^A-Za-z0-9_.-]+", "_", value).strip("._") or "artifact"
 
+    def _filter_section_level_feature_sections(self, parsed_sections):
+        exclusion_keys = self._section_feature_exclusion_keys()
+        if not exclusion_keys:
+            return parsed_sections
+        return [
+            section
+            for section in parsed_sections
+            if (section.document_id, section.section_key) not in exclusion_keys
+        ]
+
+    def _section_feature_exclusion_keys(self) -> set[tuple[str, str]]:
+        if not self.section_length_quality_report_path.exists():
+            return set()
+        try:
+            payload = json.loads(
+                self.section_length_quality_report_path.read_text(encoding="utf-8")
+            )
+        except (json.JSONDecodeError, OSError):
+            return set()
+        return {
+            (str(row.get("document_id")), str(row.get("section")))
+            for row in payload.get("rows", [])
+            if row.get("excluded_from_section_level_features") is True
+        }
+
+    def _reproducibility_metadata(self) -> dict[str, Any]:
+        return {
+            "git_commit_sha": _git_commit_sha(self.run_dir),
+            "package_version": _package_version(self.run_dir),
+            "dirty_worktree_flag": _dirty_worktree_flag(self.run_dir),
+        }
+
     def _append_stage(
         self,
         records: list[dict[str, Any]],
@@ -1008,6 +1148,7 @@ class RunManager:
                 "audit_status": audit_status if audit_status is not None else current.audit_status,
                 "coverage": coverage if coverage is not None else current.coverage,
                 "failure_reason": failure_reason,
+                **self._reproducibility_metadata(),
             }
         )
         self.write_status(updated)
@@ -1069,4 +1210,65 @@ class RunManager:
 def initialize_run_from_config(config_path: str | Path) -> RunStatusRecord:
     manager = RunManager.from_config_path(config_path)
     return manager.initialize_run()
+
+
+def _git_commit_sha(cwd: Path) -> str | None:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=cwd,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except Exception:
+        return None
+    value = result.stdout.strip()
+    return value or None
+
+
+def _dirty_worktree_flag(cwd: Path) -> bool | None:
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=cwd,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except Exception:
+        return None
+    return bool(result.stdout.strip())
+
+
+def _package_version(cwd: Path) -> str | None:
+    project_root = _git_root(cwd) or cwd
+    pyproject = project_root / "pyproject.toml"
+    if pyproject.exists():
+        try:
+            payload = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+            version = payload.get("project", {}).get("version")
+            if version:
+                return str(version)
+        except Exception:
+            pass
+    try:
+        return metadata.version("financial-10k-text-agent")
+    except metadata.PackageNotFoundError:
+        return None
+
+
+def _git_root(cwd: Path) -> Path | None:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=cwd,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except Exception:
+        return None
+    value = result.stdout.strip()
+    return Path(value) if value else None
 

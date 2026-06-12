@@ -426,6 +426,49 @@ def test_daily_price_panel_drives_portfolio_returns() -> None:
     assert result.portfolio_metrics[0].newey_west_lag == 2
 
 
+def test_daily_portfolio_exits_position_after_delisting_return() -> None:
+    labels = [
+        label("sec:test:a", "AAA", 2016, 0.0).model_copy(
+            update={"label_start_date": date(2016, 3, 2), "label_end_date": date(2016, 3, 4)}
+        ),
+        label("sec:test:b", "BBB", 2016, 0.0).model_copy(
+            update={"label_start_date": date(2016, 3, 2), "label_end_date": date(2016, 3, 4)}
+        ),
+    ]
+    predictions = [
+        prediction(labels[0], model_id="ridge::CAR_1_20::split", role="test", value=0.1),
+        prediction(labels[1], model_id="ridge::CAR_1_20::split", role="test", value=0.9),
+    ]
+    price_panel = build_price_panel(
+        pd.DataFrame(
+            [
+                ("2016-03-01", "AAA", "", "", ""),
+                ("2016-03-02", "AAA", "-0.2", "-0.5", "500"),
+                ("2016-03-03", "AAA", "0.5", "", ""),
+                ("2016-03-01", "BBB", "", "", ""),
+                ("2016-03-02", "BBB", "0.1", "", ""),
+                ("2016-03-03", "BBB", "0.1", "", ""),
+            ],
+            columns=["date", "ticker", "ret", "dlret", "dlstcd"],
+        )
+    )
+
+    result = build_evaluation_artifacts(
+        run_id="eval_test_run",
+        predictions=predictions,
+        labels=labels,
+        price_panel=price_panel,
+        portfolio_return_type="simple",
+        transaction_cost_bps_one_way=0.0,
+        newey_west_lag=1,
+    )
+
+    assert result.portfolio_returns[0].delisting_returns_applied == 1
+    assert result.portfolio_returns[0].positions_affected_by_delisting == 1
+    assert result.portfolio_returns[1].active_position_count == 1
+    assert result.delisting_application_report["delisting_returns_applied"] >= 1
+
+
 def test_monthly_common_rebalance_uses_active_signals_and_sector_neutral() -> None:
     rows = [
         ("sec:test:a", "AAA", -0.4, 0.1, "Tech", 100.0),

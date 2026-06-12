@@ -291,3 +291,37 @@ def test_xgboost_outputs_optional_model_predictions() -> None:
     assert len(result.model_manifests) == 1
     assert result.model_manifests[0].model_name == "xgboost"
     assert len(result.predictions) == 4
+
+
+def test_ridge_records_missing_feature_failures_but_baseline_still_covers_oos() -> None:
+    labels, features, assignments = fixture_records()
+    test_document_id = "sec:test:b"
+    filtered_features = [
+        record for record in features if record.source_document_id != test_document_id
+    ]
+
+    result = build_model_artifacts(
+        run_id="model_test_run",
+        labels=labels,
+        features=filtered_features,
+        split_assignments=assignments,
+        models=["historical_mean", "ridge"],
+        random_seed=42,
+    )
+
+    historical_predictions = [
+        record for record in result.predictions if record.model_id.startswith("historical_mean")
+    ]
+    ridge_predictions = [
+        record for record in result.predictions if record.model_id.startswith("ridge")
+    ]
+
+    assert len(historical_predictions) == 4
+    assert len(ridge_predictions) == 3
+    assert all(record.model_expected for record in result.predictions)
+    assert any(
+        failure.failure_stage == "missing_feature"
+        and failure.model_id.startswith("ridge")
+        and failure.label_id.startswith(test_document_id)
+        for failure in result.prediction_failures
+    )

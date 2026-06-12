@@ -1,0 +1,150 @@
+{
+  "run_id": "10_company_public_fmp_alpha_2016_2025_v1",
+  "orchestrator_version": "artifact-aware-orchestrator-v1",
+  "final_run_status": "reported",
+  "blocked_reason": null,
+  "stage_count": 9,
+  "stages": [
+    {
+      "stage": "prepare_inputs",
+      "status": "completed",
+      "message": null,
+      "inputs": [
+        "data_private\\sec\\document_manifest.jsonl",
+        "data_private\\market\\prices_with_returns.csv"
+      ],
+      "outputs": [],
+      "metrics": {
+        "copied": 0,
+        "skipped_existing_or_external": 2,
+        "raw_filings_dir": "data_private\\sec\\raw_filings"
+      },
+      "created_at_utc": "2026-06-12T13:00:37.525206+00:00"
+    },
+    {
+      "stage": "labels",
+      "status": "skipped_existing",
+      "message": null,
+      "inputs": [],
+      "outputs": [],
+      "metrics": {},
+      "created_at_utc": "2026-06-12T13:00:37.707161+00:00"
+    },
+    {
+      "stage": "splits",
+      "status": "skipped_existing",
+      "message": null,
+      "inputs": [],
+      "outputs": [],
+      "metrics": {},
+      "created_at_utc": "2026-06-12T13:00:37.707161+00:00"
+    },
+    {
+      "stage": "parsing",
+      "status": "skipped_existing",
+      "message": null,
+      "inputs": [],
+      "outputs": [],
+      "metrics": {},
+      "created_at_utc": "2026-06-12T13:00:37.878888+00:00"
+    },
+    {
+      "stage": "features",
+      "status": "skipped_existing",
+      "message": null,
+      "inputs": [],
+      "outputs": [],
+      "metrics": {},
+      "created_at_utc": "2026-06-12T13:00:38.042221+00:00"
+    },
+    {
+      "stage": "models",
+      "status": "completed",
+      "message": null,
+      "inputs": [],
+      "outputs": [
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\predictions.jsonl",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\prediction_distribution_report.json",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\model_manifest.json",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\tuning_log.json"
+      ],
+      "metrics": {
+        "predictions": 896,
+        "prediction_failures": 0,
+        "model_manifests": 48
+      },
+      "created_at_utc": "2026-06-12T13:01:33.241146+00:00"
+    },
+    {
+      "stage": "evaluation",
+      "status": "completed",
+      "message": null,
+      "inputs": [],
+      "outputs": [
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\evaluation_metrics.json",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\backtest_results.json",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\portfolio_weights.jsonl",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\portfolio_returns.jsonl",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\portfolio_metrics.json",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\factor_panel.jsonl",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\monthly_portfolio_weights.jsonl",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\monthly_portfolio_returns.jsonl",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\monthly_portfolio_metrics.json",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\delisting_application_report.json",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\tested_specifications.jsonl",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\multiple_testing_report.json",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\specification_registry.json"
+      ],
+      "metrics": {
+        "metrics": 120,
+        "backtests": 48,
+        "portfolio_weights": 960,
+        "portfolio_returns": 13392,
+        "portfolio_metrics": 96,
+        "factor_panel_rows": 3356,
+        "monthly_portfolio_weights": 4960,
+        "monthly_portfolio_returns": 39072,
+        "monthly_portfolio_metrics": 268,
+        "delisting_status": "not_applicable",
+        "portfolio_return_source": "daily_price_panel",
+        "tested_specifications": 472,
+        "multiple_testing_families": 20,
+        "primary_specifications": 2
+      },
+      "created_at_utc": "2026-06-12T13:03:07.742243+00:00"
+    },
+    {
+      "stage": "audit",
+      "status": "completed",
+      "message": null,
+      "inputs": [],
+      "outputs": [
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\audit_report.json"
+      ],
+      "metrics": {
+        "audit_status": "warn",
+        "failures": 0,
+        "warnings": 2
+      },
+      "created_at_utc": "2026-06-12T13:03:08.786471+00:00"
+    },
+    {
+      "stage": "report",
+      "status": "completed",
+      "message": null,
+      "inputs": [],
+      "outputs": [
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\report.md",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\empirical_report.md",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\factor_card.md",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\appendix_tables.md",
+        "runs\\text_factor_lab\\10_company_public_fmp_alpha_2016_2025_v1\\report_summary.json"
+      ],
+      "metrics": {
+        "conclusion_level": "exploratory_report"
+      },
+      "created_at_utc": "2026-06-12T13:03:10.189210+00:00"
+    }
+  ],
+  "created_at_utc": "2026-06-12T13:03:10.203223+00:00"
+}

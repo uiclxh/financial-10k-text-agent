@@ -1,0 +1,30 @@
+{
+  "allow_public_yahoo_fallback": false,
+  "created_at_utc": "2026-05-27T00:00:00Z",
+  "data_owner": "replace-with-licensed-user-or-organization",
+  "data_rights_scope": "local research use only; do not redistribute raw Nasdaq Data Link / Sharadar data",
+  "data_stack": "licensed_nasdaq_sharadar_applied_run_template",
+  "delisting_return_source": "sharadar_delisted_metadata_no_crsp_dlret",
+  "filing_provider": "sec_edgar",
+  "input_files": {
+    "prices_file": "data_private/sharadar/prices_with_returns.csv",
+    "raw_actions_file": "data_private/sharadar/actions_raw.csv",
+    "raw_sep_file": "data_private/sharadar/sep_raw.csv",
+    "raw_tickers_file": "data_private/sharadar/tickers_raw.csv",
+    "security_master_file": "data_private/universe_sharadar/security_master.csv",
+    "universe_membership_file": "data_private/universe_sharadar/universe_membership.csv"
+  },
+  "license_note": "Template only. Nasdaq Data Link / Sharadar raw data is licensed and must not be committed. Sharadar delisted metadata is not CRSP DLRET.",
+  "link_source": "nasdaq_sharadar_tickers_cik_mapping",
+  "market_data_provider": "nasdaq_sharadar",
+  "permitted_public_outputs": [
+    "aggregate metrics",
+    "coverage diagnostics",
+    "audit summaries",
+    "factor cards",
+    "compact empirical reports"
+  ],
+  "price_source": "nasdaq_sharadar_sep_adjusted_close",
+  "raw_data_committed": false,
+  "return_source": "nasdaq_sharadar_sep_simple_return"
+}

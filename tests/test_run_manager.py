@@ -281,6 +281,15 @@ def test_formal_run_rejects_demo_universe(tmp_path: Path) -> None:
     payload["run"]["run_id"] = "formal_demo_universe"
     payload["run"]["run_type"] = "formal_run"
     payload["run"]["output_dir"] = str(tmp_path / "runs" / "formal_demo_universe")
+    payload["data_provider"] = {
+        "market_data_provider": "crsp_wrds",
+        "filing_provider": "sec_edgar",
+        "price_source": "crsp_daily_stock",
+        "return_source": "crsp_total_return",
+        "delisting_return_source": "crsp_delisting",
+        "link_source": "crsp_compustat_ccm",
+        "allow_public_yahoo_fallback": False,
+    }
     config_path = tmp_path / "formal_config.yaml"
     config_path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
 
@@ -290,6 +299,31 @@ def test_formal_run_rejects_demo_universe(tmp_path: Path) -> None:
     assert status.status == "rejected"
     assert status.audit_status == "fail"
     assert "universe manifest is not research-grade" in (status.failure_reason or "")
+
+
+def test_formal_profile_records_missing_private_universe_without_traceback(
+    tmp_path: Path,
+) -> None:
+    payload = yaml.safe_load(
+        Path("configs/text_factor_lab/real_10k_large_universe_crsp_wrds.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    payload["run"]["run_id"] = "formal_missing_private_data"
+    payload["run"]["output_dir"] = str(tmp_path / "runs" / "formal_missing_private_data")
+    payload["universe"]["tickers_file"] = str(tmp_path / "data_private" / "tickers.csv")
+    config_path = tmp_path / "formal_missing_private_data.yaml"
+    config_path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+
+    manager = RunManager.from_config_path(config_path)
+    status = manager.initialize_run()
+
+    assert status.status == "rejected"
+    assert status.audit_status == "fail"
+    assert "Universe input is missing" in (status.failure_reason or "")
+    assert manager.failure_log_path.exists()
+    failure = json.loads(manager.failure_log_path.read_text(encoding="utf-8").splitlines()[0])
+    assert failure["failure_type"] == "data_missing"
 
 
 def test_run_pipeline_executes_available_artifact_chain(temp_config: Path) -> None:

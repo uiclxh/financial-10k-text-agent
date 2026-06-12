@@ -179,6 +179,9 @@ class PortfolioReturnRecord(StrictBaseModel):
     ending_net_exposure: float | None = None
     turnover: float = Field(ge=0)
     active_position_count: int = Field(ge=0)
+    positions_affected_by_delisting: int = Field(default=0, ge=0)
+    delisting_returns_applied: int = Field(default=0, ge=0)
+    missing_delisting_returns: int = Field(default=0, ge=0)
     created_at_utc: datetime
 
     @field_validator(

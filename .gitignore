@@ -21,9 +21,12 @@ env/
 data/raw/
 data/processed/
 data/real_10k*/
+data_private/
 runs/
 /reports/
 model_cache/
+feature_matrices/
+feature_matrix_index.json
 *.parquet
 *.pkl
 *.joblib

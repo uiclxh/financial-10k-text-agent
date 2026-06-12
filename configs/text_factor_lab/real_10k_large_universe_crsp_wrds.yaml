@@ -1,0 +1,118 @@
+run:
+  run_id: "real_10k_large_universe_crsp_wrds_formal_template"
+  run_type: "formal_run"
+  random_seed: 42
+  output_dir: "runs/text_factor_lab/real_10k_large_universe_crsp_wrds_formal_template"
+
+inputs:
+  document_manifest_path: "data_private/sec/document_manifest.jsonl"
+  prices_path: "data_private/crsp/prices_with_dlret.csv"
+  parsed_sections_path: "data_private/sec/parsed_sections.jsonl"
+  raw_filings_dir: "data_private/sec/raw_filings"
+  copy_inputs_to_run_dir: true
+
+data_provider:
+  market_data_provider: "crsp_wrds"
+  filing_provider: "sec_edgar"
+  price_source: "crsp_daily_stock"
+  return_source: "crsp_total_return"
+  delisting_return_source: "crsp_delisting"
+  link_source: "crsp_compustat_ccm"
+  allow_public_yahoo_fallback: false
+  crsp_daily_returns_file: "data_private/crsp/daily_returns.csv"
+  crsp_delisting_returns_file: "data_private/crsp/delisting_returns.csv"
+  data_license_manifest_file: "data_manifests/crsp_wrds_data_manifest.template.json"
+
+universe:
+  name: "us_large_cap_survivorship_free_crsp_wrds"
+  selection_date: "2016-01-01"
+  tickers_file: "data_private/universe/tickers.csv"
+  security_master_file: "data_private/universe/security_master.csv"
+  membership_file: "data_private/universe/universe_membership.csv"
+  entity_link_history_file: "data_private/universe/entity_link_history.csv"
+  universe_data_level: "research_grade"
+  survivorship_bias_control: true
+  allow_delisted_firms: true
+  historical_ticker_mapping: true
+
+sample:
+  start_date: "2016-01-01"
+  end_date: "2025-12-31"
+  timezone: "America/New_York"
+
+text_source:
+  document_type: "10-K"
+  source: "SEC_EDGAR"
+  sections:
+    - "Risk Factors"
+    - "MD&A"
+    - "Business"
+    - "Legal Proceedings"
+  require_available_time: true
+  require_license_note: true
+  sec_user_agent: "financial-10k-text-agent contact: replace-with-email@example.com"
+
+labels:
+  targets:
+    - "realized_volatility_1_20"
+    - "CAR_1_5"
+    - "CAR_1_20"
+  return_type: "log"
+  portfolio_return_type: "simple"
+  price_field: "crsp_ret_with_dlret"
+  market_benchmark: "CRSP_VWRETD"
+  annualization_days: 252
+
+split:
+  method: "rolling_year"
+  train_years_min: 5
+  validation_years: 1
+  test_years: 1
+  embargo_days: 20
+
+features:
+  methods:
+    - "dictionary_tone"
+    - "tfidf"
+  dictionary_tone:
+    dictionaries:
+      - "loughran_mcdonald"
+      - "risk_uncertainty"
+  tfidf:
+    max_features: 50000
+    ngram_range: [1, 2]
+    min_df: 5
+    max_df: 0.95
+    fit_scope: "train_window_only"
+    write_long_features: false
+    matrix_store_dir: "feature_matrices"
+    matrix_index_file: "feature_matrix_index.json"
+    svd_components: 64
+
+models:
+  enabled:
+    - "historical_mean"
+    - "industry_mean"
+    - "ridge"
+    - "xgboost"
+  tuning:
+    selection_metric: "validation_rank_ic"
+    save_tuning_log: true
+
+backtest:
+  rebalance_frequency: "monthly"
+  portfolio_method: "top_bottom_quintile"
+  weighting: "equal_weight"
+  holding_window_days: 20
+  transaction_cost_bps_one_way: 10
+  sector_neutral: true
+  newey_west_lag: 19
+  portfolio_signal_direction: "validation_selected"
+  target_aware_portfolio_policy: "risk_scaled"
+
+audit:
+  coverage_threshold: 0.9
+  require_license_note: true
+  require_available_time: true
+  reject_on_lookahead: true
+  reject_on_train_test_leakage: true

@@ -34,6 +34,9 @@ class RunStatusRecord(StrictBaseModel):
     failure_reason: str | None = None
     audit_status: AuditStatus
     coverage: float = Field(ge=0, le=1)
+    git_commit_sha: str | None = None
+    package_version: str | None = None
+    dirty_worktree_flag: bool | None = None
 
     @field_validator("created_at_utc", "updated_at_utc")
     @classmethod

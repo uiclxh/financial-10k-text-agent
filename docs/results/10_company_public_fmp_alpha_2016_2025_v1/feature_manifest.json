@@ -1,0 +1,1182 @@
+[
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "test_doc_count": 10,
+    "text_scope": "full",
+    "tfidf_params": null,
+    "train_doc_count": 44,
+    "validation_doc_count": 10,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "test_doc_count": 10,
+    "text_scope": "item_1",
+    "tfidf_params": null,
+    "train_doc_count": 44,
+    "validation_doc_count": 10,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "test_doc_count": 9,
+    "text_scope": "item_1a",
+    "tfidf_params": null,
+    "train_doc_count": 43,
+    "validation_doc_count": 9,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "test_doc_count": 10,
+    "text_scope": "item_3",
+    "tfidf_params": null,
+    "train_doc_count": 44,
+    "validation_doc_count": 10,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "test_doc_count": 7,
+    "text_scope": "item_7",
+    "tfidf_params": null,
+    "train_doc_count": 35,
+    "validation_doc_count": 7,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "test_doc_count": 10,
+    "text_scope": "full",
+    "tfidf_params": null,
+    "train_doc_count": 54,
+    "validation_doc_count": 10,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "test_doc_count": 10,
+    "text_scope": "item_1",
+    "tfidf_params": null,
+    "train_doc_count": 54,
+    "validation_doc_count": 10,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "test_doc_count": 9,
+    "text_scope": "item_1a",
+    "tfidf_params": null,
+    "train_doc_count": 52,
+    "validation_doc_count": 9,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "test_doc_count": 10,
+    "text_scope": "item_3",
+    "tfidf_params": null,
+    "train_doc_count": 54,
+    "validation_doc_count": 10,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "test_doc_count": 7,
+    "text_scope": "item_7",
+    "tfidf_params": null,
+    "train_doc_count": 42,
+    "validation_doc_count": 7,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "test_doc_count": 10,
+    "text_scope": "full",
+    "tfidf_params": null,
+    "train_doc_count": 64,
+    "validation_doc_count": 10,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "test_doc_count": 10,
+    "text_scope": "item_1",
+    "tfidf_params": null,
+    "train_doc_count": 64,
+    "validation_doc_count": 10,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "test_doc_count": 9,
+    "text_scope": "item_1a",
+    "tfidf_params": null,
+    "train_doc_count": 61,
+    "validation_doc_count": 9,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "test_doc_count": 10,
+    "text_scope": "item_3",
+    "tfidf_params": null,
+    "train_doc_count": 64,
+    "validation_doc_count": 10,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "test_doc_count": 7,
+    "text_scope": "item_7",
+    "tfidf_params": null,
+    "train_doc_count": 49,
+    "validation_doc_count": 7,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "test_doc_count": 10,
+    "text_scope": "full",
+    "tfidf_params": null,
+    "train_doc_count": 74,
+    "validation_doc_count": 10,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "test_doc_count": 10,
+    "text_scope": "item_1",
+    "tfidf_params": null,
+    "train_doc_count": 74,
+    "validation_doc_count": 10,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "test_doc_count": 9,
+    "text_scope": "item_1a",
+    "tfidf_params": null,
+    "train_doc_count": 70,
+    "validation_doc_count": 9,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "test_doc_count": 10,
+    "text_scope": "item_3",
+    "tfidf_params": null,
+    "train_doc_count": 74,
+    "validation_doc_count": 10,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.203694Z",
+    "dictionary_license_note": "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; free for academic research use. Keep raw dictionary CSV under data_private/.",
+    "dictionary_source": "Notre Dame SRAF Loughran-McDonald Master Dictionary",
+    "dictionary_term_count": 3876,
+    "dictionary_version": "LM_1993_2025",
+    "feature_method": "dictionary_tone",
+    "feature_version": "dictionary-tone-v0",
+    "fit_scope": "no_fit_dictionary_counts",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "test_doc_count": 7,
+    "text_scope": "item_7",
+    "tfidf_params": null,
+    "train_doc_count": 56,
+    "validation_doc_count": 7,
+    "vocabulary_size": 3876
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2020__val_2021_2021__test_2022_2022:full",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "test_doc_count": 10,
+    "text_scope": "full",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9913633524915118,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 44,
+    "validation_doc_count": 10,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2020__val_2021_2021__test_2022_2022:item_1",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "test_doc_count": 10,
+    "text_scope": "item_1",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9937705953110505,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 44,
+    "validation_doc_count": 10,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2020__val_2021_2021__test_2022_2022:item_1a",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "test_doc_count": 9,
+    "text_scope": "item_1a",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9944819101652604,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 43,
+    "validation_doc_count": 9,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2020__val_2021_2021__test_2022_2022:item_3",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "test_doc_count": 10,
+    "text_scope": "item_3",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 1.0,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 44,
+    "validation_doc_count": 10,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2020__val_2021_2021__test_2022_2022:item_7",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2020__val_2021_2021__test_2022_2022",
+    "test_doc_count": 7,
+    "text_scope": "item_7",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9966736365581214,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 35,
+    "validation_doc_count": 7,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2021__val_2022_2022__test_2023_2023:full",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "test_doc_count": 10,
+    "text_scope": "full",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9840783271832607,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 54,
+    "validation_doc_count": 10,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2021__val_2022_2022__test_2023_2023:item_1",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "test_doc_count": 10,
+    "text_scope": "item_1",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9857505057824425,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 54,
+    "validation_doc_count": 10,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2021__val_2022_2022__test_2023_2023:item_1a",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "test_doc_count": 9,
+    "text_scope": "item_1a",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9896769347861757,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 52,
+    "validation_doc_count": 9,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2021__val_2022_2022__test_2023_2023:item_3",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "test_doc_count": 10,
+    "text_scope": "item_3",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9991796005521133,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 54,
+    "validation_doc_count": 10,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2021__val_2022_2022__test_2023_2023:item_7",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2021__val_2022_2022__test_2023_2023",
+    "test_doc_count": 7,
+    "text_scope": "item_7",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9888195428587199,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 42,
+    "validation_doc_count": 7,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2022__val_2023_2023__test_2024_2024:full",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "test_doc_count": 10,
+    "text_scope": "full",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.978824197153968,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 64,
+    "validation_doc_count": 10,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2022__val_2023_2023__test_2024_2024:item_1",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "test_doc_count": 10,
+    "text_scope": "item_1",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.981196040219791,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 64,
+    "validation_doc_count": 10,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2022__val_2023_2023__test_2024_2024:item_1a",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "test_doc_count": 9,
+    "text_scope": "item_1a",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.98544253147658,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 61,
+    "validation_doc_count": 9,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2022__val_2023_2023__test_2024_2024:item_3",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "test_doc_count": 10,
+    "text_scope": "item_3",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.996005397579233,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 64,
+    "validation_doc_count": 10,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2022__val_2023_2023__test_2024_2024:item_7",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2022__val_2023_2023__test_2024_2024",
+    "test_doc_count": 7,
+    "text_scope": "item_7",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9807491938794364,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 49,
+    "validation_doc_count": 7,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2023__val_2024_2024__test_2025_2025:full",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "test_doc_count": 10,
+    "text_scope": "full",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9749965535315981,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 74,
+    "validation_doc_count": 10,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2023__val_2024_2024__test_2025_2025:item_1",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "test_doc_count": 10,
+    "text_scope": "item_1",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.975986523914898,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 74,
+    "validation_doc_count": 10,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2023__val_2024_2024__test_2025_2025:item_1a",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "test_doc_count": 9,
+    "text_scope": "item_1a",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9806673072474684,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 70,
+    "validation_doc_count": 9,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2023__val_2024_2024__test_2025_2025:item_3",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "test_doc_count": 10,
+    "text_scope": "item_3",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9934936624856435,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 74,
+    "validation_doc_count": 10,
+    "vocabulary_size": 32
+  },
+  {
+    "created_at_utc": "2026-06-12T12:52:50.206695Z",
+    "dictionary_license_note": null,
+    "dictionary_source": null,
+    "dictionary_term_count": null,
+    "dictionary_version": null,
+    "feature_method": "tfidf_svd",
+    "feature_version": "tfidf-svd-v0:train_2016_2023__val_2024_2024__test_2025_2025:item_7",
+    "fit_scope": "train_window_only",
+    "input_hashes": {
+      "document_manifest": "148df49cc755cf4efaad87c76d51805a1746f9db899a134f527ab463b4d2c938",
+      "parsed_sections": "517099a87b928351973f1f9b15f938ce347ef400cfc59b6efe8ac2359f5b356d",
+      "split_assignments": "6f0e1ed980c301ad300b476af14edae35c20001b8e10884b1b64bc499ec83d10"
+    },
+    "split_id": "train_2016_2023__val_2024_2024__test_2025_2025",
+    "test_doc_count": 7,
+    "text_scope": "item_7",
+    "tfidf_params": {
+      "explained_variance_ratio_sum": 0.9741966152696049,
+      "matrix_store_version": "tfidf-matrix-store-v0",
+      "max_df": 0.95,
+      "max_features": 5000,
+      "min_df": 2,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "source_feature_method": "tfidf",
+      "sublinear_tf": true,
+      "svd_components_effective": 32,
+      "svd_components_requested": 32,
+      "token_pattern": "(?u)\\b[a-zA-Z][a-zA-Z\\-']+\\b"
+    },
+    "train_doc_count": 56,
+    "validation_doc_count": 7,
+    "vocabulary_size": 32
+  }
+]

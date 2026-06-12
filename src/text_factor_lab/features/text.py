@@ -7,6 +7,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -18,11 +19,21 @@ from text_factor_lab.schemas.universe import UniverseRecord
 
 DICTIONARY_FEATURE_VERSION = "dictionary-tone-v0"
 TFIDF_FEATURE_VERSION = "tfidf-v0"
-DICTIONARY_SOURCE = "builtin_mvp_toy_financial_dictionary"
-DICTIONARY_VERSION = "mvp-toy-v0"
-DICTIONARY_LICENSE_NOTE = (
+LM_DICTIONARY_SOURCE = "Notre Dame SRAF Loughran-McDonald Master Dictionary"
+LM_DICTIONARY_VERSION = "LM_1993_2025"
+LM_DICTIONARY_LICENSE_NOTE = (
+    "Loughran-McDonald Master Dictionary 1993-2025 from Notre Dame SRAF; "
+    "free for academic research use. Keep raw dictionary CSV under data_private/."
+)
+TOY_DICTIONARY_SOURCE = "builtin_mvp_toy_financial_dictionary"
+TOY_DICTIONARY_VERSION = "mvp-toy-v0"
+TOY_DICTIONARY_LICENSE_NOTE = (
     "Internal MVP toy dictionary for pipeline tests; not a substitute for "
     "Loughran-McDonald in formal research."
+)
+DEFAULT_LM_DICTIONARY_PATHS = (
+    Path("data_private/dictionaries/Loughran-McDonald_MasterDictionary_1993-2025.csv"),
+    Path("data_private/dictionaries/lm_dictionary.csv"),
 )
 TOKEN_PATTERN = re.compile(r"[A-Za-z][A-Za-z\-']*")
 DEFAULT_FINANCIAL_DICTIONARIES: dict[str, set[str]] = {
@@ -73,6 +84,16 @@ DEFAULT_FINANCIAL_DICTIONARIES: dict[str, set[str]] = {
         "obligations",
     },
 }
+LM_CATEGORY_COLUMNS = {
+    "negative": "Negative",
+    "positive": "Positive",
+    "uncertainty": "Uncertainty",
+    "litigious": "Litigious",
+    "strong_modal": "Strong_Modal",
+    "weak_modal": "Weak_Modal",
+    "constraining": "Constraining",
+}
+_DICTIONARY_CACHE: tuple[dict[str, set[str]], dict[str, Any]] | None = None
 
 
 @dataclass(frozen=True)
@@ -94,6 +115,54 @@ class FeatureBuildResult:
     features: list[FeatureRecord]
     vocabulary_by_split: dict[str, dict[str, dict[str, int]]]
     feature_manifests: list[FeatureManifestRecord]
+
+
+def load_default_financial_dictionaries() -> tuple[dict[str, set[str]], dict[str, Any]]:
+    global _DICTIONARY_CACHE
+    if _DICTIONARY_CACHE is not None:
+        return _DICTIONARY_CACHE
+    for path in DEFAULT_LM_DICTIONARY_PATHS:
+        if path.exists() and path.stat().st_size > 1024:
+            dictionaries = load_loughran_mcdonald_dictionary(path)
+            if any(dictionaries.values()):
+                metadata = {
+                    "dictionary_source": LM_DICTIONARY_SOURCE,
+                    "dictionary_version": LM_DICTIONARY_VERSION,
+                    "dictionary_license_note": LM_DICTIONARY_LICENSE_NOTE,
+                    "dictionary_term_count": len(set().union(*dictionaries.values())),
+                    "dictionary_path": str(path),
+                }
+                _DICTIONARY_CACHE = dictionaries, metadata
+                return _DICTIONARY_CACHE
+    dictionaries = DEFAULT_FINANCIAL_DICTIONARIES
+    metadata = {
+        "dictionary_source": TOY_DICTIONARY_SOURCE,
+        "dictionary_version": TOY_DICTIONARY_VERSION,
+        "dictionary_license_note": TOY_DICTIONARY_LICENSE_NOTE,
+        "dictionary_term_count": len(set().union(*dictionaries.values())),
+        "dictionary_path": None,
+    }
+    _DICTIONARY_CACHE = dictionaries, metadata
+    return _DICTIONARY_CACHE
+
+
+def load_loughran_mcdonald_dictionary(path: str | Path) -> dict[str, set[str]]:
+    import csv
+
+    dictionaries: dict[str, set[str]] = {name: set() for name in LM_CATEGORY_COLUMNS}
+    with Path(path).open("r", newline="", encoding="utf-8-sig") as file:
+        reader = csv.DictReader(file)
+        if reader.fieldnames is None or "Word" not in reader.fieldnames:
+            raise ValueError(f"Not a Loughran-McDonald master dictionary CSV: {path}")
+        for row in reader:
+            word = str(row.get("Word", "")).strip().lower()
+            if not word:
+                continue
+            for category, column in LM_CATEGORY_COLUMNS.items():
+                value = str(row.get(column, "0")).strip()
+                if value and value != "0":
+                    dictionaries[category].add(word)
+    return dictionaries
 
 
 def tokenize(text: str) -> list[str]:
@@ -161,7 +230,7 @@ def build_dictionary_tone_features(
     dictionaries: dict[str, set[str]] | None = None,
     feature_version: str = DICTIONARY_FEATURE_VERSION,
 ) -> list[FeatureRecord]:
-    dictionary_terms = dictionaries or DEFAULT_FINANCIAL_DICTIONARIES
+    dictionary_terms = dictionaries or load_default_financial_dictionaries()[0]
     features: list[FeatureRecord] = []
     for document in document_texts.values():
         text_blocks = {"full": document.full_text} | document.section_texts
@@ -251,8 +320,17 @@ def build_dictionary_feature_manifests(
     feature_version: str = DICTIONARY_FEATURE_VERSION,
     input_hashes: dict[str, str] | None = None,
 ) -> list[FeatureManifestRecord]:
-    dictionary_terms = dictionaries or DEFAULT_FINANCIAL_DICTIONARIES
-    dictionary_term_count = len(set().union(*dictionary_terms.values()))
+    if dictionaries is None:
+        dictionary_terms, dictionary_metadata = load_default_financial_dictionaries()
+    else:
+        dictionary_terms = dictionaries
+        dictionary_metadata = {
+            "dictionary_source": TOY_DICTIONARY_SOURCE,
+            "dictionary_version": TOY_DICTIONARY_VERSION,
+            "dictionary_license_note": TOY_DICTIONARY_LICENSE_NOTE,
+            "dictionary_term_count": len(set().union(*dictionary_terms.values())),
+        }
+    dictionary_term_count = int(dictionary_metadata["dictionary_term_count"])
     manifests: list[FeatureManifestRecord] = []
     assignments_by_split = _assignments_by_split_and_role(split_assignments)
     created_at = datetime.now(UTC)
@@ -265,9 +343,9 @@ def build_dictionary_feature_manifests(
                 FeatureManifestRecord(
                     feature_version=feature_version,
                     feature_method="dictionary_tone",
-                    dictionary_source=DICTIONARY_SOURCE,
-                    dictionary_version=DICTIONARY_VERSION,
-                    dictionary_license_note=DICTIONARY_LICENSE_NOTE,
+                    dictionary_source=dictionary_metadata["dictionary_source"],
+                    dictionary_version=dictionary_metadata["dictionary_version"],
+                    dictionary_license_note=dictionary_metadata["dictionary_license_note"],
                     dictionary_term_count=dictionary_term_count,
                     tfidf_params=None,
                     fit_scope="no_fit_dictionary_counts",
@@ -500,8 +578,21 @@ def write_vocabulary_json(
 ) -> None:
     output = Path(path)
     output.parent.mkdir(parents=True, exist_ok=True)
+    payload: dict[str, object]
+    if vocabulary_by_split:
+        payload = vocabulary_by_split
+    else:
+        payload = {
+            "note": (
+                "Full train-window vocabulary is stored in feature matrix "
+                "feature_names.json files and summarized in vocabulary_manifest.json. "
+                "This run does not write a full long-form vocabulary payload here."
+            ),
+            "full_vocabulary_committed": False,
+            "manifest_path": "vocabulary_manifest.json",
+        }
     with output.open("w", encoding="utf-8") as file:
-        json.dump(vocabulary_by_split, file, indent=2, sort_keys=True)
+        json.dump(payload, file, indent=2, sort_keys=True)
         file.write("\n")
 
 

@@ -23,6 +23,14 @@ PortfolioSignalDirection = Literal[
 TargetAwarePortfolioPolicy = Literal["none", "long_low_vol", "risk_scaled"]
 FitScope = Literal["train_window_only"]
 UniverseDataLevel = Literal["exploratory", "applied", "research_grade"]
+MarketDataProviderName = Literal[
+    "public_yahoo",
+    "crsp_wrds",
+    "licensed_vendor",
+    "nasdaq_sharadar",
+    "fmp_alpha",
+]
+FilingProviderName = Literal["sec_edgar"]
 
 
 class RunConfig(StrictBaseModel):
@@ -38,6 +46,26 @@ class InputsConfig(StrictBaseModel):
     parsed_sections_path: Path | None = None
     raw_filings_dir: Path | None = None
     copy_inputs_to_run_dir: bool = True
+
+
+class DataProviderConfig(StrictBaseModel):
+    market_data_provider: MarketDataProviderName = "public_yahoo"
+    filing_provider: FilingProviderName = "sec_edgar"
+    price_source: str = "public_yahoo_adjusted_close"
+    return_source: str = "public_yahoo_simple_return"
+    delisting_return_source: str | None = None
+    link_source: str | None = None
+    allow_public_yahoo_fallback: bool = True
+    crsp_daily_returns_file: Path | None = None
+    crsp_delisting_returns_file: Path | None = None
+    sharadar_prices_file: Path | None = None
+    sharadar_tickers_file: Path | None = None
+    sharadar_actions_file: Path | None = None
+    fmp_prices_file: Path | None = None
+    fmp_marketcap_file: Path | None = None
+    fmp_profile_file: Path | None = None
+    alpha_listing_status_file: Path | None = None
+    data_license_manifest_file: Path | None = None
 
 
 class UniverseConfig(StrictBaseModel):
@@ -173,6 +201,7 @@ class AuditConfig(StrictBaseModel):
 class ExperimentConfig(StrictBaseModel):
     run: RunConfig
     inputs: InputsConfig = Field(default_factory=InputsConfig)
+    data_provider: DataProviderConfig = Field(default_factory=DataProviderConfig)
     universe: UniverseConfig
     sample: SampleConfig
     text_source: TextSourceConfig
@@ -199,6 +228,20 @@ class ExperimentConfig(StrictBaseModel):
                 raise ValueError("formal_run requires audit.require_available_time=true")
             if not self.audit.require_license_note:
                 raise ValueError("formal_run requires audit.require_license_note=true")
+            if self.data_provider.market_data_provider not in {
+                "crsp_wrds",
+                "licensed_vendor",
+                "nasdaq_sharadar",
+                "fmp_alpha",
+            }:
+                raise ValueError(
+                    "formal_run requires data_provider.market_data_provider to be "
+                    "crsp_wrds, licensed_vendor, or nasdaq_sharadar"
+                )
+            if self.data_provider.allow_public_yahoo_fallback:
+                raise ValueError(
+                    "formal_run requires data_provider.allow_public_yahoo_fallback=false"
+                )
             if self.text_source.source == "SEC_EDGAR" and not self.text_source.sec_user_agent:
                 raise ValueError("formal_run with SEC_EDGAR requires text_source.sec_user_agent")
         return self
