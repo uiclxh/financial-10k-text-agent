@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "financial-10k-text-agent"
-version = "0.15.1"
+version = "0.16.0"
 description = "Leakage-safe SEC 10-K text agent for out-of-sample volatility forecasting"
 readme = "README.md"
 requires-python = ">=3.11"

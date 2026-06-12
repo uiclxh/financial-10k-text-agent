@@ -10,6 +10,8 @@ information.
 
 ## Latest Public Result
 
+Current release: **v0.16.0 - 10-Company FMP/Alpha Applied Pilot**.
+
 The latest committed result package is:
 
 [docs/results/10_company_public_fmp_alpha_2016_2025_v1](docs/results/10_company_public_fmp_alpha_2016_2025_v1/README.md)

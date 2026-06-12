@@ -6,6 +6,8 @@ portfolio diagnostics, leakage checks, and empirical-finance reporting.
 Latest public package:
 [docs/results/10_company_public_fmp_alpha_2016_2025_v1](docs/results/10_company_public_fmp_alpha_2016_2025_v1/README.md)
 
+Current release: **v0.16.0 - 10-Company FMP/Alpha Applied Pilot**.
+
 Key facts:
 
 - 10-company U.S. 10-K pilot, FY2016-FY2025.

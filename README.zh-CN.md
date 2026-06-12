@@ -5,6 +5,8 @@
 最新公开结果包：
 [docs/results/10_company_public_fmp_alpha_2016_2025_v1](docs/results/10_company_public_fmp_alpha_2016_2025_v1/README.md)
 
+当前 release：**v0.16.0 - 10-Company FMP/Alpha Applied Pilot**。
+
 核心信息：
 
 - 10 家美国 10-K 公司，FY2016-FY2025。
