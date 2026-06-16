@@ -1,4 +1,0 @@
-target_name,labels_total,eligible_oos_labels,predicted_unique_labels,predicted_eligible_oos_labels,raw_label_coverage,eligible_oos_coverage,top_failure_stage
-CAR_1_20,500,247,247,247,0.494,1.0,not_oos_expected
-CAR_1_5,500,250,250,250,0.5,1.0,not_oos_expected
-realized_volatility_1_20,500,247,247,247,0.494,1.0,not_oos_expected

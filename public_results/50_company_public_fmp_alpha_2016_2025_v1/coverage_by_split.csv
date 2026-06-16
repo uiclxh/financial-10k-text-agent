@@ -1,5 +1,0 @@
-split_id,assigned_labels,eligible_oos_labels,predicted_eligible_oos_labels,eligible_oos_coverage,validation_labels,test_labels,train_labels
-train_2016_2020__val_2021_2021__test_2022_2022,920,294,294,1.0,141,153,626
-train_2016_2021__val_2022_2022__test_2023_2023,1068,297,297,1.0,147,150,771
-train_2016_2022__val_2023_2023__test_2024_2024,1218,294,294,1.0,144,150,924
-train_2016_2023__val_2024_2024__test_2025_2025,1368,294,294,1.0,144,150,1074

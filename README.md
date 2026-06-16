@@ -12,7 +12,7 @@ empirical asset pricing, rolling out-of-sample validation, and research audit.
 
 Latest public result package:
 
-[`public_results/50_company_public_fmp_alpha_2016_2025_v1`](public_results/50_company_public_fmp_alpha_2016_2025_v1/)
+[`docs/results/50_company_public_fmp_alpha_2016_2025_v1`](docs/results/50_company_public_fmp_alpha_2016_2025_v1/README.md)
 
 | Field | Value |
 | --- | --- |

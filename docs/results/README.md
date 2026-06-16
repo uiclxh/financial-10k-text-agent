@@ -1,41 +1,40 @@
 # Public Result Artifacts
 
 This directory contains compact, GitHub-friendly research outputs. It excludes
-raw filings, API responses, full price panels, large feature matrices, and
-private or licensed intermediate data.
+raw filings, API responses, full price panels, feature matrices, and private or
+licensed intermediate data.
 
 ## Latest Result Package
 
-[10_company_public_fmp_alpha_2016_2025_v1](10_company_public_fmp_alpha_2016_2025_v1/README.md)
+[50_company_public_fmp_alpha_2016_2025_v1](50_company_public_fmp_alpha_2016_2025_v1/README.md)
 
-This is the current public applied-grade pilot:
+Current public applied-grade pilot:
 
-- 10 U.S. companies.
+- 50 U.S. large-cap companies.
 - FY2016-FY2025 SEC 10-K filings.
-- 100 filings, 300 labels, 896 model predictions.
-- Loughran-McDonald dictionary plus train-window-only TF-IDF/SVD features.
-- 472 tested specifications with multiple-testing disclosure.
+- 500 filings, 1,500 labels, 4,716 OOS predictions.
+- 520k+ feature records and 568 tested specifications.
+- Preregistered primary prediction: Ridge on `realized_volatility_1_20`,
+  Rank IC `0.2606`, raw p-value `0.00017`.
 - 0 audit failures and 2 audit warnings.
+- Portfolio outputs are diagnostic only; no formal tradable-alpha claim.
 
-Main conclusion: the pipeline is validated and audit-clean enough for an
-applied research demo, but the public pilot remains exploratory and does not
-establish formal trading alpha.
+## Historical Result Packages
 
-## Historical / Extension Summaries
-
+- [10_company_public_fmp_alpha_2016_2025_v1](10_company_public_fmp_alpha_2016_2025_v1/README.md)
 - `large_universe_90_company_final_summary.md`
 - `large_universe_90_company_final_summary.json`
 - `large_universe_feature_ablation_summary.md`
 - `large_universe_feature_ablation_summary.json`
 
-These are compact summaries from an earlier large-universe experiment. They are
-kept as historical diagnostics, not as the current primary public package.
+These are retained as historical diagnostics, not as the current primary public
+package.
 
 ## Formal Licensed-Data Templates
 
 - `crsp_wrds_formal_summary_template.md`
 - `factor_card_crsp_wrds_template.md`
 
-These define the expected compact outputs for a future licensed CRSP/WRDS rerun.
+These define expected compact outputs for a future licensed CRSP/WRDS rerun.
 Raw CRSP, WRDS, CCM, Compustat, vendor, or other licensed files must remain
 under ignored private paths such as `data_private/`.
