@@ -1,0 +1,517 @@
+{
+  "status": "ok",
+  "benchmark_ticker": "SPY",
+  "coverage": 1.0,
+  "tickers": [
+    {
+      "ticker": "ABBV",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "ABT",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "ADBE",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "AEP",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "AMT",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "APD",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "AXP",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "BAC",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "CAT",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "CMCSA",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "COP",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "COST",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "CRM",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "CSCO",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "CVX",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "DUK",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "EOG",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "FCX",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "GE",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "GS",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "HD",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "HON",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "IBM",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "JNJ",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "JPM",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "KO",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "LLY",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "MA",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "MCD",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "META",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "MRK",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "MS",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "MSFT",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "NEE",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "NEM",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "NFLX",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "NKE",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "ORCL",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "OXY",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "PEP",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "PFE",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "PLD",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "SBUX",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "SHW",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "SO",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "SPY",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "UNP",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "UPS",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "V",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "WFC",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    },
+    {
+      "ticker": "XOM",
+      "expected_days": 2618,
+      "observed_days": 2618,
+      "missing_days": 0,
+      "missing_dates": [],
+      "first_date": "2015-12-01",
+      "last_date": "2026-04-30",
+      "status": "ok"
+    }
+  ]
+}

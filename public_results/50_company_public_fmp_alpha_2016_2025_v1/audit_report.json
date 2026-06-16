@@ -1,0 +1,476 @@
+{
+  "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+  "run_type": "exploratory_run",
+  "audit_status": "warn",
+  "formal_result_allowed": false,
+  "coverage": 0.496,
+  "check_count": 32,
+  "fail_count": 0,
+  "warn_count": 2,
+  "checks": [
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::document_manifest.jsonl",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "document_manifest.jsonl parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\document_manifest.jsonl"
+      ],
+      "observed_value": 500,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:48.287956Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::labels.jsonl",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "labels.jsonl parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\labels.jsonl"
+      ],
+      "observed_value": 1500,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:48.300447Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::split_assignments.jsonl",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "split_assignments.jsonl parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\split_assignments.jsonl"
+      ],
+      "observed_value": 4574,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:48.336548Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::split_leakage.jsonl",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "split_leakage.jsonl parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\split_leakage.jsonl"
+      ],
+      "observed_value": 46,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:48.362646Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::features.jsonl",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "features.jsonl parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\features.jsonl"
+      ],
+      "observed_value": 520465,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:52.776219Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::feature_manifest.json",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "feature_manifest.json parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\feature_manifest.json"
+      ],
+      "observed_value": 40,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:52.805804Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::predictions.jsonl",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "predictions.jsonl parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\predictions.jsonl"
+      ],
+      "observed_value": 4716,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:52.852410Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::model_prediction_failures.jsonl",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "model_prediction_failures.jsonl parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\model_prediction_failures.jsonl"
+      ],
+      "observed_value": 0,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:52.853519Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::model_manifest.json",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "model_manifest.json parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\model_manifest.json"
+      ],
+      "observed_value": 48,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:52.869703Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::evaluation_metrics.json",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "evaluation_metrics.json parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\evaluation_metrics.json"
+      ],
+      "observed_value": 120,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:52.887093Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::tuning_log.json",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "tuning_log.json parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\tuning_log.json"
+      ],
+      "observed_value": 48,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:52.907275Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::backtest_results.json",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "backtest_results.json parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\backtest_results.json"
+      ],
+      "observed_value": 48,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:52.929070Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::delisting_application_report.json",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "delisting_application_report.json parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\delisting_application_report.json"
+      ],
+      "observed_value": 1,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:52.947118Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::tested_specifications.jsonl",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "tested_specifications.jsonl parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\tested_specifications.jsonl"
+      ],
+      "observed_value": 568,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:52.990821Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::multiple_testing_report.json",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "multiple_testing_report.json parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\multiple_testing_report.json"
+      ],
+      "observed_value": 1,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:53.010233Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "schema_valid::specification_registry.json",
+      "stage": "schema",
+      "severity": "info",
+      "status": "pass",
+      "message": "specification_registry.json parsed successfully",
+      "affected_artifacts": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\specification_registry.json"
+      ],
+      "observed_value": 1,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:53.036293Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "coverage_waterfall_threshold",
+      "stage": "audit",
+      "severity": "info",
+      "status": "pass",
+      "message": "Raw=0.496; eligible_oos=1.000; primary_spec=1.000; primary_prediction=1.000; primary_portfolio=1.000; eligible_oos_labels=744; primary_specs=2/2; exploratory eligible_oos>=0.900; raw coverage is reported; outside_split_window_labels=120",
+      "affected_artifacts": [
+        "coverage_waterfall.json",
+        "coverage_failures.jsonl",
+        "coverage_by_target.csv",
+        "coverage_by_split.csv",
+        "coverage_by_ticker.csv",
+        "coverage_by_model.csv"
+      ],
+      "observed_value": "raw=0.496, eligible_oos=1.000, primary=1.000, primary_prediction=1.000, primary_portfolio=1.000",
+      "threshold": "eligible_oos=0.900, primary=0.950",
+      "created_at_utc": "2026-06-16T03:51:53.092302Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "historical_mean_oos_coverage",
+      "stage": "model",
+      "severity": "info",
+      "status": "pass",
+      "message": "historical_mean must cover every eligible validation/test label; 0 split-target rows are incomplete",
+      "affected_artifacts": [
+        "coverage_by_model.csv",
+        "predictions.jsonl"
+      ],
+      "observed_value": 0,
+      "threshold": 0,
+      "created_at_utc": "2026-06-16T03:51:53.092302Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "primary_model_expected_coverage",
+      "stage": "audit",
+      "severity": "info",
+      "status": "pass",
+      "message": "Primary spec coverage is 1.000 (2/2); threshold is 0.950",
+      "affected_artifacts": [
+        "coverage_waterfall.json",
+        "tested_specifications.jsonl",
+        "predictions.jsonl"
+      ],
+      "observed_value": 1.0,
+      "threshold": 0.95,
+      "created_at_utc": "2026-06-16T03:51:53.092302Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "prediction_label_alignment",
+      "stage": "model",
+      "severity": "info",
+      "status": "pass",
+      "message": "0 predictions do not map to a valid label_id",
+      "affected_artifacts": [
+        "labels.jsonl",
+        "predictions.jsonl"
+      ],
+      "observed_value": 0,
+      "threshold": 0,
+      "created_at_utc": "2026-06-16T03:51:53.093300Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "split_purge_and_leakage",
+      "stage": "split",
+      "severity": "warn",
+      "status": "warn",
+      "message": "0 split records have severity=fail; 46 records were purged by embargo; 0 records have severity=warn",
+      "affected_artifacts": [
+        "split_leakage.jsonl"
+      ],
+      "observed_value": "fail=0, purged=46, warn=0",
+      "threshold": 0,
+      "created_at_utc": "2026-06-16T03:51:53.093300Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "feature_lookahead",
+      "stage": "feature",
+      "severity": "info",
+      "status": "pass",
+      "message": "0 feature records have feature_time_utc after prediction_time_utc",
+      "affected_artifacts": [
+        "features.jsonl"
+      ],
+      "observed_value": 0,
+      "threshold": 0,
+      "created_at_utc": "2026-06-16T03:51:53.235393Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "tfidf_train_window_fit_scope",
+      "stage": "feature",
+      "severity": "info",
+      "status": "pass",
+      "message": "0 TF-IDF feature manifests are not train-window-only",
+      "affected_artifacts": [
+        "feature_manifest.json"
+      ],
+      "observed_value": 0,
+      "threshold": 0,
+      "created_at_utc": "2026-06-16T03:51:53.236390Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "feature_manifest_vocabulary_alignment",
+      "stage": "feature",
+      "severity": "info",
+      "status": "pass",
+      "message": "No TF-IDF feature manifests require vocabulary alignment",
+      "affected_artifacts": [
+        "feature_manifest.json",
+        "vocabulary.json"
+      ],
+      "observed_value": 0,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:53.236390Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "model_manifest_training_rows",
+      "stage": "model",
+      "severity": "info",
+      "status": "pass",
+      "message": "0 model manifests have no training observations",
+      "affected_artifacts": [
+        "model_manifest.json"
+      ],
+      "observed_value": 0,
+      "threshold": 0,
+      "created_at_utc": "2026-06-16T03:51:53.236390Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "model_selection_validation_only",
+      "stage": "model",
+      "severity": "info",
+      "status": "pass",
+      "message": "0 tuning logs use a non-validation model-selection metric",
+      "affected_artifacts": [
+        "tuning_log.json"
+      ],
+      "observed_value": 0,
+      "threshold": 0,
+      "created_at_utc": "2026-06-16T03:51:53.236390Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "evaluation_outputs_present",
+      "stage": "evaluation",
+      "severity": "info",
+      "status": "pass",
+      "message": "Evaluation metrics and backtest results are present",
+      "affected_artifacts": [
+        "evaluation_metrics.json",
+        "backtest_results.json"
+      ],
+      "observed_value": "metrics=120, backtests=48",
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:53.236390Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "delisting_application_report",
+      "stage": "evaluation",
+      "severity": "info",
+      "status": "pass",
+      "message": "Delisting return handling checked; applied=0, missing=0",
+      "affected_artifacts": [
+        "delisting_application_report.json"
+      ],
+      "observed_value": 0,
+      "threshold": 0,
+      "created_at_utc": "2026-06-16T03:51:53.236390Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "licensed_data_manifest",
+      "stage": "data",
+      "severity": "info",
+      "status": "pass",
+      "message": "Exploratory run does not require a licensed data manifest.",
+      "affected_artifacts": [
+        "data_provider.data_license_manifest_file"
+      ],
+      "observed_value": null,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:53.236390Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "mixed_market_data_source_boundary",
+      "stage": "data",
+      "severity": "warn",
+      "status": "warn",
+      "message": "Mixed market data source detected. Treat the run as an applied-grade pilot; do not present market-data-dependent portfolio evidence as a CRSP/WRDS-equivalent formal result.",
+      "affected_artifacts": [
+        "config_snapshot.yaml",
+        "license_manifest.json"
+      ],
+      "observed_value": "provider=fmp_alpha, price_source=mixed_fmp_yahoo_adjusted_close, return_source=mixed_fmp_yahoo_closeadj_log_return, allow_public_yahoo_fallback=True",
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:53.236390Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "tested_specifications_disclosure",
+      "stage": "audit",
+      "severity": "info",
+      "status": "pass",
+      "message": "Tested specifications, multiple-testing report, and specification registry are present",
+      "affected_artifacts": [
+        "tested_specifications.jsonl",
+        "multiple_testing_report.json",
+        "specification_registry.json"
+      ],
+      "observed_value": "targets=3, specs=568",
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:53.236390Z"
+    },
+    {
+      "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+      "check_id": "formal_metadata_gate",
+      "stage": "audit",
+      "severity": "info",
+      "status": "pass",
+      "message": "Exploratory run does not require formal metadata gate",
+      "affected_artifacts": [
+        "document_manifest.jsonl",
+        "feature_manifest.json"
+      ],
+      "observed_value": null,
+      "threshold": null,
+      "created_at_utc": "2026-06-16T03:51:53.236390Z"
+    }
+  ],
+  "created_at_utc": "2026-06-16T03:51:53.236390Z"
+}

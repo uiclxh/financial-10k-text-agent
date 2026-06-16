@@ -1,0 +1,186 @@
+{
+  "run_id": "50_company_public_fmp_alpha_2016_2025_v1",
+  "orchestrator_version": "artifact-aware-orchestrator-v1",
+  "final_run_status": "reported",
+  "blocked_reason": null,
+  "stage_count": 9,
+  "stages": [
+    {
+      "stage": "prepare_inputs",
+      "status": "completed",
+      "message": null,
+      "inputs": [
+        "data_private\\sec\\document_manifest.jsonl",
+        "data_private\\market\\prices_with_returns.csv"
+      ],
+      "outputs": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\document_manifest.jsonl",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\prices.csv"
+      ],
+      "metrics": {
+        "copied": 2,
+        "skipped_existing_or_external": 0,
+        "raw_filings_dir": "data_private\\sec\\raw_filings"
+      },
+      "created_at_utc": "2026-06-16T03:40:10.336945+00:00"
+    },
+    {
+      "stage": "labels",
+      "status": "completed",
+      "message": null,
+      "inputs": [],
+      "outputs": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\labels.jsonl",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\label_failures.jsonl"
+      ],
+      "metrics": {
+        "labels": 1500,
+        "failures": 0
+      },
+      "created_at_utc": "2026-06-16T03:40:38.643701+00:00"
+    },
+    {
+      "stage": "splits",
+      "status": "completed",
+      "message": null,
+      "inputs": [],
+      "outputs": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\split_assignments.jsonl",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\split_leakage.jsonl"
+      ],
+      "metrics": {
+        "assignments": 4574,
+        "leakage_records": 46
+      },
+      "created_at_utc": "2026-06-16T03:40:38.812468+00:00"
+    },
+    {
+      "stage": "parsing",
+      "status": "completed",
+      "message": null,
+      "inputs": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\document_manifest.jsonl",
+        "data_private\\sec\\raw_filings"
+      ],
+      "outputs": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\parsed_sections.jsonl",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\parsing_quality_report.json",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\section_length_quality_report.json"
+      ],
+      "metrics": {
+        "documents_total": 500,
+        "documents_missing_raw": 0,
+        "parsed_section_records": 2000,
+        "missing_document_ids": [],
+        "created_at_utc": "2026-06-16T03:44:36.770824+00:00"
+      },
+      "created_at_utc": "2026-06-16T03:45:21.672631+00:00"
+    },
+    {
+      "stage": "features",
+      "status": "completed",
+      "message": null,
+      "inputs": [],
+      "outputs": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\features.jsonl",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\vocabulary.json",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\vocabulary_manifest.json",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\feature_manifest.json"
+      ],
+      "metrics": {
+        "features": 520465,
+        "feature_manifests": 40
+      },
+      "created_at_utc": "2026-06-16T03:49:33.263270+00:00"
+    },
+    {
+      "stage": "models",
+      "status": "completed",
+      "message": null,
+      "inputs": [],
+      "outputs": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\predictions.jsonl",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\prediction_distribution_report.json",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\model_manifest.json",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\tuning_log.json"
+      ],
+      "metrics": {
+        "predictions": 4716,
+        "prediction_failures": 0,
+        "model_manifests": 48
+      },
+      "created_at_utc": "2026-06-16T03:49:50.885957+00:00"
+    },
+    {
+      "stage": "evaluation",
+      "status": "completed",
+      "message": null,
+      "inputs": [],
+      "outputs": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\evaluation_metrics.json",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\backtest_results.json",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\portfolio_weights.jsonl",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\portfolio_returns.jsonl",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\portfolio_metrics.json",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\factor_panel.jsonl",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\monthly_portfolio_weights.jsonl",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\monthly_portfolio_returns.jsonl",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\monthly_portfolio_metrics.json",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\delisting_application_report.json",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\tested_specifications.jsonl",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\multiple_testing_report.json",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\specification_registry.json"
+      ],
+      "metrics": {
+        "metrics": 120,
+        "backtests": 48,
+        "portfolio_weights": 4296,
+        "portfolio_returns": 43058,
+        "portfolio_metrics": 192,
+        "factor_panel_rows": 20760,
+        "monthly_portfolio_weights": 36720,
+        "monthly_portfolio_returns": 41136,
+        "monthly_portfolio_metrics": 268,
+        "delisting_status": "not_applicable",
+        "portfolio_return_source": "daily_price_panel",
+        "tested_specifications": 568,
+        "multiple_testing_families": 20,
+        "primary_specifications": 2
+      },
+      "created_at_utc": "2026-06-16T03:51:48.188228+00:00"
+    },
+    {
+      "stage": "audit",
+      "status": "completed",
+      "message": null,
+      "inputs": [],
+      "outputs": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\audit_report.json"
+      ],
+      "metrics": {
+        "audit_status": "warn",
+        "failures": 0,
+        "warnings": 2
+      },
+      "created_at_utc": "2026-06-16T03:51:53.424495+00:00"
+    },
+    {
+      "stage": "report",
+      "status": "completed",
+      "message": null,
+      "inputs": [],
+      "outputs": [
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\report.md",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\empirical_report.md",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\factor_card.md",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\appendix_tables.md",
+        "runs\\text_factor_lab\\50_company_public_fmp_alpha_2016_2025_v1\\report_summary.json"
+      ],
+      "metrics": {
+        "conclusion_level": "exploratory_report"
+      },
+      "created_at_utc": "2026-06-16T03:51:55.570552+00:00"
+    }
+  ],
+  "created_at_utc": "2026-06-16T03:51:55.582568+00:00"
+}

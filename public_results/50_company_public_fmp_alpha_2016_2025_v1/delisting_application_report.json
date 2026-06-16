@@ -1,0 +1,11 @@
+{
+  "delisting_returns_applied": 0,
+  "labels_missing_delisting_return": 0,
+  "labels_total": 1500,
+  "labels_with_delisting_return_applied": 0,
+  "missing_delisting_returns": 0,
+  "portfolio_return_rows": 84194,
+  "positions_affected_by_delisting": 0,
+  "report_version": "delisting-application-report-v0",
+  "status": "not_applicable"
+}
