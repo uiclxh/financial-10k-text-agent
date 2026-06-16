@@ -1347,8 +1347,8 @@ def _interpretation_policy(
                 ),
                 "usage_boundary": (
                     "Report as an applied-grade pilot. Do not describe the result as "
-                    "formal trading alpha; disclose mixed-source market data, the small "
-                    "10-company panel, and that industry structure dominates the best "
+                    "formal trading alpha; disclose mixed-source market data, the applied "
+                    "public-data panel, and that industry structure dominates the best "
                     "prediction result."
                 ),
                 "conclusion_text": (

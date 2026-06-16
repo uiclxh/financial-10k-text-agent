@@ -268,7 +268,7 @@ flowchart LR
     A["v0.1-v0.4<br/>foundation<br/>schemas, CLI, orchestration, parsing, labels"]
     B["v0.5-v0.8<br/>research controls<br/>calendar, portfolio series, inference, universe"]
     C["v0.9-v0.15<br/>robustness<br/>coverage, daily accounting, target-aware portfolios"]
-    D["Current evidence<br/>90-company public run<br/>volatility forecasting signal"]
+    D["Current evidence<br/>50-company public run<br/>volatility forecasting signal"]
     E["Next: licensed replication<br/>CRSP/WRDS or qualified vendor panel"]
     F["Next: prompt-governed text extension<br/>versioned JSON extraction + QA"]
     G["Next: broader robustness<br/>subperiods, industries, costs, capacity"]
@@ -286,7 +286,7 @@ flowchart LR
 | --- | --- | --- | --- |
 | Pipeline foundation | Complete | Config-driven SEC-to-report workflow | Smoke tests and schema checks |
 | Leakage and inference controls | Complete | Calendar alignment, train-only fitting, registry, multiple testing | Audit pass |
-| Public 90-company experiment | Complete | Compact volatility evidence summary | Exploratory/applied-grade only |
+| Public 50-company experiment | Complete | Compact volatility evidence summary | Exploratory/applied-grade only |
 | Licensed replication | Next | Survivorship-free universe, entity links, delisting-aware prices | Licensed-data manifest pass |
 | Prompt-governed extraction | Next | Versioned prompt manifest, structured LLM factors, QA fallback | Prompt audit and validation-only freeze |
 | Broader empirical robustness | Next | Subperiod, industry, cost, capacity, and ablation tables | Preregistered robustness report |
@@ -295,8 +295,8 @@ flowchart LR
 
 ```text
 current supported claim
-  -> 10-K textual information contains out-of-sample information about future
-     realized volatility
+  -> the 50-company public run shows exploratory out-of-sample information
+     about future realized volatility
 
 current unsupported claim
   -> the project has established formal cost-adjusted tradable alpha

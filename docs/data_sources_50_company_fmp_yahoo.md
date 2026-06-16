@@ -14,22 +14,22 @@ SEC EDGAR official filings
 
 ## Positioning
 
-The committed public result is a **10-company applied-grade pilot panel**. The
-configured expansion path now includes a **30-company S&P 500 sector seed** and
-a more balanced **50-company S&P 500 sector seed**. None of these profiles is a
-survivorship-free CRSP/WRDS replication.
+The current committed public result is the **50-company applied-grade S&P 500
+sector-seed panel**. The original 10-company panel is retained as a historical
+seed package, and the 30-company panel is an intermediate expansion profile.
+None of these profiles is a survivorship-free CRSP/WRDS replication.
 
 The market data layer is explicitly **mixed-source applied-grade** when Yahoo
-fallback is used. FMP remains the primary price provider; Yahoo is allowed only
-for the predeclared fallback tickers `MCD` and `LLY` when FMP price access is
-unavailable. The audit report must mark this boundary with
+fallback is used. FMP remains the primary intended price provider; Yahoo is
+allowed as a documented fallback for expanded-universe tickers when FMP price
+access is unavailable. The audit report must mark this boundary with
 `mixed_market_data_source_boundary`.
 
 Allowed claim:
 
 ```text
 This experiment tests whether SEC 10-K text contains out-of-sample information
-about future realized volatility in a fixed 10-company U.S. 10-K panel.
+about future realized volatility in a fixed 50-company U.S. 10-K panel.
 ```
 
 Blocked claim:
@@ -39,7 +39,7 @@ This experiment proves a survivorship-free tradable equity factor or captures
 CRSP-style delisting returns.
 ```
 
-## Current 10-Company Universe
+## Historical 10-Company Seed Universe
 
 Sony is excluded because it is a foreign private issuer and normally files
 `20-F`, not `10-K`. JPMorgan Chase is used instead.
@@ -60,7 +60,7 @@ Sony is excluded because it is a foreign private issuer and normally files
 
 ## Expansion Panels
 
-The first expansion keeps the current 10 companies and adds 20 S&P 500-style
+The first expansion keeps the historical 10-company seed and adds 20 S&P 500-style
 large-cap U.S. `10-K` filers by sector. The second expansion keeps those 30 and
 adds 20 more names to improve coverage in Energy, Industrials, Utilities,
 Materials, Real Estate, and payment/financial infrastructure.
@@ -246,8 +246,9 @@ checks.
 - SEC EDGAR provides official filings and filing timestamps.
 - FMP provides primary adjusted daily prices, historical market cap, profiles,
   symbol changes, and delisted-company checks.
-- Yahoo Finance chart data is a narrow fallback for predeclared prices only;
-  runs using it must be described as mixed-source applied-grade runs.
+- Yahoo Finance chart data is a documented fallback for predeclared or
+  audit-disclosed price gaps only; runs using it must be described as
+  mixed-source applied-grade runs.
 - Price labels use the configured common equity ticker only. SEC submissions
   metadata can include preferred-share tickers such as bank preferreds; those
   SEC tickers must not be used for stock-return labels.
@@ -255,4 +256,5 @@ checks.
   cross-checks.
 - Loughran-McDonald is the primary finance dictionary source.
 - This stack does not provide CRSP `DLRET` and does not make the fixed
-  10-company panel survivorship-free.
+  applied panel survivorship-free.
+
