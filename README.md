@@ -79,6 +79,8 @@ SEC 10-K filings
 - Event-based and monthly portfolio diagnostics.
 - Multiple-testing registry with primary, robustness, and exploratory specs.
 - Compact public result artifacts under `docs/results/`.
+- Configured 30-company and 50-company S&P 500 sector-seed expansions for the
+  next applied runs.
 
 ## What Is Not Claimed
 

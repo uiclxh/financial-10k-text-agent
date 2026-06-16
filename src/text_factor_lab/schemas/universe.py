@@ -11,6 +11,8 @@ class UniverseRecord(StrictBaseModel):
     entity_id: str = Field(min_length=1)
     ticker: str = Field(min_length=1)
     historical_ticker: str = Field(min_length=1)
+    common_equity_price_ticker: str | None = None
+    price_ticker_policy: str | None = None
     cik: str = Field(min_length=1)
     company_name: str = Field(min_length=1)
     sector: str = Field(min_length=1)
@@ -25,6 +27,7 @@ class UniverseRecord(StrictBaseModel):
     delisting_date: date | None = None
     mapping_source: str = Field(min_length=1)
     mapping_available_time_utc: datetime
+    research_notes: str | None = None
 
     @field_validator("ticker", "historical_ticker")
     @classmethod
@@ -52,9 +55,12 @@ class UniverseRecord(StrictBaseModel):
 
     @field_validator(
         "market_cap_at_selection",
+        "common_equity_price_ticker",
+        "price_ticker_policy",
         "market_cap_source",
         "market_cap_available_time_utc",
         "market_cap_quality_flag",
+        "research_notes",
         mode="before",
     )
     @classmethod
@@ -89,6 +95,8 @@ class SecurityMasterRecord(StrictBaseModel):
     cik: str = Field(min_length=1)
     ticker: str = Field(min_length=1)
     historical_ticker: str = Field(min_length=1)
+    common_equity_price_ticker: str | None = None
+    price_ticker_policy: str | None = None
     company_name: str = Field(min_length=1)
     name_start_date: date | None = None
     name_end_date: date | None = None
@@ -105,6 +113,7 @@ class SecurityMasterRecord(StrictBaseModel):
     source: str = Field(min_length=1)
     source_version: str = Field(min_length=1)
     available_time_utc: datetime
+    research_notes: str | None = None
 
     @field_validator("ticker", "historical_ticker")
     @classmethod
@@ -125,6 +134,8 @@ class SecurityMasterRecord(StrictBaseModel):
         "permno",
         "permco",
         "gvkey",
+        "common_equity_price_ticker",
+        "price_ticker_policy",
         "sic",
         "naics",
         "gics_sector",
@@ -134,6 +145,7 @@ class SecurityMasterRecord(StrictBaseModel):
         "siccd",
         "name_start_date",
         "name_end_date",
+        "research_notes",
         mode="before",
     )
     @classmethod
@@ -164,6 +176,8 @@ class UniverseMembershipRecord(StrictBaseModel):
     universe_id: str = Field(min_length=1)
     entity_id: str = Field(min_length=1)
     ticker: str = Field(min_length=1)
+    common_equity_price_ticker: str | None = None
+    price_ticker_policy: str | None = None
     selection_date: date
     entry_date: date
     exit_date: date | None = None
@@ -178,6 +192,7 @@ class UniverseMembershipRecord(StrictBaseModel):
     liquidity_filter_pass: bool
     source: str = Field(min_length=1)
     source_version: str = Field(min_length=1)
+    research_notes: str | None = None
 
     @field_validator("ticker")
     @classmethod
@@ -187,6 +202,8 @@ class UniverseMembershipRecord(StrictBaseModel):
     @field_validator(
         "exit_date",
         "delisting_date",
+        "common_equity_price_ticker",
+        "price_ticker_policy",
         "selection_rank",
         "market_cap_at_selection",
         "market_cap_source",
@@ -194,6 +211,7 @@ class UniverseMembershipRecord(StrictBaseModel):
         "market_cap_quality_flag",
         "price_at_selection",
         "shares_outstanding_at_selection",
+        "research_notes",
         mode="before",
     )
     @classmethod
@@ -242,6 +260,7 @@ class EntityLinkHistoryRecord(StrictBaseModel):
     link_type: str = Field(min_length=1)
     link_confidence: float = Field(ge=0, le=1)
     source: str = Field(min_length=1)
+    research_notes: str | None = None
 
     @field_validator("ticker")
     @classmethod
@@ -258,7 +277,7 @@ class EntityLinkHistoryRecord(StrictBaseModel):
             raise ValueError("cik must not exceed 10 digits")
         return cleaned.zfill(10)
 
-    @field_validator("permno", "gvkey", "link_end_date", mode="before")
+    @field_validator("permno", "gvkey", "link_end_date", "research_notes", mode="before")
     @classmethod
     def parse_optional_values(cls, value: object) -> object:
         if value == "":

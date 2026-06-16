@@ -27,6 +27,7 @@ runs/
 model_cache/
 feature_matrices/
 feature_matrix_index.json
+logs/
 *.parquet
 *.pkl
 *.joblib

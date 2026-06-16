@@ -16,6 +16,7 @@ Key facts:
 - 0 audit failures, 2 audit warnings.
 - Loughran-McDonald tone plus train-window-only TF-IDF/SVD.
 - 472 tested specifications with multiple-testing disclosure.
+- 30-company and 50-company S&P 500 sector-seed expansion configs are prepared.
 
 Interpretation: this is an applied-grade, leakage-aware research package. It
 shows exploratory forecasting evidence and a complete audit/report workflow,

@@ -96,6 +96,26 @@ LM_CATEGORY_COLUMNS = {
 _DICTIONARY_CACHE: tuple[dict[str, set[str]], dict[str, Any]] | None = None
 
 
+def make_streaming_tfidf_analyzer(
+    ngram_range: tuple[int, int],
+):
+    """Yield lowercased word ngrams without copying the full document string."""
+
+    min_n, max_n = ngram_range
+
+    def analyze(document: str):
+        window: list[str] = []
+        for match in TOKEN_PATTERN.finditer(document):
+            window.append(match.group(0).lower())
+            if len(window) > max_n:
+                window.pop(0)
+            upper = min(max_n, len(window))
+            for n in range(min_n, upper + 1):
+                yield " ".join(window[-n:])
+
+    return analyze
+
+
 @dataclass(frozen=True)
 class DocumentText:
     document_id: str
@@ -104,10 +124,11 @@ class DocumentText:
     event_time_utc: datetime
     prediction_time_utc: datetime
     section_texts: dict[str, str]
+    full_text_value: str
 
     @property
     def full_text(self) -> str:
-        return "\n\n".join(text for _, text in sorted(self.section_texts.items()))
+        return self.full_text_value
 
 
 @dataclass(frozen=True)
@@ -213,6 +234,7 @@ def load_document_texts(
     document_texts: dict[str, DocumentText] = {}
     for document_id, section_texts in section_texts_by_document.items():
         manifest = manifest_by_document_id[document_id]
+        full_text = "\n\n".join(text for _, text in sorted(section_texts.items()))
         document_texts[document_id] = DocumentText(
             document_id=document_id,
             entity_id=manifest.entity_id,
@@ -220,6 +242,7 @@ def load_document_texts(
             event_time_utc=manifest.event_time_utc,
             prediction_time_utc=manifest.event_time_utc,
             section_texts=section_texts,
+            full_text_value=full_text,
         )
     return document_texts
 
@@ -401,13 +424,12 @@ def build_tfidf_features(
             if not any(text.strip() for text in train_texts):
                 continue
             vectorizer = TfidfVectorizer(
-                lowercase=True,
+                analyzer=make_streaming_tfidf_analyzer(ngram_range),
+                lowercase=False,
                 max_features=max_features,
-                ngram_range=ngram_range,
                 min_df=min_df,
                 max_df=max_df,
                 sublinear_tf=True,
-                token_pattern=r"(?u)\b[a-zA-Z][a-zA-Z\-']+\b",
             )
             vectorizer.fit(train_texts)
             vocabulary_by_split[split_id][text_scope] = {

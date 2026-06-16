@@ -15,6 +15,7 @@
 - audit failure = 0，audit warning = 2。
 - 使用 Loughran-McDonald tone 和 train-window-only TF-IDF/SVD。
 - 472 个 tested specifications，并披露多重检验。
+- 已准备 30 家和 50 家 S&P 500 行业分层种子样本配置，用于下一步扩展运行。
 
 结论边界：
 

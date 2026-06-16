@@ -1,0 +1,2079 @@
+{
+  "created_at_utc": "2026-06-15T12:15:44.824674+00:00",
+  "method": "Post-replacement coverage audit: SEC data.sec.gov submissions + Yahoo chart API; DIS replaced by CMCSA after missing 2016-2018 SEC 10-K coverage.",
+  "universe_file": "configs/universe/50_company_sp500_sector_seed_2016_2025.csv",
+  "price_window": "2015-12-01..2026-04-30",
+  "expected_10k_report_years": [
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+  ],
+  "records": [
+    {
+      "ticker": "ABBV",
+      "company_name": "AbbVie Inc.",
+      "sector": "Health Care",
+      "industry": "Biotechnology",
+      "cik": "0001551152",
+      "sec": {
+        "sec_name": "AbbVie Inc.",
+        "sec_tickers": [
+          "ABBV"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "ABT",
+      "company_name": "Abbott Laboratories",
+      "sector": "Health Care",
+      "industry": "Health Care Equipment",
+      "cik": "0000001800",
+      "sec": {
+        "sec_name": "ABBOTT LABORATORIES",
+        "sec_tickers": [
+          "ABT"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "ADBE",
+      "company_name": "Adobe Inc.",
+      "sector": "Information Technology",
+      "industry": "Software",
+      "cik": "0000796343",
+      "sec": {
+        "sec_name": "ADOBE INC.",
+        "sec_tickers": [
+          "ADBE"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "AEP",
+      "company_name": "American Electric Power Company, Inc.",
+      "sector": "Utilities",
+      "industry": "Electric Utilities",
+      "cik": "0000004904",
+      "sec": {
+        "sec_name": "AMERICAN ELECTRIC POWER CO INC",
+        "sec_tickers": [
+          "AEP"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "AMT",
+      "company_name": "American Tower Corporation",
+      "sector": "Real Estate",
+      "industry": "Telecom Tower REITs",
+      "cik": "0001053507",
+      "sec": {
+        "sec_name": "AMERICAN TOWER CORP /MA/",
+        "sec_tickers": [
+          "AMT"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "APD",
+      "company_name": "Air Products and Chemicals, Inc.",
+      "sector": "Materials",
+      "industry": "Chemicals",
+      "cik": "0000002969",
+      "sec": {
+        "sec_name": "Air Products & Chemicals, Inc.",
+        "sec_tickers": [
+          "APD"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "AXP",
+      "company_name": "American Express Company",
+      "sector": "Financials",
+      "industry": "Consumer Finance",
+      "cik": "0000004962",
+      "sec": {
+        "sec_name": "AMERICAN EXPRESS CO",
+        "sec_tickers": [
+          "AXP"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "BAC",
+      "company_name": "Bank of America Corporation",
+      "sector": "Financials",
+      "industry": "Banks",
+      "cik": "0000070858",
+      "sec": {
+        "sec_name": "BANK OF AMERICA CORP /DE/",
+        "sec_tickers": [
+          "BAC",
+          "BML-PG",
+          "BML-PL",
+          "BAC-PB",
+          "BAC-PK",
+          "BAC-PE",
+          "BAC-PL",
+          "BAC-PM",
+          "BAC-PN",
+          "BAC-PO",
+          "BAC-PP",
+          "BAC-PQ",
+          "BAC-PS",
+          "BACRP",
+          "BML-PH",
+          "BML-PJ",
+          "MER-PK"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "CAT",
+      "company_name": "Caterpillar Inc.",
+      "sector": "Industrials",
+      "industry": "Machinery",
+      "cik": "0000018230",
+      "sec": {
+        "sec_name": "CATERPILLAR INC",
+        "sec_tickers": [
+          "CAT"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "CMCSA",
+      "company_name": "Comcast Corporation",
+      "sector": "Communication Services",
+      "industry": "Media",
+      "cik": "0001166691",
+      "sec": {
+        "sec_name": "COMCAST CORP",
+        "sec_tickers": [
+          "CMCSA",
+          "CCZ"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "blocker_flags": [],
+      "review_flags": [],
+      "severe_flags": []
+    },
+    {
+      "ticker": "COP",
+      "company_name": "ConocoPhillips",
+      "sector": "Energy",
+      "industry": "Oil Gas and Consumable Fuels",
+      "cik": "0001163165",
+      "sec": {
+        "sec_name": "CONOCOPHILLIPS",
+        "sec_tickers": [
+          "COP"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "COST",
+      "company_name": "Costco Wholesale Corporation",
+      "sector": "Consumer Staples",
+      "industry": "Consumer Staples Merchandise Retail",
+      "cik": "0000909832",
+      "sec": {
+        "sec_name": "COSTCO WHOLESALE CORP /NEW",
+        "sec_tickers": [
+          "COST"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "CRM",
+      "company_name": "Salesforce, Inc.",
+      "sector": "Information Technology",
+      "industry": "Software",
+      "cik": "0001108524",
+      "sec": {
+        "sec_name": "Salesforce, Inc.",
+        "sec_tickers": [
+          "CRM"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "CSCO",
+      "company_name": "Cisco Systems, Inc.",
+      "sector": "Information Technology",
+      "industry": "Communications Equipment",
+      "cik": "0000858877",
+      "sec": {
+        "sec_name": "CISCO SYSTEMS, INC.",
+        "sec_tickers": [
+          "CSCO"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "CVX",
+      "company_name": "Chevron Corporation",
+      "sector": "Energy",
+      "industry": "Oil Gas and Consumable Fuels",
+      "cik": "0000093410",
+      "sec": {
+        "sec_name": "CHEVRON CORP",
+        "sec_tickers": [
+          "CVX"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "DUK",
+      "company_name": "Duke Energy Corporation",
+      "sector": "Utilities",
+      "industry": "Electric Utilities",
+      "cik": "0001326160",
+      "sec": {
+        "sec_name": "Duke Energy CORP",
+        "sec_tickers": [
+          "DUK",
+          "DUKB",
+          "DUK-PA"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "EOG",
+      "company_name": "EOG Resources, Inc.",
+      "sector": "Energy",
+      "industry": "Oil Gas and Consumable Fuels",
+      "cik": "0000821189",
+      "sec": {
+        "sec_name": "EOG RESOURCES INC",
+        "sec_tickers": [
+          "EOG"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "FCX",
+      "company_name": "Freeport-McMoRan Inc.",
+      "sector": "Materials",
+      "industry": "Metals and Mining",
+      "cik": "0000831259",
+      "sec": {
+        "sec_name": "FREEPORT-MCMORAN INC",
+        "sec_tickers": [
+          "FCX"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "GE",
+      "company_name": "GE Aerospace",
+      "sector": "Industrials",
+      "industry": "Aerospace and Defense",
+      "cik": "0000040545",
+      "sec": {
+        "sec_name": "GENERAL ELECTRIC CO",
+        "sec_tickers": [
+          "GE"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": [
+        "manual_linkage_review_recommended_ge_restructuring"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "company_name": "The Goldman Sachs Group, Inc.",
+      "sector": "Financials",
+      "industry": "Capital Markets",
+      "cik": "0000886982",
+      "sec": {
+        "sec_name": "GOLDMAN SACHS GROUP INC",
+        "sec_tickers": [
+          "GS",
+          "GSCE",
+          "GS-PA",
+          "GS-PC",
+          "GS-PD"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "HD",
+      "company_name": "The Home Depot, Inc.",
+      "sector": "Consumer Discretionary",
+      "industry": "Specialty Retail",
+      "cik": "0000354950",
+      "sec": {
+        "sec_name": "HOME DEPOT, INC.",
+        "sec_tickers": [
+          "HD"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "HON",
+      "company_name": "Honeywell International Inc.",
+      "sector": "Industrials",
+      "industry": "Industrial Conglomerates",
+      "cik": "0000773840",
+      "sec": {
+        "sec_name": "HONEYWELL INTERNATIONAL INC",
+        "sec_tickers": [
+          "HON"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "IBM",
+      "company_name": "International Business Machines Corporation",
+      "sector": "Information Technology",
+      "industry": "IT Services",
+      "cik": "0000051143",
+      "sec": {
+        "sec_name": "INTERNATIONAL BUSINESS MACHINES CORP",
+        "sec_tickers": [
+          "IBM"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "JNJ",
+      "company_name": "Johnson & Johnson",
+      "sector": "Health Care",
+      "industry": "Pharmaceuticals",
+      "cik": "0000200406",
+      "sec": {
+        "sec_name": "JOHNSON & JOHNSON",
+        "sec_tickers": [
+          "JNJ"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 9,
+        "missing_10k_report_years": [
+          "2020"
+        ],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "JPM",
+      "company_name": "JPMorgan Chase & Co.",
+      "sector": "Financials",
+      "industry": "Banks",
+      "cik": "0000019617",
+      "sec": {
+        "sec_name": "JPMORGAN CHASE & CO",
+        "sec_tickers": [
+          "JPM",
+          "JPM-PC",
+          "AMJB",
+          "JPM-PD",
+          "JPM-PJ",
+          "JPM-PK",
+          "JPM-PL",
+          "JPM-PM",
+          "VYLD"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "KO",
+      "company_name": "The Coca-Cola Company",
+      "sector": "Consumer Staples",
+      "industry": "Beverages",
+      "cik": "0000021344",
+      "sec": {
+        "sec_name": "COCA COLA CO",
+        "sec_tickers": [
+          "KO"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "LLY",
+      "company_name": "Eli Lilly and Company",
+      "sector": "Health Care",
+      "industry": "Pharmaceuticals",
+      "cik": "0000059478",
+      "sec": {
+        "sec_name": "ELI LILLY & Co",
+        "sec_tickers": [
+          "LLY"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "MA",
+      "company_name": "Mastercard Incorporated",
+      "sector": "Financials",
+      "industry": "Transaction and Payment Processing Services",
+      "cik": "0001141391",
+      "sec": {
+        "sec_name": "Mastercard Inc",
+        "sec_tickers": [
+          "MA"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "MCD",
+      "company_name": "McDonald's Corporation",
+      "sector": "Consumer Discretionary",
+      "industry": "Hotels Restaurants and Leisure",
+      "cik": "0000063908",
+      "sec": {
+        "sec_name": "MCDONALDS CORP",
+        "sec_tickers": [
+          "MCD"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "META",
+      "company_name": "Meta Platforms, Inc.",
+      "sector": "Communication Services",
+      "industry": "Interactive Media and Services",
+      "cik": "0001326801",
+      "sec": {
+        "sec_name": "Meta Platforms, Inc.",
+        "sec_tickers": [
+          "META"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "MRK",
+      "company_name": "Merck & Co., Inc.",
+      "sector": "Health Care",
+      "industry": "Pharmaceuticals",
+      "cik": "0000310158",
+      "sec": {
+        "sec_name": "Merck & Co., Inc.",
+        "sec_tickers": [
+          "MRK"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "MS",
+      "company_name": "Morgan Stanley",
+      "sector": "Financials",
+      "industry": "Capital Markets",
+      "cik": "0000895421",
+      "sec": {
+        "sec_name": "MORGAN STANLEY",
+        "sec_tickers": [
+          "MS",
+          "MS-PK",
+          "MS-PE",
+          "MS-PA",
+          "MS-PF",
+          "MS-PI",
+          "MS-PL",
+          "MS-PO",
+          "MS-PP",
+          "MS-PQ"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "MSFT",
+      "company_name": "Microsoft Corporation",
+      "sector": "Information Technology",
+      "industry": "Software",
+      "cik": "0000789019",
+      "sec": {
+        "sec_name": "MICROSOFT CORP",
+        "sec_tickers": [
+          "MSFT"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "NEE",
+      "company_name": "NextEra Energy, Inc.",
+      "sector": "Utilities",
+      "industry": "Electric Utilities",
+      "cik": "0000753308",
+      "sec": {
+        "sec_name": "NEXTERA ENERGY INC",
+        "sec_tickers": [
+          "NEE",
+          "NEE-PN",
+          "NEE-PS",
+          "NEE-PT",
+          "NEE-PU",
+          "NEE-PV",
+          "NEE-PW"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "NEM",
+      "company_name": "Newmont Corporation",
+      "sector": "Materials",
+      "industry": "Metals and Mining",
+      "cik": "0001164727",
+      "sec": {
+        "sec_name": "NEWMONT Corp /DE/",
+        "sec_tickers": [
+          "NEM",
+          "NEMCL"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "NFLX",
+      "company_name": "Netflix, Inc.",
+      "sector": "Communication Services",
+      "industry": "Entertainment",
+      "cik": "0001065280",
+      "sec": {
+        "sec_name": "NETFLIX INC",
+        "sec_tickers": [
+          "NFLX"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "NKE",
+      "company_name": "NIKE, Inc.",
+      "sector": "Consumer Discretionary",
+      "industry": "Textiles Apparel and Luxury Goods",
+      "cik": "0000320187",
+      "sec": {
+        "sec_name": "NIKE, Inc.",
+        "sec_tickers": [
+          "NKE"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "ORCL",
+      "company_name": "Oracle Corporation",
+      "sector": "Information Technology",
+      "industry": "Software",
+      "cik": "0001341439",
+      "sec": {
+        "sec_name": "ORACLE CORP",
+        "sec_tickers": [
+          "ORCL",
+          "ORCL-PD"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "OXY",
+      "company_name": "Occidental Petroleum Corporation",
+      "sector": "Energy",
+      "industry": "Oil Gas and Consumable Fuels",
+      "cik": "0000797468",
+      "sec": {
+        "sec_name": "OCCIDENTAL PETROLEUM CORP /DE/",
+        "sec_tickers": [
+          "OXY",
+          "OXY-WT"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "PEP",
+      "company_name": "PepsiCo, Inc.",
+      "sector": "Consumer Staples",
+      "industry": "Beverages",
+      "cik": "0000077476",
+      "sec": {
+        "sec_name": "PEPSICO INC",
+        "sec_tickers": [
+          "PEP"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "PFE",
+      "company_name": "Pfizer Inc.",
+      "sector": "Health Care",
+      "industry": "Pharmaceuticals",
+      "cik": "0000078003",
+      "sec": {
+        "sec_name": "PFIZER INC",
+        "sec_tickers": [
+          "PFE"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "PLD",
+      "company_name": "Prologis, Inc.",
+      "sector": "Real Estate",
+      "industry": "Industrial REITs",
+      "cik": "0001045609",
+      "sec": {
+        "sec_name": "Prologis, Inc.",
+        "sec_tickers": [
+          "PLD",
+          "PLDGP"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "SBUX",
+      "company_name": "Starbucks Corporation",
+      "sector": "Consumer Discretionary",
+      "industry": "Hotels Restaurants and Leisure",
+      "cik": "0000829224",
+      "sec": {
+        "sec_name": "STARBUCKS CORP",
+        "sec_tickers": [
+          "SBUX"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "SHW",
+      "company_name": "The Sherwin-Williams Company",
+      "sector": "Materials",
+      "industry": "Chemicals",
+      "cik": "0000089800",
+      "sec": {
+        "sec_name": "SHERWIN WILLIAMS CO",
+        "sec_tickers": [
+          "SHW"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "SO",
+      "company_name": "The Southern Company",
+      "sector": "Utilities",
+      "industry": "Electric Utilities",
+      "cik": "0000092122",
+      "sec": {
+        "sec_name": "SOUTHERN CO",
+        "sec_tickers": [
+          "SO",
+          "SOJC",
+          "SOJD",
+          "SOJE",
+          "SOJF",
+          "SOMN"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "UNP",
+      "company_name": "Union Pacific Corporation",
+      "sector": "Industrials",
+      "industry": "Ground Transportation",
+      "cik": "0000100885",
+      "sec": {
+        "sec_name": "UNION PACIFIC CORP",
+        "sec_tickers": [
+          "UNP"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "UPS",
+      "company_name": "United Parcel Service, Inc.",
+      "sector": "Industrials",
+      "industry": "Air Freight and Logistics",
+      "cik": "0001090727",
+      "sec": {
+        "sec_name": "UNITED PARCEL SERVICE INC",
+        "sec_tickers": [
+          "UPS"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "V",
+      "company_name": "Visa Inc.",
+      "sector": "Financials",
+      "industry": "Transaction and Payment Processing Services",
+      "cik": "0001403161",
+      "sec": {
+        "sec_name": "VISA INC.",
+        "sec_tickers": [
+          "V"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "WFC",
+      "company_name": "Wells Fargo & Company",
+      "sector": "Financials",
+      "industry": "Banks",
+      "cik": "0000072971",
+      "sec": {
+        "sec_name": "WELLS FARGO & COMPANY/MN",
+        "sec_tickers": [
+          "WFC",
+          "WFC-PY",
+          "WFC-PL",
+          "WFC-PC",
+          "WFCNP",
+          "WFC-PA",
+          "WFC-PD",
+          "WFC-PZ"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    },
+    {
+      "ticker": "XOM",
+      "company_name": "Exxon Mobil Corporation",
+      "sector": "Energy",
+      "industry": "Oil Gas and Consumable Fuels",
+      "cik": "0000034088",
+      "sec": {
+        "sec_name": "EXXON MOBIL CORP",
+        "sec_tickers": [
+          "XOM"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": []
+    }
+  ],
+  "blockers": [],
+  "manual_review": [
+    {
+      "ticker": "GE",
+      "company_name": "GE Aerospace",
+      "sector": "Industrials",
+      "industry": "Aerospace and Defense",
+      "cik": "0000040545",
+      "sec": {
+        "sec_name": "GENERAL ELECTRIC CO",
+        "sec_tickers": [
+          "GE"
+        ],
+        "annual_10k_years": [
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025"
+        ],
+        "annual_10k_count": 10,
+        "missing_10k_report_years": [],
+        "file_errors": []
+      },
+      "sec_error": null,
+      "yahoo_price": {
+        "status": "ok",
+        "observed_days": 2617,
+        "first_date": "2015-12-01",
+        "last_date": "2026-04-29"
+      },
+      "yahoo_error": null,
+      "severe_flags": [],
+      "blocker_flags": [],
+      "review_flags": [
+        "manual_linkage_review_recommended_ge_restructuring"
+      ]
+    }
+  ]
+}

@@ -18,6 +18,7 @@ from text_factor_lab.features.text import (
     _feature_record,
     _text_for_scope,
     _text_scopes_for_documents,
+    make_streaming_tfidf_analyzer,
 )
 from text_factor_lab.schemas.features import FeatureManifestRecord, FeatureRecord
 from text_factor_lab.schemas.splits import SplitAssignmentRecord
@@ -80,13 +81,12 @@ def build_tfidf_matrix_store(
             if not any(text.strip() for text in train_texts):
                 continue
             vectorizer = TfidfVectorizer(
-                lowercase=True,
+                analyzer=make_streaming_tfidf_analyzer(ngram_range),
+                lowercase=False,
                 max_features=max_features,
-                ngram_range=ngram_range,
                 min_df=min_df,
                 max_df=max_df,
                 sublinear_tf=True,
-                token_pattern=r"(?u)\b[a-zA-Z][a-zA-Z\-']+\b",
             )
             vectorizer.fit(train_texts)
             terms = list(vectorizer.get_feature_names_out())

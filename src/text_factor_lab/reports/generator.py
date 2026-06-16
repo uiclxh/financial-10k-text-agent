@@ -45,6 +45,7 @@ class ReportArtifactPaths:
     monthly_portfolio_metrics: Path
     multiple_testing_report: Path
     specification_registry: Path
+    universe_quality_report: Path
     coverage_waterfall: Path
     coverage_by_target: Path
     coverage_by_split: Path
@@ -84,6 +85,7 @@ class ReportArtifactPaths:
             monthly_portfolio_metrics=base / "monthly_portfolio_metrics.json",
             multiple_testing_report=base / "multiple_testing_report.json",
             specification_registry=base / "specification_registry.json",
+            universe_quality_report=base / "universe_quality_report.json",
             coverage_waterfall=base / "coverage_waterfall.json",
             coverage_by_target=base / "coverage_by_target.csv",
             coverage_by_split=base / "coverage_by_split.csv",
@@ -257,6 +259,7 @@ def _load_report_artifacts(paths: ReportArtifactPaths) -> dict[str, Any]:
             paths.multiple_testing_report
         ),
         "specification_registry": _read_optional_json_object(paths.specification_registry),
+        "universe_quality_report": _read_optional_json_object(paths.universe_quality_report),
         "coverage_waterfall": _read_optional_json_object(paths.coverage_waterfall),
         "coverage_tables": {
             "by_target": _read_optional_csv_rows(paths.coverage_by_target),
@@ -297,6 +300,7 @@ def _build_summary(
         "multiple_testing_report"
     ]
     specification_registry = artifacts["specification_registry"] or {}
+    universe_quality_report = artifacts["universe_quality_report"] or {}
     coverage_waterfall = artifacts["coverage_waterfall"] or {}
     coverage_tables = artifacts["coverage_tables"]
     vocabulary_manifest = artifacts["vocabulary_manifest"]
@@ -308,6 +312,11 @@ def _build_summary(
     failed_checks = [check for check in audit.checks if check.status == "fail"]
     warning_checks = [check for check in audit.checks if check.status == "warn"]
     conclusion_level = _conclusion_level(audit, metrics, backtests, allow_failed_audit)
+    formal_result_blockers = _formal_result_blockers(
+        audit=audit,
+        config=config,
+        universe_quality_report=universe_quality_report,
+    )
 
     return {
         "report_version": REPORT_VERSION,
@@ -316,6 +325,7 @@ def _build_summary(
         "generated_at_utc": generated_at_utc.isoformat(),
         "conclusion_level": conclusion_level,
         "formal_result_allowed": audit.formal_result_allowed and audit.audit_status == "pass",
+        "formal_result_blockers": formal_result_blockers,
         "audit": {
             "status": audit.audit_status,
             "coverage": audit.coverage,
@@ -490,6 +500,7 @@ def _render_markdown(summary: dict[str, Any]) -> str:
         f"- Run type: `{summary['run_type']}`.",
         f"- Conclusion level: `{summary['conclusion_level']}`.",
         f"- Formal result allowed: `{summary['formal_result_allowed']}`.",
+        _formal_result_blocker_section(summary["formal_result_blockers"]),
         (
             "- Audit: "
             f"`{summary['audit']['status']}` with coverage "
@@ -672,7 +683,11 @@ def _render_empirical_report(summary: dict[str, Any]) -> str:
         "",
         _licensed_data_stack_section(summary["data_provider"]),
         "",
-        "## 2.2 Coverage And Audit Diagnosis",
+        "## 2.2 Formal Result Boundary",
+        "",
+        _formal_result_blocker_section(summary["formal_result_blockers"]),
+        "",
+        "## 2.3 Coverage And Audit Diagnosis",
         "",
         _coverage_diagnosis_section(summary["audit"]["coverage_diagnosis"]),
         "",
@@ -771,6 +786,7 @@ def _render_factor_card(summary: dict[str, Any]) -> str:
         "| --- | --- |",
         f"| Conclusion | `{summary['conclusion_level']}` |",
         f"| Formal result allowed | `{summary['formal_result_allowed']}` |",
+        f"| Formal result blockers | {_inline_list(summary['formal_result_blockers'])} |",
         f"| Audit status | `{summary['audit']['status']}` |",
         f"| Coverage | `{summary['audit']['coverage']:.3f}` |",
         (
@@ -855,6 +871,8 @@ def _render_factor_card(summary: dict[str, Any]) -> str:
         ),
         "",
         "## Usage Boundary",
+        "",
+        _formal_result_blocker_section(summary["formal_result_blockers"]),
         "",
         summary["interpretation"]["usage_boundary"],
         "",
@@ -1071,6 +1089,54 @@ def _conclusion_level(
     if audit.formal_result_allowed and audit.audit_status == "pass":
         return "formal_report_allowed"
     return "exploratory_report"
+
+
+def _formal_result_blockers(
+    *,
+    audit: AuditReportRecord,
+    config: Any,
+    universe_quality_report: dict[str, Any],
+) -> list[str]:
+    blockers: list[str] = []
+    if config.run.run_type != "formal_run":
+        blockers.append(
+            "run_type is exploratory_run, so the run is intentionally not eligible "
+            "for a formal empirical result."
+        )
+    price_source = str(config.data_provider.price_source).lower()
+    return_source = str(config.data_provider.return_source).lower()
+    if (
+        "mixed" in price_source
+        or "yahoo" in price_source
+        or "mixed" in return_source
+        or "yahoo" in return_source
+        or config.data_provider.allow_public_yahoo_fallback
+    ):
+        blockers.append(
+            "market data uses a mixed FMP/Yahoo public-source stack, not a single "
+            "CRSP/WRDS-equivalent research-grade source."
+        )
+    estimated_market_cap_rows = int(
+        universe_quality_report.get("membership_estimated_market_cap_rows")
+        or universe_quality_report.get("estimated_market_cap_rows")
+        or 0
+    )
+    if estimated_market_cap_rows > 0:
+        blockers.append(
+            "market_cap_at_selection is based on applied-grade estimates rather "
+            "than licensed CRSP/Compustat/WRDS market-cap history."
+        )
+    if not universe_quality_report.get("is_research_grade", False):
+        blockers.append(
+            "the universe is an applied fixed-company panel, not a survivorship-free "
+            "CRSP/WRDS research-grade universe."
+        )
+    if audit.audit_status != "pass":
+        blockers.append(
+            f"audit_status is {audit.audit_status}; warnings are boundary disclosures, "
+            "not pipeline failures."
+        )
+    return list(dict.fromkeys(blockers))
 
 
 def _metric_summary(metric: EvaluationMetricRecord) -> dict[str, Any]:
@@ -1614,6 +1680,17 @@ def _coverage_diagnosis_section(summary: dict[str, Any]) -> str:
         "",
         _coverage_failure_table(summary["top_failure_reasons"]),
     ]
+    return "\n".join(lines)
+
+
+def _formal_result_blocker_section(blockers: list[str]) -> str:
+    if not blockers:
+        return "No formal-result blocker was detected."
+    lines = [
+        "Formal result is not allowed for data-boundary reasons, not because the "
+        "pipeline failed:",
+    ]
+    lines.extend(f"- {blocker}" for blocker in blockers)
     return "\n".join(lines)
 
 

@@ -1,0 +1,43 @@
+{
+  "created_at_utc": "2026-06-15T12:33:09.444659+00:00",
+  "status": "blocked_missing_runtime_api_credentials",
+  "next_stage": "full_50_company_sec_fmp_alpha_extraction",
+  "universe_file": "E:\\financial_10K_text_agent\\configs\\universe\\50_company_sp500_sector_seed_2016_2025.csv",
+  "config_file": "configs/text_factor_lab/50_company_public_fmp_alpha.yaml",
+  "company_count": 50,
+  "duplicate_tickers": [],
+  "sector_counts": {
+    "Information Technology": 6,
+    "Communication Services": 3,
+    "Consumer Discretionary": 4,
+    "Financials": 8,
+    "Energy": 5,
+    "Health Care": 6,
+    "Consumer Staples": 3,
+    "Industrials": 5,
+    "Utilities": 4,
+    "Materials": 4,
+    "Real Estate": 2
+  },
+  "coverage_audit_file": "E:\\financial_10K_text_agent\\data_manifests\\50_company_api_coverage_audit_post_replacement.json",
+  "coverage_blockers": [],
+  "manual_review": [
+    [
+      "GE",
+      [
+        "manual_linkage_review_recommended_ge_restructuring"
+      ]
+    ]
+  ],
+  "known_boundaries": [
+    "GE retained under continuous CIK/ticker linkage but flagged for restructuring review.",
+    "Market data labels use canonical common equity tickers only; SEC preferred-share tickers are not used.",
+    "FMP is primary market data source; Yahoo remains fallback only for predeclared gaps."
+  ],
+  "missing_runtime_environment": {
+    "FMP_API_KEY": true,
+    "SEC_USER_AGENT": true,
+    "ALPHAVANTAGE_API_KEY_or_ALPHA_VANTAGE_API_KEY": true
+  },
+  "ready_after_env_set": true
+}

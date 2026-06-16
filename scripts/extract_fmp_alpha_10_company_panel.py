@@ -65,6 +65,12 @@ class CompanySpec:
     cik: str
     sector: str
     industry: str
+    common_equity_price_ticker: str | None = None
+    research_notes: str = ""
+
+    @property
+    def price_ticker(self) -> str:
+        return self.common_equity_price_ticker or self.ticker
 
 
 DEFAULT_COMPANIES = [
@@ -142,11 +148,349 @@ DEFAULT_COMPANIES = [
         "Pharmaceuticals",
     ),
 ]
+SECTOR_EXPANSION_COMPANIES = [
+    CompanySpec(
+        "ORCL",
+        "ORCL",
+        "Oracle Corporation",
+        "0001341439",
+        "Information Technology",
+        "Software",
+    ),
+    CompanySpec(
+        "ADBE",
+        "ADBE",
+        "Adobe Inc.",
+        "0000796343",
+        "Information Technology",
+        "Software",
+    ),
+    CompanySpec(
+        "CRM",
+        "CRM",
+        "Salesforce, Inc.",
+        "0001108524",
+        "Information Technology",
+        "Software",
+    ),
+    CompanySpec(
+        "CSCO",
+        "CSCO",
+        "Cisco Systems, Inc.",
+        "0000858877",
+        "Information Technology",
+        "Communications Equipment",
+    ),
+    CompanySpec(
+        "IBM",
+        "IBM",
+        "International Business Machines Corporation",
+        "0000051143",
+        "Information Technology",
+        "IT Services",
+    ),
+    CompanySpec(
+        "BAC",
+        "BAC",
+        "Bank of America Corporation",
+        "0000070858",
+        "Financials",
+        "Banks",
+    ),
+    CompanySpec(
+        "GS",
+        "GS",
+        "The Goldman Sachs Group, Inc.",
+        "0000886982",
+        "Financials",
+        "Capital Markets",
+    ),
+    CompanySpec(
+        "MS",
+        "MS",
+        "Morgan Stanley",
+        "0000895421",
+        "Financials",
+        "Capital Markets",
+    ),
+    CompanySpec(
+        "WFC",
+        "WFC",
+        "Wells Fargo & Company",
+        "0000072971",
+        "Financials",
+        "Banks",
+    ),
+    CompanySpec(
+        "AXP",
+        "AXP",
+        "American Express Company",
+        "0000004962",
+        "Financials",
+        "Consumer Finance",
+    ),
+    CompanySpec(
+        "PFE",
+        "PFE",
+        "Pfizer Inc.",
+        "0000078003",
+        "Health Care",
+        "Pharmaceuticals",
+    ),
+    CompanySpec(
+        "MRK",
+        "MRK",
+        "Merck & Co., Inc.",
+        "0000310158",
+        "Health Care",
+        "Pharmaceuticals",
+    ),
+    CompanySpec(
+        "ABBV",
+        "ABBV",
+        "AbbVie Inc.",
+        "0001551152",
+        "Health Care",
+        "Biotechnology",
+    ),
+    CompanySpec(
+        "JNJ",
+        "JNJ",
+        "Johnson & Johnson",
+        "0000200406",
+        "Health Care",
+        "Pharmaceuticals",
+    ),
+    CompanySpec(
+        "ABT",
+        "ABT",
+        "Abbott Laboratories",
+        "0000001800",
+        "Health Care",
+        "Health Care Equipment",
+    ),
+    CompanySpec(
+        "COST",
+        "COST",
+        "Costco Wholesale Corporation",
+        "0000909832",
+        "Consumer Staples",
+        "Consumer Staples Merchandise Retail",
+    ),
+    CompanySpec(
+        "KO",
+        "KO",
+        "The Coca-Cola Company",
+        "0000021344",
+        "Consumer Staples",
+        "Beverages",
+    ),
+    CompanySpec(
+        "PEP",
+        "PEP",
+        "PepsiCo, Inc.",
+        "0000077476",
+        "Consumer Staples",
+        "Beverages",
+    ),
+    CompanySpec(
+        "HD",
+        "HD",
+        "The Home Depot, Inc.",
+        "0000354950",
+        "Consumer Discretionary",
+        "Specialty Retail",
+    ),
+    CompanySpec(
+        "CMCSA",
+        "CMCSA",
+        "Comcast Corporation",
+        "0001166691",
+        "Communication Services",
+        "Media",
+    ),
+]
+DEFAULT_30_COMPANIES = DEFAULT_COMPANIES + SECTOR_EXPANSION_COMPANIES
+SECTOR_BALANCE_50_EXPANSION_COMPANIES = [
+    CompanySpec(
+        "CVX",
+        "CVX",
+        "Chevron Corporation",
+        "0000093410",
+        "Energy",
+        "Oil Gas and Consumable Fuels",
+    ),
+    CompanySpec(
+        "COP",
+        "COP",
+        "ConocoPhillips",
+        "0001163165",
+        "Energy",
+        "Oil Gas and Consumable Fuels",
+    ),
+    CompanySpec(
+        "EOG",
+        "EOG",
+        "EOG Resources, Inc.",
+        "0000821189",
+        "Energy",
+        "Oil Gas and Consumable Fuels",
+    ),
+    CompanySpec(
+        "OXY",
+        "OXY",
+        "Occidental Petroleum Corporation",
+        "0000797468",
+        "Energy",
+        "Oil Gas and Consumable Fuels",
+    ),
+    CompanySpec(
+        "UNP",
+        "UNP",
+        "Union Pacific Corporation",
+        "0000100885",
+        "Industrials",
+        "Ground Transportation",
+    ),
+    CompanySpec(
+        "CAT",
+        "CAT",
+        "Caterpillar Inc.",
+        "0000018230",
+        "Industrials",
+        "Machinery",
+    ),
+    CompanySpec(
+        "HON",
+        "HON",
+        "Honeywell International Inc.",
+        "0000773840",
+        "Industrials",
+        "Industrial Conglomerates",
+    ),
+    CompanySpec(
+        "GE",
+        "GE",
+        "GE Aerospace",
+        "0000040545",
+        "Industrials",
+        "Aerospace and Defense",
+        research_notes=(
+            "GE is retained under continuous CIK/ticker linkage, but flagged "
+            "for manual review due to major corporate restructuring during the "
+            "sample period."
+        ),
+    ),
+    CompanySpec(
+        "UPS",
+        "UPS",
+        "United Parcel Service, Inc.",
+        "0001090727",
+        "Industrials",
+        "Air Freight and Logistics",
+    ),
+    CompanySpec(
+        "NEE",
+        "NEE",
+        "NextEra Energy, Inc.",
+        "0000753308",
+        "Utilities",
+        "Electric Utilities",
+    ),
+    CompanySpec(
+        "DUK",
+        "DUK",
+        "Duke Energy Corporation",
+        "0001326160",
+        "Utilities",
+        "Electric Utilities",
+    ),
+    CompanySpec(
+        "SO",
+        "SO",
+        "The Southern Company",
+        "0000092122",
+        "Utilities",
+        "Electric Utilities",
+    ),
+    CompanySpec(
+        "AEP",
+        "AEP",
+        "American Electric Power Company, Inc.",
+        "0000004904",
+        "Utilities",
+        "Electric Utilities",
+    ),
+    CompanySpec(
+        "APD",
+        "APD",
+        "Air Products and Chemicals, Inc.",
+        "0000002969",
+        "Materials",
+        "Chemicals",
+    ),
+    CompanySpec(
+        "SHW",
+        "SHW",
+        "The Sherwin-Williams Company",
+        "0000089800",
+        "Materials",
+        "Chemicals",
+    ),
+    CompanySpec(
+        "FCX",
+        "FCX",
+        "Freeport-McMoRan Inc.",
+        "0000831259",
+        "Materials",
+        "Metals and Mining",
+    ),
+    CompanySpec(
+        "NEM",
+        "NEM",
+        "Newmont Corporation",
+        "0001164727",
+        "Materials",
+        "Metals and Mining",
+    ),
+    CompanySpec(
+        "PLD",
+        "PLD",
+        "Prologis, Inc.",
+        "0001045609",
+        "Real Estate",
+        "Industrial REITs",
+    ),
+    CompanySpec(
+        "AMT",
+        "AMT",
+        "American Tower Corporation",
+        "0001053507",
+        "Real Estate",
+        "Telecom Tower REITs",
+    ),
+    CompanySpec(
+        "MA",
+        "MA",
+        "Mastercard Incorporated",
+        "0001141391",
+        "Financials",
+        "Transaction and Payment Processing Services",
+    ),
+]
+DEFAULT_50_COMPANIES = DEFAULT_30_COMPANIES + SECTOR_BALANCE_50_EXPANSION_COMPANIES
+PANEL_PRESETS = {
+    "10_company": DEFAULT_COMPANIES,
+    "30_company_sp500_sector_seed": DEFAULT_30_COMPANIES,
+    "50_company_sp500_sector_seed": DEFAULT_50_COMPANIES,
+}
 BENCHMARK_TICKER = "SPY"
 UNIVERSE_COLUMNS = [
     "entity_id",
     "ticker",
     "historical_ticker",
+    "common_equity_price_ticker",
+    "price_ticker_policy",
     "cik",
     "company_name",
     "sector",
@@ -161,11 +505,14 @@ UNIVERSE_COLUMNS = [
     "delisting_date",
     "mapping_source",
     "mapping_available_time_utc",
+    "research_notes",
 ]
 MEMBERSHIP_COLUMNS = [
     "universe_id",
     "entity_id",
     "ticker",
+    "common_equity_price_ticker",
+    "price_ticker_policy",
     "selection_date",
     "entry_date",
     "exit_date",
@@ -180,11 +527,13 @@ MEMBERSHIP_COLUMNS = [
     "liquidity_filter_pass",
     "source",
     "source_version",
+    "research_notes",
 ]
 
 
 @dataclass(frozen=True)
 class ExtractionConfig:
+    panel_name: str
     companies: list[CompanySpec]
     start_date: str
     end_date: str
@@ -206,16 +555,26 @@ class ExtractionConfig:
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Extract the fixed 10-company applied-grade panel using SEC EDGAR, "
+            "Extract an applied-grade panel using SEC EDGAR, "
             "FMP primary market data, Alpha Vantage backup checks, and optional "
             "local Loughran-McDonald dictionary input."
         )
     )
     parser.add_argument(
+        "--panel",
+        choices=sorted(PANEL_PRESETS),
+        default="10_company",
+        help=(
+            "Company preset. Use 30_company_sp500_sector_seed for the first "
+            "expansion batch or 50_company_sp500_sector_seed for a more balanced "
+            "sector sample."
+        ),
+    )
+    parser.add_argument(
         "--tickers",
         nargs="+",
-        default=[company.ticker for company in DEFAULT_COMPANIES],
-        help="Target tickers. Defaults to the Sony->JPM 10-company 10-K panel.",
+        default=None,
+        help="Optional subset of tickers from the selected panel preset.",
     )
     parser.add_argument("--start-date", default="2015-12-01")
     parser.add_argument("--end-date", default="2026-04-30")
@@ -246,9 +605,15 @@ def main() -> int:
     parser.add_argument("--sleep-seconds", type=float, default=0.2)
     args = parser.parse_args()
 
-    company_by_ticker = {company.ticker: company for company in DEFAULT_COMPANIES}
-    companies = [company_by_ticker[ticker.upper()] for ticker in normalize_tickers(args.tickers)]
+    selected_panel = PANEL_PRESETS[args.panel]
+    requested_tickers = args.tickers or [company.ticker for company in selected_panel]
+    company_by_ticker = {company.ticker: company for company in selected_panel}
+    companies = [
+        company_by_ticker[ticker.upper()]
+        for ticker in normalize_tickers(requested_tickers, selected_panel)
+    ]
     config = ExtractionConfig(
+        panel_name=args.panel,
         companies=companies,
         start_date=args.start_date,
         end_date=args.end_date,
@@ -265,7 +630,8 @@ def main() -> int:
         skip_alpha_crosscheck=args.skip_alpha_crosscheck,
         yahoo_fallback_tickers=normalize_yahoo_fallback_tickers(
             args.yahoo_fallback_tickers,
-            args.tickers,
+            requested_tickers,
+            selected_panel,
         ),
         sleep_seconds=args.sleep_seconds,
     )
@@ -282,8 +648,11 @@ def main() -> int:
     return 0
 
 
-def normalize_tickers(values: list[str]) -> list[str]:
-    allowed = {company.ticker for company in DEFAULT_COMPANIES}
+def normalize_tickers(
+    values: list[str],
+    companies: list[CompanySpec] | None = None,
+) -> list[str]:
+    allowed = {company.ticker for company in (companies or DEFAULT_COMPANIES)}
     tickers = []
     for value in values:
         ticker = value.strip().upper()
@@ -296,8 +665,9 @@ def normalize_tickers(values: list[str]) -> list[str]:
 def normalize_yahoo_fallback_tickers(
     values: list[str],
     requested_tickers: list[str],
+    companies: list[CompanySpec] | None = None,
 ) -> list[str]:
-    requested = set(normalize_tickers(requested_tickers))
+    requested = set(normalize_tickers(requested_tickers, companies))
     fallback = []
     for value in values:
         ticker = value.strip().upper()
@@ -310,7 +680,7 @@ def normalize_yahoo_fallback_tickers(
 
 
 def print_plan(config: ExtractionConfig) -> None:
-    print("FMP + Alpha Vantage + SEC 10-company extraction plan")
+    print(f"FMP + Alpha Vantage + SEC extraction plan ({len(config.companies)} companies)")
     print(f"tickers={', '.join(company.ticker for company in config.companies)}")
     print(f"benchmark={BENCHMARK_TICKER}")
     print(f"price_window={config.start_date}..{config.end_date}")
@@ -369,7 +739,7 @@ def extract_panel(config: ExtractionConfig) -> None:
     price_quality = build_price_quality_report(
         prices,
         benchmark_ticker=BENCHMARK_TICKER,
-        expected_tickers=[company.ticker for company in config.companies],
+        expected_tickers=[company.price_ticker for company in config.companies],
     )
     write_json(price_quality, market_dir / "price_quality_report.json")
     write_json(
@@ -438,7 +808,9 @@ def load_fmp_prices(
     existing_prices: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
-    for ticker in [company.ticker for company in config.companies] + [BENCHMARK_TICKER]:
+    for ticker in [company.price_ticker for company in config.companies] + [
+        BENCHMARK_TICKER
+    ]:
         cached_rows = existing_price_rows_for_ticker(existing_prices, ticker)
         if cached_rows:
             rows.extend(cached_rows)
@@ -549,11 +921,12 @@ def _sequence_value(values: list[Any] | None, index: int) -> Any:
 def load_fmp_market_caps(config: ExtractionConfig) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     for company in config.companies:
+        ticker = company.price_ticker
         try:
             payload = fetch_fmp_json(
                 "/stable/historical-market-capitalization",
                 {
-                    "symbol": company.ticker,
+                    "symbol": ticker,
                     "from": config.start_date,
                     "to": config.end_date,
                 },
@@ -566,11 +939,11 @@ def load_fmp_market_caps(config: ExtractionConfig) -> pd.DataFrame:
             )
             if isinstance(historical, list):
                 for item in historical:
-                    rows.append({"ticker": company.ticker, **item})
+                    rows.append({"ticker": ticker, **item})
         except Exception as exc:
             rows.append(
                 {
-                    "ticker": company.ticker,
+                    "ticker": ticker,
                     "status": "unavailable",
                     "error": str(exc),
                     "source": "fmp_historical_market_capitalization",
@@ -609,7 +982,7 @@ def load_fmp_delisted_companies(config: ExtractionConfig) -> pd.DataFrame:
     except Exception as exc:
         return pd.DataFrame([{"status": "failed", "error": str(exc)}])
     rows = payload if isinstance(payload, list) else []
-    wanted = {company.ticker for company in config.companies}
+    wanted = {company.price_ticker for company in config.companies}
     return pd.DataFrame([row for row in rows if str(row.get("symbol", "")).upper() in wanted])
 
 
@@ -619,6 +992,7 @@ def load_listing_status(config: ExtractionConfig) -> pd.DataFrame:
             [
                 {
                     "ticker": company.ticker,
+                    "common_equity_price_ticker": company.price_ticker,
                     "status": "not_checked",
                     "source": "alpha_vantage_listing_status",
                 }
@@ -626,7 +1000,7 @@ def load_listing_status(config: ExtractionConfig) -> pd.DataFrame:
             ]
         )
     payload = fetch_alpha_csv({"function": "LISTING_STATUS"}, config.alpha_api_key)
-    wanted = {company.ticker for company in config.companies}
+    wanted = {company.price_ticker for company in config.companies}
     if payload.empty:
         return pd.DataFrame()
     symbol_column = "symbol" if "symbol" in payload.columns else payload.columns[0]
@@ -641,10 +1015,12 @@ def build_prices_with_returns(raw: pd.DataFrame) -> pd.DataFrame:
         return empty_prices_frame()
     prices["ticker"] = prices["ticker"].astype(str).str.upper()
     prices["date"] = pd.to_datetime(prices["date"], errors="coerce")
-    prices["closeadj"] = pd.to_numeric(
-        prices.get("adjClose", prices.get("closeadj", prices.get("close"))),
-        errors="coerce",
-    )
+    closeadj = pd.Series(pd.NA, index=prices.index, dtype="Float64")
+    for candidate in ["adjClose", "closeadj", "close"]:
+        if candidate in prices:
+            candidate_values = pd.to_numeric(prices[candidate], errors="coerce")
+            closeadj = closeadj.fillna(candidate_values)
+    prices["closeadj"] = closeadj
     for column in ["open", "high", "low", "close", "volume"]:
         if column not in prices:
             prices[column] = pd.NA
@@ -748,6 +1124,12 @@ def build_security_master(config: ExtractionConfig, profiles: pd.DataFrame) -> p
                 "cik": normalize_cik(company.cik),
                 "ticker": company.ticker,
                 "historical_ticker": company.historical_ticker,
+                "common_equity_price_ticker": company.price_ticker,
+                "price_ticker_policy": (
+                    "Use the manually selected canonical common equity ticker "
+                    "for market data and labels; do not use SEC preferred-share "
+                    "or affiliated tickers returned in submissions metadata."
+                ),
                 "company_name": profile.get("companyName", company.company_name)
                 if hasattr(profile, "get")
                 else company.company_name,
@@ -772,6 +1154,7 @@ def build_security_master(config: ExtractionConfig, profiles: pd.DataFrame) -> p
                 "source": "fmp_profile_sec_cik_manual_verified",
                 "source_version": "fmp_profile_v3",
                 "available_time_utc": f"{config.selection_date}T00:00:00Z",
+                "research_notes": company.research_notes,
             }
         )
     return pd.DataFrame(rows)
@@ -794,12 +1177,16 @@ def build_universe_membership(
     price_lookup = price_at_selection(prices, config.selection_date)
     rows = []
     for company in config.companies:
-        market_cap_metadata = marketcap_lookup.get(company.ticker, {})
+        market_cap_metadata = marketcap_lookup.get(company.price_ticker, {})
         rows.append(
             {
                 "entity_id": f"CIK{normalize_cik(company.cik)}",
                 "ticker": company.ticker,
                 "historical_ticker": company.historical_ticker,
+                "common_equity_price_ticker": company.price_ticker,
+                "price_ticker_policy": (
+                    "labels_and_portfolios_use_common_equity_price_ticker_only"
+                ),
                 "cik": normalize_cik(company.cik),
                 "company_name": company.company_name,
                 "sector": company.sector,
@@ -816,10 +1203,14 @@ def build_universe_membership(
                 "entry_date": config.selection_date,
                 "exit_date": "",
                 "delisting_date": "",
-                "mapping_source": "sec_cik_fmp_profile_manual_fb_meta",
+                "mapping_source": (
+                    "sec_cik_fmp_profile_manual_ge_restructuring_review"
+                    if company.ticker == "GE"
+                    else "sec_cik_fmp_profile_manual_fb_meta"
+                ),
                 "mapping_available_time_utc": f"{config.selection_date}T00:00:00Z",
-                "universe_id": "fixed_10_company_us_10k_fmp_alpha_pilot",
-                "price_at_selection": price_lookup.get(company.ticker),
+                "universe_id": f"fixed_{config.panel_name}_fmp_alpha_pilot",
+                "price_at_selection": price_lookup.get(company.price_ticker),
                 "shares_outstanding_at_selection": market_cap_metadata.get(
                     "shares_outstanding_at_selection",
                     "",
@@ -827,6 +1218,7 @@ def build_universe_membership(
                 "liquidity_filter_pass": True,
                 "source": "fmp_profile_marketcap_sec_cik",
                 "source_version": "fmp_alpha_pilot_v1",
+                "research_notes": company.research_notes,
             }
         )
     frame = pd.DataFrame(rows)
@@ -855,10 +1247,17 @@ def build_entity_links(config: ExtractionConfig) -> pd.DataFrame:
                 "link_type": (
                     "manual_fb_meta_ticker_change"
                     if company.ticker == "META"
+                    else "continuous_cik_ticker_with_restructuring_review"
+                    if company.ticker == "GE"
                     else "sec_cik_current_ticker"
                 ),
-                "link_confidence": 1.0 if company.ticker != "META" else 0.95,
+                "link_confidence": 0.9
+                if company.ticker == "GE"
+                else 1.0
+                if company.ticker != "META"
+                else 0.95,
                 "source": "sec_submissions_fmp_symbol_change_manual_review",
+                "research_notes": company.research_notes,
             }
         )
     return pd.DataFrame(rows)
@@ -1068,12 +1467,19 @@ def select_annual_10k_filings(
         report_date = str(filing.get("reportDate") or "")
         if not report_date:
             continue
-        report_year = int(report_date[:4])
+        report_year = fiscal_year_from_report_date(report_date)
         if start_year <= report_year <= end_year and report_year not in by_year:
             row = dict(filing)
             row["report_year"] = report_year
             by_year[report_year] = row
     return [by_year[year] for year in sorted(by_year)]
+
+
+def fiscal_year_from_report_date(report_date: str) -> int:
+    parsed = date.fromisoformat(str(report_date)[:10])
+    if parsed.month == 1 and parsed.day <= 7:
+        return parsed.year - 1
+    return parsed.year
 
 
 def manifest_record_for_filing(
@@ -1230,11 +1636,30 @@ def build_data_provenance(
 ) -> dict[str, Any]:
     return {
         "created_at_utc": datetime.now(UTC).isoformat(),
-        "panel_type": "10-company applied-grade non-WRDS non-Nasdaq pilot",
+        "panel_type": f"{len(config.companies)}-company applied-grade non-WRDS non-Nasdaq pilot",
         "target_tickers": [company.ticker for company in config.companies],
+        "common_equity_price_tickers": [
+            company.price_ticker for company in config.companies
+        ],
+        "price_ticker_policy": (
+            "Market data, labels, and portfolio returns use the configured "
+            "canonical common equity ticker only. SEC submissions may list "
+            "preferred shares or affiliated tickers; those are not used for "
+            "price labels."
+        ),
+        "manual_review_notes": [
+            {
+                "ticker": company.ticker,
+                "note": company.research_notes,
+            }
+            for company in config.companies
+            if company.research_notes
+        ],
         "replacement_policy": (
             "SONY excluded because it is a 20-F foreign private issuer; "
-            "JPM is used instead."
+            "JPM is used instead. DIS is excluded from the sector-seed expansion "
+            "because the current CIK seed missed 2016-2018 10-K coverage in API "
+            "checks; CMCSA is used instead."
         ),
         "benchmark": BENCHMARK_TICKER,
         "filing_source": "SEC EDGAR submissions API and Archives",
@@ -1261,6 +1686,11 @@ def build_data_provenance(
             "Not survivorship-free.",
             "No CRSP delisting returns.",
             "Fixed active-company 10-K pilot panel.",
+            "GE is retained under continuous CIK/ticker linkage but flagged for "
+            "manual review due to major corporate restructuring during the "
+            "sample period.",
+            "Financial and utility issuers can expose preferred-share tickers in "
+            "SEC metadata; price labels use only configured common equity tickers.",
             "Portfolio evidence should remain secondary to prediction metrics.",
         ],
         "price_quality": price_quality,
@@ -1269,13 +1699,13 @@ def build_data_provenance(
 
 def write_license_manifest(config: ExtractionConfig, metadata_dir: Path) -> None:
     manifest = DataLicenseManifestRecord(
-        data_stack="sec_fmp_yahoo_alpha_lm_fixed_10_company_pilot",
+        data_stack="sec_fmp_yahoo_alpha_lm_fixed_applied_company_panel",
         market_data_provider="fmp_alpha",
         filing_provider="sec_edgar",
         price_source="mixed_fmp_yahoo_adjusted_close",
         return_source="mixed_fmp_yahoo_closeadj_log_return",
         delisting_return_source="fmp_alpha_listing_status_no_crsp_dlret",
-        link_source="sec_cik_fmp_symbol_change_manual_fb_meta",
+        link_source="sec_cik_fmp_symbol_change_manual_fb_meta_ge_review_common_equity_ticker_policy",
         data_owner="SEC, Financial Modeling Prep, Alpha Vantage, Notre Dame SRAF",
         data_rights_scope="private local research artifacts only",
         input_files={

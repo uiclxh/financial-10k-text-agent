@@ -1,4 +1,4 @@
-# 10-Company FMP / Alpha Data Stack
+# FMP / Alpha Public-Data Stack
 
 This profile replaces the prior WRDS / Nasdaq Data Link dependency with an
 applied-grade, non-WRDS data stack:
@@ -14,8 +14,10 @@ SEC EDGAR official filings
 
 ## Positioning
 
-This is a **10-company applied-grade pilot panel**, not a survivorship-free
-CRSP/WRDS replication.
+The committed public result is a **10-company applied-grade pilot panel**. The
+configured expansion path now includes a **30-company S&P 500 sector seed** and
+a more balanced **50-company S&P 500 sector seed**. None of these profiles is a
+survivorship-free CRSP/WRDS replication.
 
 The market data layer is explicitly **mixed-source applied-grade** when Yahoo
 fallback is used. FMP remains the primary price provider; Yahoo is allowed only
@@ -37,7 +39,7 @@ This experiment proves a survivorship-free tradable equity factor or captures
 CRSP-style delisting returns.
 ```
 
-## Universe
+## Current 10-Company Universe
 
 Sony is excluded because it is a foreign private issuer and normally files
 `20-F`, not `10-K`. JPMorgan Chase is used instead.
@@ -55,6 +57,57 @@ Sony is excluded because it is a foreign private issuer and normally files
 | Target | XOM | ExxonMobil | `0000034088` | 10-K |
 | Target | LLY | Eli Lilly | `0000059478` | 10-K |
 | Benchmark | SPY | SPDR S&P 500 ETF | ETF | price benchmark |
+
+## Expansion Panels
+
+The first expansion keeps the current 10 companies and adds 20 S&P 500-style
+large-cap U.S. `10-K` filers by sector. The second expansion keeps those 30 and
+adds 20 more names to improve coverage in Energy, Industrials, Utilities,
+Materials, Real Estate, and payment/financial infrastructure.
+
+This is not random sampling and is not presented as official historical S&P 500
+membership.
+
+Config files:
+
+- `configs/universe/30_company_sp500_sector_seed_2016_2025.csv`
+- `configs/text_factor_lab/30_company_public_fmp_alpha.yaml`
+- `configs/universe/50_company_sp500_sector_seed_2016_2025.csv`
+- `configs/text_factor_lab/50_company_public_fmp_alpha.yaml`
+
+30-company additions:
+
+| Sector bucket | Added tickers |
+| --- | --- |
+| Information Technology | ORCL, ADBE, CRM, CSCO, IBM |
+| Financials | BAC, GS, MS, WFC, AXP |
+| Health Care | PFE, MRK, ABBV, JNJ, ABT |
+| Consumer / media | COST, KO, PEP, HD, CMCSA |
+
+50-company additions:
+
+| Sector bucket | Added tickers |
+| --- | --- |
+| Energy | CVX, COP, EOG, OXY |
+| Industrials | UNP, CAT, HON, GE, UPS |
+| Utilities | NEE, DUK, SO, AEP |
+| Materials | APD, SHW, FCX, NEM |
+| Real Estate | PLD, AMT |
+| Payment / financial infrastructure | MA |
+
+The resulting 50-company panel should produce about 500 annual filings for
+FY2016-FY2025 if SEC coverage is complete. Comcast replaces Disney after an API
+coverage audit found Disney's current CIK seed missing 2016-2018 10-K coverage.
+
+GE is retained under continuous CIK/ticker linkage, but flagged for manual
+review due to major corporate restructuring during the sample period. The
+research interpretation should not silently treat 2016 GE text and 2025 GE
+Aerospace text as economically identical without this caveat.
+
+Financials, utilities, and some large issuers can expose multiple SEC tickers
+for preferred shares or affiliated securities. This does not affect price labels
+because the extraction script uses only the configured canonical common equity
+ticker for market data, labels, and portfolio returns.
 
 ## Required Inputs
 
@@ -101,10 +154,38 @@ python scripts\extract_fmp_alpha_10_company_panel.py `
   --lm-dictionary-file "E:\path\to\Loughran-McDonald_MasterDictionary_1993-2025.csv"
 ```
 
+30-company expansion:
+
+```powershell
+python scripts\extract_fmp_alpha_10_company_panel.py `
+  --panel 30_company_sp500_sector_seed `
+  --start-date 2015-12-01 `
+  --end-date 2026-04-30 `
+  --filing-start-year 2016 `
+  --filing-end-year 2025 `
+  --yahoo-fallback-tickers MCD LLY `
+  --lm-dictionary-file "E:\path\to\Loughran-McDonald_MasterDictionary_1993-2025.csv"
+```
+
+50-company expansion:
+
+```powershell
+python scripts\extract_fmp_alpha_10_company_panel.py `
+  --panel 50_company_sp500_sector_seed `
+  --start-date 2015-12-01 `
+  --end-date 2026-04-30 `
+  --filing-start-year 2016 `
+  --filing-end-year 2025 `
+  --yahoo-fallback-tickers MCD LLY `
+  --lm-dictionary-file "E:\path\to\Loughran-McDonald_MasterDictionary_1993-2025.csv"
+```
+
 Dry run:
 
 ```powershell
 python scripts\extract_fmp_alpha_10_company_panel.py --dry-run
+python scripts\extract_fmp_alpha_10_company_panel.py --panel 30_company_sp500_sector_seed --dry-run
+python scripts\extract_fmp_alpha_10_company_panel.py --panel 50_company_sp500_sector_seed --dry-run
 ```
 
 Pipeline run:
@@ -112,6 +193,14 @@ Pipeline run:
 ```powershell
 python -m text_factor_lab run `
   --config configs/text_factor_lab/10_company_public_fmp_alpha.yaml `
+  --execute
+
+python -m text_factor_lab run `
+  --config configs/text_factor_lab/30_company_public_fmp_alpha.yaml `
+  --execute
+
+python -m text_factor_lab run `
+  --config configs/text_factor_lab/50_company_public_fmp_alpha.yaml `
   --execute
 ```
 
@@ -157,8 +246,11 @@ checks.
 - SEC EDGAR provides official filings and filing timestamps.
 - FMP provides primary adjusted daily prices, historical market cap, profiles,
   symbol changes, and delisted-company checks.
-- Yahoo Finance chart data is a narrow fallback for `MCD` and `LLY` prices only;
+- Yahoo Finance chart data is a narrow fallback for predeclared prices only;
   runs using it must be described as mixed-source applied-grade runs.
+- Price labels use the configured common equity ticker only. SEC submissions
+  metadata can include preferred-share tickers such as bank preferreds; those
+  SEC tickers must not be used for stock-return labels.
 - Alpha Vantage is a backup source for listing status and optional price
   cross-checks.
 - Loughran-McDonald is the primary finance dictionary source.
