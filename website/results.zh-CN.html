@@ -17,6 +17,7 @@
         <a class="brand" href="index.zh-CN.html">Financial 10-K Text Agent</a>
         <nav class="nav-links" aria-label="主导航">
           <a href="index.zh-CN.html">首页</a>
+          <a href="methods.zh-CN.html">方法</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
           <a href="#reproducibility">本地运行</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT 许可</a>
@@ -113,6 +114,23 @@
           <p class="section-note">
             审计轨迹区分 raw label coverage 与 eligible OOS prediction coverage，披露多重检验，并记录应用级数据边界。
           </p>
+          <div class="waterfall-card compact-chart" aria-label="覆盖率瀑布图">
+            <div class="waterfall-row">
+              <span>原始标签</span>
+              <span class="waterfall-track"><span style="--bar-width: 49%"></span></span>
+              <strong>48.7%</strong>
+            </div>
+            <div class="waterfall-row">
+              <span>合格样本外</span>
+              <span class="waterfall-track"><span style="--bar-width: 100%"></span></span>
+              <strong>100%</strong>
+            </div>
+            <div class="waterfall-row">
+              <span>主规格覆盖</span>
+              <span class="waterfall-track"><span style="--bar-width: 100%"></span></span>
+              <strong>2 / 2</strong>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -186,9 +204,10 @@ python -m pytest</code></pre>
         <p>公开结果摘要仅用于研究展示。</p>
         <nav class="footer-links" aria-label="页脚导航">
           <a href="index.zh-CN.html">首页</a>
+          <a href="methods.zh-CN.html">方法</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
-          <a href="#reproducibility">????</a>
-          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT ??</a>
+          <a href="#reproducibility">本地运行</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT 许可</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md">Working Paper</a>
         </nav>
       </div>

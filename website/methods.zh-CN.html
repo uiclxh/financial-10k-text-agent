@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>方法与审计 | Financial 10-K Text Agent</title>
+    <meta
+      name="description"
+      content="Financial 10-K Text Agent 50家公司公开结果包的方法与审计控制说明。"
+    >
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="index.zh-CN.html">Financial 10-K Text Agent</a>
+        <nav class="nav-links" aria-label="主导航">
+          <a href="index.zh-CN.html">首页</a>
+          <a href="results.zh-CN.html">结果</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <div class="language-switch" aria-label="语言切换">
+            <a class="switch-option" href="methods.html" lang="en">English</a>
+            <a class="switch-option is-active" href="methods.zh-CN.html" lang="zh-CN">Chinese</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="page-hero">
+        <div class="container narrow">
+          <span class="badge">方法 / 审计</span>
+          <h1>防泄漏研究设计</h1>
+          <p class="hero-subtitle">
+            50家公司公开结果包被设计为可审计的实证金融工作流：年报有时间戳，
+            特征只在训练窗口拟合，模型只用验证窗口调参，组合输出仅作为诊断。
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">方法流程</p>
+            <h2>从年报发布时间到结论边界</h2>
+          </div>
+          <div class="method-flow" aria-label="方法流程图">
+            <div class="flow-node"><strong>SEC 10-K</strong><span>发布时间与章节文本</span></div>
+            <div class="flow-arrow" aria-hidden="true">-></div>
+            <div class="flow-node"><strong>事件标签</strong><span>未来波动率与 CAR</span></div>
+            <div class="flow-arrow" aria-hidden="true">-></div>
+            <div class="flow-node"><strong>滚动样本外</strong><span>训练 / 验证 / 测试</span></div>
+            <div class="flow-arrow" aria-hidden="true">-></div>
+            <div class="flow-node"><strong>文本特征</strong><span>LM 词典 + TF-IDF/SVD</span></div>
+            <div class="flow-arrow" aria-hidden="true">-></div>
+            <div class="flow-node"><strong>审计报告</strong><span>覆盖率与边界披露</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section muted">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">控制机制</p>
+            <h2>研究审计控制</h2>
+          </div>
+          <div class="control-grid">
+            <div class="control-card">
+              <span class="control-marker"></span>
+              <h3>事件时间对齐</h3>
+              <p>先根据年报发布时间确定预测时间，再构造未来标签，避免未来价格窗口进入特征。</p>
+            </div>
+            <div class="control-card">
+              <span class="control-marker"></span>
+              <h3>滚动切分</h3>
+              <p>实验使用滚动训练、验证、测试窗口，并记录 forward-label overlap 的 purge 结果。</p>
+            </div>
+            <div class="control-card">
+              <span class="control-marker"></span>
+              <h3>训练窗口词表</h3>
+              <p>TF-IDF/SVD 词表只在每个训练窗口拟合，并通过 vocabulary manifest 与 hash 记录。</p>
+            </div>
+            <div class="control-card">
+              <span class="control-marker"></span>
+              <h3>验证窗口调参</h3>
+              <p>Ridge 与 XGBoost 超参数只用 validation Rank IC 选择，测试集指标不参与调参。</p>
+            </div>
+            <div class="control-card">
+              <span class="control-marker"></span>
+              <h3>预注册规则</h3>
+              <p>主预测和主组合规格与稳健性、探索性比较分开记录，避免事后挑结果。</p>
+            </div>
+            <div class="control-card">
+              <span class="control-marker"></span>
+              <h3>多重检验披露</h3>
+              <p>本次运行披露 568 个测试规格，并报告 Bonferroni、Holm 和 BH-FDR 校正。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container split-section">
+          <div>
+            <p class="eyebrow">审计图表</p>
+            <h2>覆盖率瀑布图</h2>
+            <p>
+              raw label coverage 会包含不属于配置样本外窗口的标签；真正衡量模型完整性的是
+              eligible OOS prediction coverage。
+            </p>
+          </div>
+          <div class="waterfall-card" aria-label="覆盖率瀑布图">
+            <div class="waterfall-row">
+              <span>原始标签</span>
+              <span class="waterfall-track"><span style="--bar-width: 49%"></span></span>
+              <strong>48.7%</strong>
+            </div>
+            <div class="waterfall-row">
+              <span>合格样本外</span>
+              <span class="waterfall-track"><span style="--bar-width: 100%"></span></span>
+              <strong>100%</strong>
+            </div>
+            <div class="waterfall-row">
+              <span>模型应预测</span>
+              <span class="waterfall-track"><span style="--bar-width: 100%"></span></span>
+              <strong>100%</strong>
+            </div>
+            <div class="waterfall-row">
+              <span>主规格覆盖</span>
+              <span class="waterfall-track"><span style="--bar-width: 100%"></span></span>
+              <strong>2 / 2</strong>
+            </div>
+            <div class="audit-summary">
+              <span>审计失败：<strong>0</strong></span>
+              <span>审计警告：<strong>2</strong></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section muted">
+        <div class="container split-section">
+          <div class="boundary-box">
+            <h2>预测结论边界</h2>
+            <p>
+              预注册主预测支持探索性的波动率预测证据：Ridge 预测
+              <code>realized_volatility_1_20</code> 的 Rank IC 为
+              <code>0.2606</code>，原始 p 值为 <code>0.00017</code>。
+            </p>
+          </div>
+          <div class="boundary-box">
+            <h2>交易结论边界</h2>
+            <p>
+              组合结果仅作为诊断。本公开结果包不证明正式可交易 alpha，
+              不构成投资建议，也不等同于 CRSP/WRDS 级别的资产定价证据。
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>方法说明对应当前 50家公司公开结果包。</p>
+        <nav class="footer-links" aria-label="页脚导航">
+          <a href="index.zh-CN.html">首页</a>
+          <a href="results.zh-CN.html">结果</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT 许可</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md">论文定位</a>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>

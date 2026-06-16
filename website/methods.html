@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Methods and Audit | Financial 10-K Text Agent</title>
+    <meta
+      name="description"
+      content="Methods and audit controls for the Financial 10-K Text Agent 50-company public result package."
+    >
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="index.html">Financial 10-K Text Agent</a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="index.html">Home</a>
+          <a href="results.html">Results</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <div class="language-switch" aria-label="Language switch">
+            <a class="switch-option is-active" href="methods.html" lang="en">English</a>
+            <a class="switch-option" href="methods.zh-CN.html" lang="zh-CN">Chinese</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="page-hero">
+        <div class="container narrow">
+          <span class="badge">Methods / Audit</span>
+          <h1>Leakage-Safe Research Design</h1>
+          <p class="hero-subtitle">
+            The 50-company public package is designed as an auditable empirical
+            finance workflow: filings are timestamped, features are fit only on
+            training windows, models are tuned only on validation windows, and
+            portfolio outputs are treated as diagnostics.
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Method pipeline</p>
+            <h2>From Filing Time to Claim Boundary</h2>
+          </div>
+          <div class="method-flow" aria-label="Method pipeline diagram">
+            <div class="flow-node"><strong>SEC 10-K</strong><span>filing time and sections</span></div>
+            <div class="flow-arrow" aria-hidden="true">-></div>
+            <div class="flow-node"><strong>Event labels</strong><span>future volatility and CAR</span></div>
+            <div class="flow-arrow" aria-hidden="true">-></div>
+            <div class="flow-node"><strong>Rolling OOS</strong><span>train / validation / test</span></div>
+            <div class="flow-arrow" aria-hidden="true">-></div>
+            <div class="flow-node"><strong>Text features</strong><span>LM tone + TF-IDF/SVD</span></div>
+            <div class="flow-arrow" aria-hidden="true">-></div>
+            <div class="flow-node"><strong>Audit reports</strong><span>coverage and boundaries</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section muted">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Controls</p>
+            <h2>Research Controls</h2>
+          </div>
+          <div class="control-grid">
+            <div class="control-card">
+              <span class="control-marker"></span>
+              <h3>Event-Time Alignment</h3>
+              <p>
+                Filing timestamps are mapped to prediction times before labels
+                are constructed, so future price windows cannot enter features.
+              </p>
+            </div>
+            <div class="control-card">
+              <span class="control-marker"></span>
+              <h3>Rolling Splits</h3>
+              <p>
+                Experiments use rolling train, validation, and test windows with
+                purge records for forward-label overlap checks.
+              </p>
+            </div>
+            <div class="control-card">
+              <span class="control-marker"></span>
+              <h3>Train-Window-Only TF-IDF</h3>
+              <p>
+                TF-IDF/SVD vocabularies are fit inside each training window and
+                tracked with vocabulary manifests and hashes.
+              </p>
+            </div>
+            <div class="control-card">
+              <span class="control-marker"></span>
+              <h3>Validation-Only Tuning</h3>
+              <p>
+                Ridge and XGBoost hyperparameters are selected on validation
+                Rank IC; test metrics are not used for tuning.
+              </p>
+            </div>
+            <div class="control-card">
+              <span class="control-marker"></span>
+              <h3>Preregistered Rules</h3>
+              <p>
+                Primary prediction and portfolio specifications are separated
+                from robustness and exploratory comparisons.
+              </p>
+            </div>
+            <div class="control-card">
+              <span class="control-marker"></span>
+              <h3>Multiple Testing Disclosure</h3>
+              <p>
+                The run reports 568 tested specifications with Bonferroni, Holm,
+                and Benjamini-Hochberg FDR adjustments.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container split-section">
+          <div>
+            <p class="eyebrow">Audit chart</p>
+            <h2>Coverage Waterfall</h2>
+            <p>
+              Raw label coverage includes labels outside the configured
+              out-of-sample windows. Eligible OOS prediction coverage is the
+              relevant model-completeness metric.
+            </p>
+          </div>
+          <div class="waterfall-card" aria-label="Coverage waterfall chart">
+            <div class="waterfall-row">
+              <span>Raw labels</span>
+              <span class="waterfall-track"><span style="--bar-width: 49%"></span></span>
+              <strong>48.7%</strong>
+            </div>
+            <div class="waterfall-row">
+              <span>Eligible OOS</span>
+              <span class="waterfall-track"><span style="--bar-width: 100%"></span></span>
+              <strong>100%</strong>
+            </div>
+            <div class="waterfall-row">
+              <span>Model expected</span>
+              <span class="waterfall-track"><span style="--bar-width: 100%"></span></span>
+              <strong>100%</strong>
+            </div>
+            <div class="waterfall-row">
+              <span>Primary specs</span>
+              <span class="waterfall-track"><span style="--bar-width: 100%"></span></span>
+              <strong>2 / 2</strong>
+            </div>
+            <div class="audit-summary">
+              <span>Audit failures: <strong>0</strong></span>
+              <span>Audit warnings: <strong>2</strong></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section muted">
+        <div class="container split-section">
+          <div class="boundary-box">
+            <h2>Prediction Boundary</h2>
+            <p>
+              The preregistered primary prediction supports exploratory
+              volatility-forecasting evidence: Ridge on
+              <code>realized_volatility_1_20</code> reaches Rank IC
+              <code>0.2606</code> with raw p-value <code>0.00017</code>.
+            </p>
+          </div>
+          <div class="boundary-box">
+            <h2>Trading Boundary</h2>
+            <p>
+              Portfolio results remain diagnostic. The current package does not
+              establish formal tradable alpha, investment advice, or
+              CRSP/WRDS-equivalent asset-pricing evidence.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>Methods summarize the current 50-company public package.</p>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="index.html">Home</a>
+          <a href="results.html">Results</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT License</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md">Working Paper</a>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>
