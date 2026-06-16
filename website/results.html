@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Results | Financial 10-K Text Agent</title>
+    <meta
+      name="description"
+      content="50-company public result package for the Financial 10-K Text Agent."
+    >
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="index.html">Financial 10-K Text Agent</a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="index.html">Home</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="page-hero">
+        <div class="container narrow">
+          <span class="badge">50-company public result package</span>
+          <h1>Results and Artifacts</h1>
+          <p class="hero-subtitle">
+            A compact public summary of the latest applied-grade SEC 10-K text
+            factor run: `50_company_public_fmp_alpha_2016_2025_v1`.
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Run summary</p>
+            <h2>50-Company Applied Pilot</h2>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                <tr><th>Run ID</th><td><code>50_company_public_fmp_alpha_2016_2025_v1</code></td></tr>
+                <tr><th>Universe</th><td>50 U.S. large-cap firms</td></tr>
+                <tr><th>Sample</th><td>FY2016-FY2025</td></tr>
+                <tr><th>SEC 10-K filings</th><td class="numeric">500</td></tr>
+                <tr><th>Labels</th><td class="numeric">1,500</td></tr>
+                <tr><th>OOS predictions</th><td class="numeric">4,716</td></tr>
+                <tr><th>Feature records</th><td class="numeric">520,465</td></tr>
+                <tr><th>Tested specifications</th><td class="numeric">568</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section muted">
+        <div class="container split-section">
+          <div class="finding-card">
+            <span class="card-label">Preregistered primary result</span>
+            <h2>Main Result</h2>
+            <p>
+              Ridge on `realized_volatility_1_20`, evaluated by ALL_SPLITS Rank IC.
+            </p>
+            <div class="result-grid">
+              <div>
+                <span class="result-label">Rank IC</span>
+                <strong class="result-number">0.2606</strong>
+              </div>
+              <div>
+                <span class="result-label">Raw p-value</span>
+                <strong class="result-number">0.00017</strong>
+              </div>
+            </div>
+          </div>
+          <div class="exploratory-card">
+            <span class="card-label">Exploratory comparison</span>
+            <h2>Best Observed Prediction</h2>
+            <p>
+              XGBoost on `realized_volatility_1_20` reported as model-comparison
+              evidence, not as the preregistered primary claim.
+            </p>
+            <table>
+              <tbody>
+                <tr><th>Rank IC</th><td class="numeric">0.3133</td></tr>
+                <tr><th>Newey-West t-stat</th><td class="numeric">6.8479</td></tr>
+                <tr><th>RMSE</th><td class="numeric">0.00834</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Audit</p>
+            <h2>Coverage and Controls</h2>
+          </div>
+          <div class="metric-grid compact">
+            <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">Eligible OOS coverage</div></div>
+            <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">Audit failures</div></div>
+            <div class="metric-card"><div class="metric-number">2</div><div class="metric-label">Audit warnings</div></div>
+            <div class="metric-card"><div class="metric-number">568</div><div class="metric-label">Tested specifications</div></div>
+          </div>
+          <p class="section-note">
+            The audit trail separates raw label coverage from eligible OOS
+            prediction coverage, discloses multiple testing, and records the
+            applied-grade data boundary.
+          </p>
+        </div>
+      </section>
+
+      <section class="section muted">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Artifacts</p>
+            <h2>Representative Evidence Files</h2>
+          </div>
+          <div class="artifact-grid">
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1"><span>Result Package</span><span>Latest public package</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/factor_card.md"><span>Factor Card</span><span>Fast result summary</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/empirical_report.md"><span>Empirical Report</span><span>Paper-style narrative</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/audit_report.json"><span>Audit Report</span><span>Formal gate and warnings</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/coverage_waterfall.json"><span>Coverage Waterfall</span><span>Raw vs eligible OOS coverage</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/multiple_testing_report.json"><span>Multiple Testing</span><span>Bonferroni, Holm, BH-FDR</span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container split-section">
+          <div class="boundary-box">
+            <h2>Data Boundary</h2>
+            <p>
+              SEC EDGAR provides official 10-K filings and filing timestamps.
+              Market data uses a mixed FMP/Yahoo public-source stack, and
+              market-cap-at-selection values are applied-grade estimates.
+            </p>
+            <p>
+              This is not a CRSP/WRDS-equivalent survivorship-free replication.
+            </p>
+          </div>
+          <div class="boundary-box">
+            <h2>Interpretation Policy</h2>
+            <p>
+              Use this package as evidence of an auditable financial NLP research
+              workflow and exploratory volatility-prediction evidence.
+            </p>
+            <p>
+              Portfolio outputs are diagnostic only; this package does not establish
+              formal tradable alpha or provide investment advice.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>Public result summaries are provided for research demonstration only.</p>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="index.html">Home</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md">Working Paper</a>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>

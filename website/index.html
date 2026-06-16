@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Financial 10-K Text Agent</title>
+    <meta
+      name="description"
+      content="An auditable financial NLP research pipeline for testing whether SEC 10-K disclosures contain out-of-sample predictive information."
+    >
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="index.html">Financial 10-K Text Agent</a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="results.html">Results</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <span class="badge">Applied financial NLP research</span>
+            <h1>Financial 10-K Text Agent</h1>
+            <p class="hero-subtitle">
+              An auditable financial NLP research pipeline for testing whether SEC
+              10-K disclosures contain out-of-sample predictive information about
+              future volatility and abnormal-return targets.
+            </p>
+            <p class="hero-support">
+              This project sits at the intersection of financial NLP, empirical
+              asset pricing, rolling out-of-sample validation, and research audit.
+              It is not a RAG demo, generic sentiment classifier, or AI trading bot.
+            </p>
+            <div class="button-row" aria-label="Project links">
+              <a class="btn btn-primary" href="https://github.com/uiclxh/financial-10k-text-agent">View GitHub</a>
+              <a
+                class="btn btn-secondary"
+                href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1"
+              >Read Result Package</a>
+              <a
+                class="btn btn-secondary"
+                href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md"
+              >Read Project Summary</a>
+            </div>
+          </div>
+
+          <aside class="hero-panel" aria-label="Current run summary">
+            <p class="eyebrow">Current public package</p>
+            <p class="run-id">50_company_public_fmp_alpha_2016_2025_v1</p>
+            <div class="mini-chart" aria-label="Result scale preview">
+              <div class="mini-row">
+                <span>Filings</span>
+                <span class="bar" style="--bar-width: 100%"></span>
+                <strong>500</strong>
+              </div>
+              <div class="mini-row">
+                <span>Labels</span>
+                <span class="bar" style="--bar-width: 92%"></span>
+                <strong>1,500</strong>
+              </div>
+              <div class="mini-row">
+                <span>OOS predictions</span>
+                <span class="bar" style="--bar-width: 86%"></span>
+                <strong>4,716</strong>
+              </div>
+              <div class="mini-row">
+                <span>Specs</span>
+                <span class="bar" style="--bar-width: 70%"></span>
+                <strong>568</strong>
+              </div>
+            </div>
+            <div class="status-strip">
+              <span>100% eligible OOS coverage</span>
+              <span>0 audit failures</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Scale</p>
+            <h2>Current Release Metrics</h2>
+          </div>
+          <div class="metric-grid">
+            <div class="metric-card"><div class="metric-number">50</div><div class="metric-label">Companies</div></div>
+            <div class="metric-card"><div class="metric-number">500</div><div class="metric-label">SEC 10-K filings</div></div>
+            <div class="metric-card"><div class="metric-number">FY2016-FY2025</div><div class="metric-label">Sample period</div></div>
+            <div class="metric-card"><div class="metric-number">1,500</div><div class="metric-label">Labels</div></div>
+            <div class="metric-card"><div class="metric-number">4,716</div><div class="metric-label">OOS predictions</div></div>
+            <div class="metric-card"><div class="metric-number">520k+</div><div class="metric-label">Feature records</div></div>
+            <div class="metric-card"><div class="metric-number">568</div><div class="metric-label">Tested specifications</div></div>
+            <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">Eligible OOS coverage</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section muted">
+        <div class="container finding-layout">
+          <div class="section-header">
+            <p class="eyebrow">Main finding</p>
+            <h2>Preregistered Primary Prediction</h2>
+            <p>
+              The preregistered primary prediction specification uses Ridge on
+              future 20-day realized volatility and evaluates ALL_SPLITS Rank IC.
+            </p>
+          </div>
+          <div class="finding-card">
+            <span class="card-label">Ridge -> realized_volatility_1_20</span>
+            <div class="result-grid">
+              <div>
+                <span class="result-label">Rank IC</span>
+                <strong class="result-number">0.2606</strong>
+              </div>
+              <div>
+                <span class="result-label">Raw p-value</span>
+                <strong class="result-number">0.00017</strong>
+              </div>
+            </div>
+            <p>
+              This supports exploratory out-of-sample evidence that 10-K text
+              features contain ranking information about future 20-day realized
+              volatility. The claim is prediction evidence, not tradable alpha.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container split-section">
+          <div>
+            <p class="eyebrow">Model comparison</p>
+            <h2>Best Observed Exploratory Prediction</h2>
+            <p>
+              The strongest observed model-comparison result is reported separately
+              from the preregistered primary claim.
+            </p>
+          </div>
+          <div class="exploratory-card">
+            <span class="card-label">Exploratory model-comparison result</span>
+            <table>
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Target</th>
+                  <th>Rank IC</th>
+                  <th>NW t-stat</th>
+                  <th>RMSE</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>XGBoost</td>
+                  <td><code>realized_volatility_1_20</code></td>
+                  <td class="numeric">0.3133</td>
+                  <td class="numeric">6.8479</td>
+                  <td class="numeric">0.00834</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="small-note">
+              This is exploratory model-comparison evidence, not the preregistered primary claim.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section muted">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Pipeline</p>
+            <h2>From SEC Filing to Audited Result</h2>
+          </div>
+          <div class="pipeline" aria-label="Research pipeline">
+            <div class="pipeline-step"><span class="step-index">1</span><strong>SEC Filings</strong><p>Official 10-K filings and timestamps.</p></div>
+            <div class="pipeline-step"><span class="step-index">2</span><strong>Parsing</strong><p>Business, Risk Factors, Legal Proceedings, MD&A.</p></div>
+            <div class="pipeline-step"><span class="step-index">3</span><strong>Labels</strong><p>Future volatility and abnormal-return targets.</p></div>
+            <div class="pipeline-step"><span class="step-index">4</span><strong>Splits</strong><p>Rolling train / validation / test windows.</p></div>
+            <div class="pipeline-step"><span class="step-index">5</span><strong>Features</strong><p>LM tone plus train-window-only TF-IDF/SVD.</p></div>
+            <div class="pipeline-step"><span class="step-index">6</span><strong>Models</strong><p>Baselines, Ridge, and XGBoost.</p></div>
+            <div class="pipeline-step"><span class="step-index">7</span><strong>Diagnostics</strong><p>Rank IC, Newey-West, and portfolio diagnostics.</p></div>
+            <div class="pipeline-step"><span class="step-index">8</span><strong>Audit</strong><p>Coverage, manifests, registry, checksums.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Research controls</p>
+            <h2>Audit-Backed Workflow</h2>
+          </div>
+          <div class="control-grid">
+            <div class="control-card"><span class="control-marker"></span><h3>Leakage Control</h3><p>Rolling splits, filing-time alignment, label-window checks, and train-window-only vocabularies reduce look-ahead bias.</p></div>
+            <div class="control-card"><span class="control-marker"></span><h3>Model Comparison</h3><p>Historical mean, industry mean, Ridge, and XGBoost are compared under rolling out-of-sample evaluation.</p></div>
+            <div class="control-card"><span class="control-marker"></span><h3>Multiple Testing</h3><p>568 tested specifications are disclosed with Bonferroni, Holm, and Benjamini-Hochberg FDR adjustments.</p></div>
+            <div class="control-card"><span class="control-marker"></span><h3>Audit Trail</h3><p>The package includes audit reports, coverage waterfalls, manifests, vocabulary hashes, prediction-scale checks, and checksums.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section muted">
+        <div class="container split-section">
+          <div>
+            <p class="eyebrow">Artifacts</p>
+            <h2>Inspect the Evidence</h2>
+            <p>
+              The homepage links to compact public artifacts. Raw filings, API
+              responses, full price panels, and private intermediate datasets are
+              intentionally not committed.
+            </p>
+          </div>
+          <div class="artifact-list">
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent"><span>GitHub Repository</span><span>Source code and docs</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1"><span>50-Company Result Package</span><span>Compact public artifacts</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/factor_card.md"><span>Factor Card</span><span>Fast result summary</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/empirical_report.md"><span>Empirical Report</span><span>Paper-style narrative</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md"><span>Working Paper Positioning</span><span>Research framing</span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="boundary-box">
+            <h2>Usage Boundary</h2>
+            <p>
+              This is an applied-grade exploratory research run. It does not claim
+              formal CRSP/WRDS-equivalent asset-pricing evidence, a survivorship-free
+              research-grade universe, a production trading system, proven tradable
+              alpha, or investment advice.
+            </p>
+            <p>
+              Portfolio outputs are diagnostic only. The preregistered primary
+              portfolio specification did not establish formal tradable alpha.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">Contribution</p>
+            <h2>My Contributions</h2>
+          </div>
+          <div class="contribution-grid">
+            <div class="contribution-card"><strong>Research Design</strong><p>Defined the empirical question, primary target, and preregistered result structure.</p></div>
+            <div class="contribution-card"><strong>Data Engineering</strong><p>Built document, price, label, and split artifacts across a 50-firm 10-K panel.</p></div>
+            <div class="contribution-card"><strong>NLP Features</strong><p>Implemented dictionary tone and train-window-only TF-IDF/SVD features.</p></div>
+            <div class="contribution-card"><strong>Modeling</strong><p>Compared baselines, Ridge, and XGBoost under rolling OOS evaluation.</p></div>
+            <div class="contribution-card"><strong>Research Audit</strong><p>Added coverage, leakage, multiple-testing, and artifact-integrity reports.</p></div>
+            <div class="contribution-card"><strong>Interpretation</strong><p>Reported volatility-prediction evidence while treating portfolio results as diagnostics.</p></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>Public result summaries are provided for research demonstration only.</p>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <a href="results.html">Results</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md">Working Paper</a>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>
