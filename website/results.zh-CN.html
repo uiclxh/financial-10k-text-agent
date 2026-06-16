@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>结果 | Financial 10-K Text Agent</title>
+    <meta
+      name="description"
+      content="Financial 10-K Text Agent 的 50 家公司公开结果包。"
+    >
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="index.zh-CN.html">Financial 10-K Text Agent</a>
+        <nav class="nav-links" aria-label="主导航">
+          <a href="index.zh-CN.html">首页</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <a class="language-link" href="results.html" lang="en">EN</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="page-hero">
+        <div class="container narrow">
+          <span class="badge">50家公司公开结果包</span>
+          <h1>结果与证据文件</h1>
+          <p class="hero-subtitle">
+            这是最新应用级 SEC 10-K 文本因子运行的精简公开摘要：<code>50_company_public_fmp_alpha_2016_2025_v1</code>。
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">运行摘要</p>
+            <h2>50家公司应用级试验</h2>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                <tr><th>Run ID</th><td><code>50_company_public_fmp_alpha_2016_2025_v1</code></td></tr>
+                <tr><th>股票池</th><td>50 家美国大盘公司</td></tr>
+                <tr><th>样本区间</th><td>FY2016-FY2025</td></tr>
+                <tr><th>SEC 10-K 年报</th><td class="numeric">500</td></tr>
+                <tr><th>标签</th><td class="numeric">1,500</td></tr>
+                <tr><th>样本外预测</th><td class="numeric">4,716</td></tr>
+                <tr><th>特征记录</th><td class="numeric">520,465</td></tr>
+                <tr><th>测试规格</th><td class="numeric">568</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section muted">
+        <div class="container split-section">
+          <div class="finding-card">
+            <span class="card-label">预注册主结果</span>
+            <h2>主结果</h2>
+            <p>
+              Ridge 预测 <code>realized_volatility_1_20</code>，并使用 ALL_SPLITS Rank IC 评价。
+            </p>
+            <div class="result-grid">
+              <div>
+                <span class="result-label">Rank IC</span>
+                <strong class="result-number">0.2606</strong>
+              </div>
+              <div>
+                <span class="result-label">原始 p 值</span>
+                <strong class="result-number">0.00017</strong>
+              </div>
+            </div>
+          </div>
+          <div class="exploratory-card">
+            <span class="card-label">探索性比较</span>
+            <h2>最佳观察到的预测结果</h2>
+            <p>
+              XGBoost 对 <code>realized_volatility_1_20</code> 的结果作为模型比较证据报告，不作为预注册主结论。
+            </p>
+            <table>
+              <tbody>
+                <tr><th>Rank IC</th><td class="numeric">0.3133</td></tr>
+                <tr><th>Newey-West t 统计量</th><td class="numeric">6.8479</td></tr>
+                <tr><th>RMSE</th><td class="numeric">0.00834</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">审计</p>
+            <h2>覆盖率与控制</h2>
+          </div>
+          <div class="metric-grid compact">
+            <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">合格样本外覆盖率</div></div>
+            <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">审计失败</div></div>
+            <div class="metric-card"><div class="metric-number">2</div><div class="metric-label">审计警告</div></div>
+            <div class="metric-card"><div class="metric-number">568</div><div class="metric-label">测试规格</div></div>
+          </div>
+          <p class="section-note">
+            审计轨迹区分 raw label coverage 与 eligible OOS prediction coverage，披露多重检验，并记录应用级数据边界。
+          </p>
+        </div>
+      </section>
+
+      <section class="section muted">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">证据文件</p>
+            <h2>代表性公开 artifact</h2>
+          </div>
+          <div class="artifact-grid">
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1"><span>结果包</span><span>最新公开结果包</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/factor_card.md"><span>因子卡片</span><span>快速结果摘要</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/empirical_report.md"><span>实证报告</span><span>论文式叙述</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/audit_report.json"><span>审计报告</span><span>正式门槛和警告</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/coverage_waterfall.json"><span>覆盖率瀑布图</span><span>raw 与 eligible OOS 覆盖率</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/multiple_testing_report.json"><span>多重检验</span><span>Bonferroni、Holm、BH-FDR</span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container split-section">
+          <div class="boundary-box">
+            <h2>数据边界</h2>
+            <p>
+              SEC EDGAR 提供官方 10-K 文件和提交时间戳。市场数据使用 FMP/Yahoo 混合公开数据源，selection 时点市值为应用级估计。
+            </p>
+            <p>
+              这不是等同 CRSP/WRDS 的无幸存者偏差研究级复现。
+            </p>
+          </div>
+          <div class="boundary-box">
+            <h2>解释规则</h2>
+            <p>
+              该结果包可作为可审计金融 NLP 研究工作流和探索性波动率预测证据。
+            </p>
+            <p>
+              组合输出仅作为诊断；该结果包不建立正式可交易 alpha，也不提供投资建议。
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>公开结果摘要仅用于研究展示。</p>
+        <nav class="footer-links" aria-label="页脚导航">
+          <a href="index.zh-CN.html">首页</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md">Working Paper</a>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -193,6 +193,14 @@ tr:last-child td {
   color: var(--accent);
 }
 
+.language-link {
+  padding: 4px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--primary);
+}
+
 .hero,
 .page-hero {
   border-bottom: 1px solid var(--border);
@@ -272,6 +280,16 @@ tr:last-child td {
   border: 1px solid var(--primary);
   background: var(--primary);
   color: #ffffff;
+}
+
+.btn-result {
+  min-height: 56px;
+  padding: 14px 24px;
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  box-shadow: 0 12px 30px rgba(15, 42, 67, 0.18);
+  color: #ffffff;
+  font-size: 17px;
 }
 
 .btn-secondary {
