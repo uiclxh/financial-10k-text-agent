@@ -18,6 +18,8 @@
         <nav class="nav-links" aria-label="主导航">
           <a href="index.zh-CN.html">首页</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <a href="#reproducibility">本地运行</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT 许可</a>
           <div class="language-switch" aria-label="语言切换">
             <a class="switch-option" href="results.html" lang="en">English</a>
             <a class="switch-option is-active" href="results.zh-CN.html" lang="zh-CN">Chinese</a>
@@ -153,6 +155,30 @@
           </div>
         </div>
       </section>
+
+      <section class="section muted" id="reproducibility">
+        <div class="container split-section">
+          <div>
+            <p class="eyebrow">可复现性</p>
+            <h2>在本地运行公开代码</h2>
+            <p>
+              公开仓库可以在不使用私有数据的情况下完成 clone、安装、lint 和测试。完整真实数据运行需要 API key 和本地私有数据目录。
+            </p>
+          </div>
+          <div class="code-card">
+            <pre><code>git clone https://github.com/uiclxh/financial-10k-text-agent.git
+cd financial-10k-text-agent
+python -m pip install -e ".[dev]"
+python -m ruff check .
+python -m pytest</code></pre>
+            <p class="small-note">
+              项目代码以
+              <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT License</a>
+              开源。
+            </p>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer">
@@ -161,6 +187,8 @@
         <nav class="footer-links" aria-label="页脚导航">
           <a href="index.zh-CN.html">首页</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <a href="#reproducibility">????</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT ??</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md">Working Paper</a>
         </nav>
       </div>

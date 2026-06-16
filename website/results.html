@@ -161,6 +161,31 @@
           </div>
         </div>
       </section>
+
+      <section class="section muted" id="reproducibility">
+        <div class="container split-section">
+          <div>
+            <p class="eyebrow">Reproducibility</p>
+            <h2>Run the Public Code Locally</h2>
+            <p>
+              The public repository can be cloned, installed, linted, and tested
+              without private data. Full real-data runs require API keys and local
+              private data directories.
+            </p>
+          </div>
+          <div class="code-card">
+            <pre><code>git clone https://github.com/uiclxh/financial-10k-text-agent.git
+cd financial-10k-text-agent
+python -m pip install -e ".[dev]"
+python -m ruff check .
+python -m pytest</code></pre>
+            <p class="small-note">
+              Open-source code is released under the
+              <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT License</a>.
+            </p>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer">
@@ -169,6 +194,8 @@
         <nav class="footer-links" aria-label="Footer navigation">
           <a href="index.html">Home</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <a href="#reproducibility">Run Locally</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT License</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md">Working Paper</a>
         </nav>
       </div>
