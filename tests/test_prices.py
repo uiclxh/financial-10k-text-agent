@@ -31,7 +31,7 @@ def test_load_price_panel_csv_calculates_simple_and_log_returns() -> None:
 def test_price_panel_rejects_duplicate_ticker_dates() -> None:
     panel = load_price_panel_csv("tests/fixtures/prices_aapl_spy.csv")
     duplicate = panel.frame.loc[:, ["date", "ticker", "adj_close"]]
-    duplicate = duplicate._append(duplicate.iloc[0], ignore_index=True)
+    duplicate = pd.concat([duplicate, duplicate.iloc[[0]]], ignore_index=True)
 
     with pytest.raises(PriceDataError, match="duplicate"):
         build_price_panel(duplicate)
