@@ -288,6 +288,67 @@ tr:last-child td {
   margin-top: 28px;
 }
 
+.action-rail {
+  display: grid;
+  gap: 8px;
+  max-width: 640px;
+  margin-top: 30px;
+  border-left: 4px solid var(--accent);
+  border-radius: 0 16px 16px 0;
+  background: rgba(255, 255, 255, 0.74);
+  padding: 10px 0 10px 14px;
+}
+
+.action-rail-title {
+  margin-bottom: 2px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.action-link {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 12px 14px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.action-link:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.07);
+  transform: translateY(-1px);
+}
+
+.action-link span {
+  color: var(--text-main);
+  font-weight: 800;
+}
+
+.action-link small {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.action-link.is-primary {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.action-link.is-primary span,
+.action-link.is-primary small {
+  color: #ffffff;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -807,6 +868,16 @@ tr:last-child td {
   .mini-row {
     grid-template-columns: 1fr;
     gap: 6px;
+  }
+
+  .action-rail {
+    border-left-width: 3px;
+    padding-left: 12px;
+  }
+
+  .action-link {
+    grid-template-columns: 1fr;
+    gap: 3px;
   }
 
   .waterfall-row {
