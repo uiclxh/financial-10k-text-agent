@@ -1,118 +1,95 @@
 # Financial 10-K Text Agent
 
-An auditable research pipeline that turns SEC 10-K filings into text factors,
-out-of-sample forecasts, portfolio diagnostics, and empirical-finance reports.
+An auditable financial NLP research pipeline for testing whether SEC 10-K text
+features contain out-of-sample predictive information about future volatility
+and abnormal-return targets.
 
-The project is **not** a financial RAG demo and does **not** claim a proven
-trading alpha. Its strongest contribution is a leakage-aware, reproducible
-agentic workflow for testing whether financial text contains forecasting
-information.
+This project is not a RAG demo, a generic FinBERT sentiment classifier, or an
+AI trading bot. It is positioned at the intersection of financial NLP,
+empirical asset pricing, rolling out-of-sample validation, and research audit.
 
-## Latest Public Result
+## Current Release
 
-Current release: **v0.16.0 - 10-Company FMP/Alpha Applied Pilot**.
+Latest public result package:
 
-The latest committed result package is:
+[`public_results/50_company_public_fmp_alpha_2016_2025_v1`](public_results/50_company_public_fmp_alpha_2016_2025_v1/)
 
-[docs/results/10_company_public_fmp_alpha_2016_2025_v1](docs/results/10_company_public_fmp_alpha_2016_2025_v1/README.md)
-
-It is a fixed 10-company U.S. 10-K pilot using:
-
-- SEC EDGAR annual filings and filing timestamps.
-- FMP adjusted prices, with Yahoo fallback only for selected gaps.
-- Loughran-McDonald dictionary tone features.
-- Train-window-only TF-IDF/SVD text representations.
-- Rolling out-of-sample splits, audit gates, and multiple-testing disclosure.
-
-Headline run status:
-
-| Item | Value |
-| --- | ---: |
-| 10-K filings | 100 |
-| Labels | 300 |
-| OOS predictions | 896 |
+| Field | Value |
+| --- | --- |
+| Run ID | `50_company_public_fmp_alpha_2016_2025_v1` |
+| Universe | 50 U.S. large-cap firms |
+| Sample | FY2016-FY2025 |
+| SEC 10-K filings | 500 |
+| Labels | 1,500 |
+| OOS predictions | 4,716 |
+| Feature records | 520k+ |
+| Tested specifications | 568 |
 | Eligible OOS coverage | 100% |
 | Audit failures | 0 |
 | Audit warnings | 2 |
-| Tested specifications | 472 |
-| Primary portfolio result | Diagnostic only |
+| Result status | exploratory applied-grade run |
 
-Best observed prediction metric in the public artifact:
+## Main Finding
 
-| Target | Best model | ALL_SPLITS Rank IC | NW t-stat |
-| --- | --- | ---: | ---: |
-| `CAR_1_5` | XGBoost | 0.3212 | 4.1481 |
-| `realized_volatility_1_20` | industry mean | 0.2545 | 4.1049 |
+The preregistered primary prediction specification uses Ridge on
+`realized_volatility_1_20` and evaluates ALL_SPLITS Rank IC.
 
-Preregistered primary rules are deliberately stricter:
+| Model | Target | Metric | Value | Raw p-value |
+| --- | --- | ---: | ---: | ---: |
+| Ridge | `realized_volatility_1_20` | Rank IC | 0.2606 | 0.00017 |
 
-- Primary prediction: Ridge on `realized_volatility_1_20`, ALL_SPLITS Rank IC
-  `-0.2788`, raw p-value `0.0815`.
-- Primary portfolio: monthly sector-neutral equal-weight volatility portfolio,
-  Sharpe `-0.3028`, raw p-value `0.6263`.
+This provides exploratory out-of-sample evidence that 10-K text features contain
+ranking information about future 20-day realized volatility. The claim is
+deliberately framed as prediction evidence, not as a tradable-alpha claim.
 
-Interpretation: the public pilot validates the pipeline and shows exploratory
-forecasting evidence, but it does **not** establish formal tradable alpha.
+## Best Observed Exploratory Prediction
+
+The strongest observed model-comparison result is:
+
+| Model | Target | Rank IC | Newey-West t-stat | RMSE |
+| --- | --- | ---: | ---: | ---: |
+| XGBoost | `realized_volatility_1_20` | 0.3133 | 6.8479 | 0.00834 |
+
+This is reported as exploratory model-comparison evidence rather than the
+preregistered primary claim.
 
 ## Pipeline
 
 ```text
 SEC 10-K filings
-  -> document manifest and event-time alignment
-  -> 10-K section parsing
-  -> labels: realized volatility and CAR windows
-  -> rolling train / validation / test splits
-  -> dictionary tone, TF-IDF/SVD, metadata features
-  -> historical mean, industry mean, Ridge, XGBoost
-  -> OOS IC metrics and portfolio diagnostics
-  -> audit report, multiple-testing report, empirical report
+-> section parsing
+-> event-time label construction
+-> rolling train / validation / test splits
+-> dictionary tone + train-window-only TF-IDF/SVD features
+-> historical mean / industry mean / Ridge / XGBoost
+-> OOS Rank IC, Newey-West diagnostics, portfolio diagnostics
+-> audit and multiple-testing reports
 ```
 
-## What Is Included
+Core artifacts include document manifests, parsed section indexes, labels,
+split assignments, feature manifests, model manifests, predictions, evaluation
+metrics, portfolio diagnostics, multiple-testing reports, audit reports, and
+empirical result summaries.
 
-- Config-driven local orchestrator.
-- Pydantic-style artifact schemas and audit gates.
-- SEC 10-K parser for Business, Risk Factors, Legal Proceedings, and MD&A.
-- Event-date handling with trading-calendar aware metadata.
-- Leakage controls for available time, label windows, splits, and TF-IDF fitting.
-- Model comparison across baselines, Ridge, and optional XGBoost.
-- Event-based and monthly portfolio diagnostics.
-- Multiple-testing registry with primary, robustness, and exploratory specs.
-- Compact public result artifacts under `docs/results/`.
-- Configured 30-company and 50-company S&P 500 sector-seed expansions for the
-  next applied runs.
+## Usage Boundary
 
-## What Is Not Claimed
+This release is an applied-grade exploratory research run. It does not claim:
 
-- No CRSP/WRDS survivorship-free universe in the public pilot.
-- No formal delisting-return research claim.
-- No production trading system.
-- No investment advice.
-- Portfolio outputs are diagnostics, not deployable strategy evidence.
+- Formal CRSP/WRDS-equivalent asset-pricing evidence
+- A survivorship-free research-grade universe
+- A production trading system
+- Proven tradable alpha
+- Investment advice
 
-## Quick Start
+Portfolio outputs are diagnostic only. The preregistered primary portfolio
+specification did not establish formal tradable alpha.
 
-```bash
-python -m pip install -e ".[dev]"
-python -m text_factor_lab run --config configs/text_factor_lab/e2e_smoke.yaml --execute
-python -m pytest -q
-```
+The main formal-result blockers are data-boundary issues, not pipeline failures:
 
-Useful entry points:
-
-```bash
-python -m text_factor_lab run --help
-python -m text_factor_lab audit --help
-python -m text_factor_lab report --help
-```
-
-## Documentation
-
-- [Global workflow rules](FINANCIAL_TEXT_FACTOR_LAB_GLOBAL_WORKFLOW.md)
-- [Architecture and roadmap](docs/system_architecture_and_roadmap.md)
-- [10-company data stack](docs/data_sources_10_company_fmp_alpha.md)
-- [Working paper positioning](docs/working_paper_positioning.md)
-- [Public result artifacts](docs/results/README.md)
+- Market data uses a mixed FMP/Yahoo public-source stack
+- Market-cap-at-selection values are applied-grade estimates
+- The universe is a fixed active-company panel, not CRSP/WRDS survivorship-free
+- Audit warnings are boundary disclosures, not failed pipeline checks
 
 ## License
 
