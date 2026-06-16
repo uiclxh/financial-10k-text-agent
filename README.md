@@ -29,6 +29,41 @@ Latest public result package:
 | Audit warnings | 2 |
 | Result status | exploratory applied-grade run |
 
+## Reproduce Locally
+
+The repository includes a public smoke-test pipeline that can be run without
+private API keys or licensed datasets.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -U pip
+python -m pip install -e ".[dev,ml]"
+python -m pytest -q
+python -m ruff check .
+python -m text_factor_lab run --config configs/text_factor_lab/e2e_smoke.yaml --execute
+```
+
+The smoke run writes artifacts to:
+
+```text
+runs/text_factor_lab/tflab_e2e_smoke_001/
+```
+
+To rerun the 50-company applied-data experiment, provide market-data API keys
+and the required private data cache, then run:
+
+```powershell
+$env:FMP_API_KEY="..."
+$env:ALPHAVANTAGE_API_KEY="..."
+$env:SEC_USER_AGENT="financial-10k-text-agent contact:your_email@example.com"
+python -m text_factor_lab run --config configs/text_factor_lab/50_company_public_fmp_alpha.yaml --execute
+```
+
+The committed 50-company public result package is a compact artifact summary;
+raw SEC filings, API responses, full price panels, and private intermediate
+datasets are intentionally not committed.
+
 ## Main Finding
 
 The preregistered primary prediction specification uses Ridge on

@@ -1,8 +1,8 @@
 # Financial 10-K Text Agent
 
-一个可审计的金融 NLP 研究流水线，用于检验 SEC 10-K 文本特征是否包含对未来波动率和异常收益目标的样本外预测信息。
+一个可审计的金融 NLP 研究流水线，用来检验 SEC 10-K 文本特征是否包含对未来波动率和异常收益目标的样本外预测信息。
 
-这个项目不是 RAG demo、普通 FinBERT 情绪分类器，也不是 AI 炒股机器人。它的定位是：金融 NLP、实证资产定价、rolling 样本外验证和研究审计的交叉项目。
+这个项目不是 RAG demo、通用 FinBERT 情绪分类器，也不是 AI 炒股机器人。它的定位是：金融 NLP、实证资产定价、rolling 样本外验证和研究审计的交叉项目。
 
 ## 当前版本
 
@@ -24,6 +24,37 @@
 | Audit failures | 0 |
 | Audit warnings | 2 |
 | 结果状态 | exploratory applied-grade run |
+
+## 本地复现
+
+仓库包含一个不需要私有 API key 或授权数据集的公开 smoke-test pipeline。
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -U pip
+python -m pip install -e ".[dev,ml]"
+python -m pytest -q
+python -m ruff check .
+python -m text_factor_lab run --config configs/text_factor_lab/e2e_smoke.yaml --execute
+```
+
+smoke run 会把 artifacts 写入：
+
+```text
+runs/text_factor_lab/tflab_e2e_smoke_001/
+```
+
+如果要重跑 50-company applied-data experiment，需要先提供市场数据 API key 和必要的私有数据缓存：
+
+```powershell
+$env:FMP_API_KEY="..."
+$env:ALPHAVANTAGE_API_KEY="..."
+$env:SEC_USER_AGENT="financial-10k-text-agent contact:your_email@example.com"
+python -m text_factor_lab run --config configs/text_factor_lab/50_company_public_fmp_alpha.yaml --execute
+```
+
+仓库中提交的 50-company 结果包是 compact artifact summary；raw SEC filings、API responses、完整价格面板和私有中间数据不会提交到仓库。
 
 ## 主要发现
 
