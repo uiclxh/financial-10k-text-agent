@@ -33,6 +33,11 @@
             <p class="hero-subtitle">
               基于 SEC 10-K 披露文本，构建可审计的金融 NLP 流水线，用于样本外未来波动率预测。
             </p>
+            <div class="hero-cta" aria-label="主要项目入口">
+              <a class="btn btn-primary" href="results.zh-CN.html">查看结果</a>
+              <a class="btn btn-secondary" href="methods.zh-CN.html">阅读方法</a>
+              <a class="btn btn-secondary" href="https://github.com/uiclxh/financial-10k-text-agent">打开 GitHub</a>
+            </div>
             <div class="hero-proof-grid" aria-label="核心证据">
               <div class="proof-card">
                 <strong>500</strong>
@@ -97,75 +102,25 @@
             <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">审计失败</div></div>
           </div>
           <div class="project-link-strip" aria-label="项目导航">
-            <a href="results.zh-CN.html">结果页</a>
-            <a href="methods.zh-CN.html">方法 / 审计</a>
-            <a href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1">结果包</a>
-            <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+            <a href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1">下载结果包</a>
+            <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md">Working Paper</a>
+            <a href="results.zh-CN.html#reproducibility">本地运行</a>
           </div>
         </div>
       </section>
 
       <section class="section muted">
-        <div class="container finding-layout">
-          <div class="section-header">
-            <p class="eyebrow">主发现</p>
-            <h2>预注册主预测结果</h2>
-            <p>
-              预注册主预测规格使用 Ridge 预测未来 20 个交易日实现波动率，并以 ALL_SPLITS Rank IC 作为评价指标。
-            </p>
-          </div>
-          <div class="finding-card">
-            <span class="card-label">Ridge -> realized_volatility_1_20</span>
-            <div class="result-grid">
-              <div>
-                <span class="result-label">Rank IC</span>
-                <strong class="result-number">0.2606</strong>
-              </div>
-              <div>
-                <span class="result-label">原始 p 值</span>
-                <strong class="result-number">0.00017</strong>
-              </div>
+        <div class="container">
+          <div class="thirty-card">
+            <div>
+              <p class="eyebrow">30 秒读懂</p>
+              <h2>这个项目证明了什么</h2>
             </div>
             <p>
-              这支持一种探索性样本外证据：10-K 文本特征包含关于未来 20 日实现波动率排序的信息。该结论是预测证据，不是可交易 alpha 结论。
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">模型比较</p>
-            <h2>最佳观察到的探索性预测结果</h2>
-            <p>
-              最强的模型比较结果与预注册主结论分开报告，避免事后挑选结果。
-            </p>
-          </div>
-          <div class="exploratory-card">
-            <span class="card-label">探索性模型比较结果</span>
-            <table>
-              <thead>
-                <tr>
-                  <th>模型</th>
-                  <th>目标</th>
-                  <th>Rank IC</th>
-                  <th>NW t 统计量</th>
-                  <th>RMSE</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>XGBoost</td>
-                  <td><code>realized_volatility_1_20</code></td>
-                  <td class="numeric">0.3133</td>
-                  <td class="numeric">6.8479</td>
-                  <td class="numeric">0.00834</td>
-                </tr>
-              </tbody>
-            </table>
-            <p class="small-note">
-              这是探索性模型比较证据，不是预注册主结论。
+              本项目在 500 份 SEC 10-K 年报上构建防泄漏的金融 NLP 流水线，
+              检验披露文本是否能预测未来 realized volatility。预注册 Ridge
+              模型达到 <code>0.2606</code> 的 Rank IC，结论限定为预测证据，
+              不是可交易 alpha。
             </p>
           </div>
         </div>
@@ -177,66 +132,20 @@
             <p class="eyebrow">流水线</p>
             <h2>从 SEC 年报到审计结果</h2>
           </div>
-          <div class="pipeline" aria-label="研究流水线">
-            <div class="pipeline-step"><span class="step-index">1</span><strong>SEC 年报</strong><p>官方 10-K 文件和提交时间戳。</p></div>
-            <div class="pipeline-step"><span class="step-index">2</span><strong>文本解析</strong><p>Business、Risk Factors、Legal Proceedings、MD&A。</p></div>
-            <div class="pipeline-step"><span class="step-index">3</span><strong>标签构建</strong><p>未来波动率和异常收益目标。</p></div>
-            <div class="pipeline-step"><span class="step-index">4</span><strong>样本切分</strong><p>滚动训练 / 验证 / 测试窗口。</p></div>
-            <div class="pipeline-step"><span class="step-index">5</span><strong>文本特征</strong><p>LM 词典语调和训练窗口内拟合的 TF-IDF/SVD。</p></div>
-            <div class="pipeline-step"><span class="step-index">6</span><strong>模型</strong><p>基准模型、Ridge 和 XGBoost。</p></div>
-            <div class="pipeline-step"><span class="step-index">7</span><strong>诊断</strong><p>Rank IC、Newey-West 和组合诊断。</p></div>
-            <div class="pipeline-step"><span class="step-index">8</span><strong>审计</strong><p>覆盖率、manifest、规格注册表和校验和。</p></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">研究控制</p>
-            <h2>带审计轨迹的研究工作流</h2>
-          </div>
-          <div class="control-grid">
-            <div class="control-card"><span class="control-marker"></span><h3>防泄漏控制</h3><p>滚动切分、提交时间对齐、标签窗口检查和训练窗口内词表拟合，用于降低前视偏差。</p></div>
-            <div class="control-card"><span class="control-marker"></span><h3>模型横向比较</h3><p>历史均值、行业均值、Ridge 和 XGBoost 在滚动样本外评价下进行比较。</p></div>
-            <div class="control-card"><span class="control-marker"></span><h3>多重检验</h3><p>披露 568 个测试规格，并使用 Bonferroni、Holm 和 Benjamini-Hochberg FDR 调整。</p></div>
-            <div class="control-card"><span class="control-marker"></span><h3>审计轨迹</h3><p>结果包包含审计报告、覆盖率瀑布图、模型和特征 manifest、词表哈希、预测尺度检查和校验和。</p></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">证据文件</p>
-            <h2>查看公开证据</h2>
-            <p>
-              主页只链接到精简公开 artifact。原始年报、API 响应、完整价格面板和私有中间数据不会提交到公开仓库。
-            </p>
-          </div>
-          <div class="artifact-list">
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent"><span>GitHub 仓库</span><span>源码和文档</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1"><span>50家公司结果包</span><span>精简公开 artifact</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/factor_card.md"><span>因子卡片</span><span>最快速结果摘要</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1/empirical_report.md"><span>实证报告</span><span>论文式结果叙述</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md"><span>Working Paper 定位</span><span>研究问题和边界</span></a>
-            <a class="artifact-card" href="methods.zh-CN.html"><span>方法 / 审计页面</span><span>研究控制和图表</span></a>
-            <a class="artifact-card" href="results.zh-CN.html#reproducibility"><span>复现 / 本地运行</span><span>最小运行命令</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE"><span>MIT 许可</span><span>开源许可声明</span></a>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <div class="boundary-box">
-            <h2>使用边界</h2>
-            <p>
-              这是一个应用级探索性研究运行。它不声称拥有等同 CRSP/WRDS 的正式资产定价证据、无幸存者偏差的研究级股票池、生产级交易系统、已被证明的可交易 alpha，或任何投资建议。
-            </p>
-            <p>
-              组合输出仅作为诊断。预注册主组合规格没有建立正式可交易 alpha。
-            </p>
+          <div class="pipeline-flow" aria-label="研究流水线">
+            <div class="pipeline-node"><strong>SEC 年报</strong><span>官方时间戳</span></div>
+            <div class="pipeline-arrow" aria-hidden="true">→</div>
+            <div class="pipeline-node"><strong>文本解析</strong><span>核心章节</span></div>
+            <div class="pipeline-arrow" aria-hidden="true">→</div>
+            <div class="pipeline-node"><strong>标签构建</strong><span>未来目标</span></div>
+            <div class="pipeline-arrow" aria-hidden="true">→</div>
+            <div class="pipeline-node"><strong>样本切分</strong><span>滚动 OOS</span></div>
+            <div class="pipeline-arrow" aria-hidden="true">→</div>
+            <div class="pipeline-node"><strong>文本特征</strong><span>仅训练窗口</span></div>
+            <div class="pipeline-arrow" aria-hidden="true">→</div>
+            <div class="pipeline-node"><strong>模型</strong><span>Ridge / XGBoost</span></div>
+            <div class="pipeline-arrow" aria-hidden="true">→</div>
+            <div class="pipeline-node"><strong>审计</strong><span>覆盖率 + 检验</span></div>
           </div>
         </div>
       </section>
@@ -247,22 +156,12 @@
             <p class="eyebrow">个人贡献</p>
             <h2>我的贡献</h2>
           </div>
-          <div class="capability-table-wrap">
-            <table class="capability-table">
-              <thead>
-                <tr>
-                  <th>能力模块</th>
-                  <th>项目证据</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>实证金融设计</td><td>预注册目标、滚动样本外验证、事件时间标签。</td></tr>
-                <tr><td>数据工程</td><td>50家公司 10-K 面板、标签、切分、manifest 和 checksums。</td></tr>
-                <tr><td>金融 NLP</td><td>Loughran-McDonald 语调、TF-IDF/SVD、训练窗口词表。</td></tr>
-                <tr><td>模型评价</td><td>Ridge/XGBoost 对比、Rank IC、Newey-West、多重检验。</td></tr>
-                <tr><td>研究审计</td><td>覆盖率瀑布图、泄漏检查、预测尺度检查、artifact 完整性。</td></tr>
-              </tbody>
-            </table>
+          <div class="capability-card-grid">
+            <div class="capability-card"><strong>实证金融设计</strong><p>预注册目标、滚动样本外验证、事件时间标签。</p></div>
+            <div class="capability-card"><strong>数据工程</strong><p>50 家公司 10-K 面板、标签、切分、manifest、checksums。</p></div>
+            <div class="capability-card"><strong>金融 NLP</strong><p>LM 语调、TF-IDF、SVD 特征和训练窗口词表。</p></div>
+            <div class="capability-card"><strong>模型评价</strong><p>Ridge、XGBoost、Rank IC、Newey-West、多重检验。</p></div>
+            <div class="capability-card"><strong>研究审计</strong><p>覆盖率检查、泄漏检查、可复现文件。</p></div>
           </div>
         </div>
       </section>

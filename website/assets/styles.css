@@ -258,6 +258,13 @@ tr:last-child td {
   color: var(--text-muted);
 }
 
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
 .hero-proof-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -548,6 +555,29 @@ tr:last-child td {
   color: var(--accent);
 }
 
+.thirty-card {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.7fr) minmax(0, 1.3fr);
+  gap: 28px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--accent);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 28px;
+}
+
+.thirty-card h2 {
+  margin-bottom: 0;
+}
+
+.thirty-card p:last-child {
+  color: var(--text-secondary);
+  font-size: 17px;
+  line-height: 1.75;
+}
+
 .section {
   padding: 72px 0;
 }
@@ -726,6 +756,45 @@ tr:last-child td {
   line-height: 1.55;
 }
 
+.pipeline-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: stretch;
+}
+
+.pipeline-node {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 106px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.pipeline-node strong {
+  color: var(--text-main);
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.pipeline-node span {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.pipeline-arrow {
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+  font-weight: 900;
+}
+
 .step-index {
   display: inline-flex;
   align-items: center;
@@ -763,6 +832,34 @@ tr:last-child td {
 }
 
 .capability-table td {
+  line-height: 1.6;
+}
+
+.capability-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.capability-card {
+  min-height: 150px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.capability-card strong {
+  display: block;
+  color: var(--text-main);
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.capability-card p {
+  margin-top: 12px;
+  color: var(--text-muted);
   line-height: 1.6;
 }
 
@@ -1137,6 +1234,15 @@ tr:last-child td {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .pipeline-flow {
+    grid-template-columns: 1fr;
+  }
+
+  .pipeline-arrow {
+    justify-content: center;
+    transform: rotate(90deg);
+  }
+
   .flow-arrow {
     display: none;
   }
@@ -1169,12 +1275,19 @@ tr:last-child td {
   .metric-grid.compact,
   .hero-proof-grid,
   .pipeline,
+  .pipeline-flow,
   .method-flow,
   .control-grid,
   .contribution-grid,
   .artifact-grid,
+  .capability-card-grid,
   .result-grid {
     grid-template-columns: 1fr;
+  }
+
+  .pipeline-arrow {
+    justify-content: center;
+    transform: rotate(90deg);
   }
 
   .metric-number {
@@ -1231,7 +1344,12 @@ tr:last-child td {
   }
 
   .button-row,
+  .hero-cta,
   .btn {
     width: 100%;
+  }
+
+  .thirty-card {
+    grid-template-columns: 1fr;
   }
 }
