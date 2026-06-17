@@ -9,6 +9,7 @@
       content="50-company public result package for the Financial 10-K Text Agent."
     >
     <link rel="stylesheet" href="assets/styles.css">
+    <script defer src="assets/site.js"></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -16,9 +17,6 @@
       <div class="container header-inner">
         <a class="brand" href="index.html">Financial 10-K Text Agent</a>
         <nav class="nav-links" aria-label="Primary navigation">
-          <a href="index.html">Home</a>
-          <a href="methods.html">Methods</a>
-          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
           <div class="language-switch" aria-label="Language switch">
             <a class="switch-option is-active" href="results.html" lang="en">English</a>
             <a class="switch-option" href="results.zh-CN.html" lang="zh-CN">Chinese</a>
@@ -100,7 +98,7 @@
       </section>
 
       <section class="section">
-        <div class="container split-section">
+        <div class="container split-section equal-cards">
           <div>
             <p class="eyebrow">Model comparison</p>
             <h2>Rank IC by Model</h2>
@@ -206,7 +204,7 @@
       </section>
 
       <section class="section">
-        <div class="container split-section">
+        <div class="container split-section equal-cards">
           <div class="boundary-box">
             <h2>Data Boundary</h2>
             <p>
@@ -244,7 +242,11 @@
             </p>
           </div>
           <div class="code-card">
-            <pre><code>git clone https://github.com/uiclxh/financial-10k-text-agent.git
+            <div class="code-toolbar">
+              <span>Local commands</span>
+              <button class="copy-button" type="button" data-copy-target="run-commands">Copy</button>
+            </div>
+            <pre><code id="run-commands">git clone https://github.com/uiclxh/financial-10k-text-agent.git
 cd financial-10k-text-agent
 python -m pip install -e ".[dev]"
 python -m ruff check .
