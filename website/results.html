@@ -100,6 +100,58 @@
       </section>
 
       <section class="section">
+        <div class="container split-section">
+          <div>
+            <p class="eyebrow">Model comparison</p>
+            <h2>Rank IC by Model</h2>
+            <p>
+              A compact view of ALL_SPLITS test Rank IC on
+              <code>realized_volatility_1_20</code>. Ridge is the preregistered
+              primary model; XGBoost is exploratory.
+            </p>
+          </div>
+          <div class="model-chart-card" aria-label="Rank IC model comparison bar chart">
+            <div class="rank-chart-row is-exploratory">
+              <div>
+                <strong>XGBoost</strong>
+                <span>exploratory text model</span>
+              </div>
+              <span class="rank-track"><span style="--bar-width: 100%"></span></span>
+              <code>0.3133</code>
+            </div>
+            <div class="rank-chart-row">
+              <div>
+                <strong>Industry mean</strong>
+                <span>benchmark</span>
+              </div>
+              <span class="rank-track"><span style="--bar-width: 94%"></span></span>
+              <code>0.2952</code>
+            </div>
+            <div class="rank-chart-row is-primary">
+              <div>
+                <strong>Ridge</strong>
+                <span>preregistered primary</span>
+              </div>
+              <span class="rank-track"><span style="--bar-width: 83%"></span></span>
+              <code>0.2606</code>
+            </div>
+            <div class="rank-chart-row is-negative">
+              <div>
+                <strong>Historical mean</strong>
+                <span>benchmark</span>
+              </div>
+              <span class="rank-track"><span style="--bar-width: 7%"></span></span>
+              <code>-0.0206</code>
+            </div>
+            <p class="small-note">
+              Bars are scaled to the largest displayed Rank IC. Negative values
+              indicate the score ranks future volatility in the opposite direction.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
         <div class="container">
           <div class="section-header">
             <p class="eyebrow">Audit</p>

@@ -755,6 +755,69 @@ tr:last-child td {
   text-align: right;
 }
 
+.model-chart-card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.rank-chart-row {
+  display: grid;
+  grid-template-columns: 150px minmax(130px, 1fr) 72px;
+  gap: 14px;
+  align-items: center;
+}
+
+.rank-chart-row strong {
+  display: block;
+  color: var(--text-main);
+  font-size: 15px;
+}
+
+.rank-chart-row span {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.rank-track {
+  position: relative;
+  display: block;
+  height: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eaf0f6;
+}
+
+.rank-track span {
+  display: block;
+  width: var(--bar-width);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.rank-chart-row.is-primary .rank-track span {
+  background: var(--primary);
+}
+
+.rank-chart-row.is-exploratory .rank-track span {
+  background: #0891b2;
+}
+
+.rank-chart-row.is-negative .rank-track span {
+  background: var(--warning);
+}
+
+.rank-chart-row code {
+  color: var(--text-main);
+  font-weight: 800;
+  text-align: right;
+}
+
 .audit-summary {
   display: flex;
   flex-wrap: wrap;
@@ -885,11 +948,17 @@ tr:last-child td {
     gap: 7px;
   }
 
+  .rank-chart-row {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
   .mini-row strong {
     text-align: left;
   }
 
-  .waterfall-row strong {
+  .waterfall-row strong,
+  .rank-chart-row code {
     text-align: left;
   }
 

@@ -100,6 +100,56 @@
       </section>
 
       <section class="section">
+        <div class="container split-section">
+          <div>
+            <p class="eyebrow">模型对比</p>
+            <h2>不同模型的 Rank IC</h2>
+            <p>
+              这里展示 <code>realized_volatility_1_20</code> 在 ALL_SPLITS test
+              上的 Rank IC。Ridge 是预注册主模型；XGBoost 是探索性模型对比。
+            </p>
+          </div>
+          <div class="model-chart-card" aria-label="Rank IC 模型对比条形图">
+            <div class="rank-chart-row is-exploratory">
+              <div>
+                <strong>XGBoost</strong>
+                <span>探索性文本模型</span>
+              </div>
+              <span class="rank-track"><span style="--bar-width: 100%"></span></span>
+              <code>0.3133</code>
+            </div>
+            <div class="rank-chart-row">
+              <div>
+                <strong>Industry mean</strong>
+                <span>行业均值基准</span>
+              </div>
+              <span class="rank-track"><span style="--bar-width: 94%"></span></span>
+              <code>0.2952</code>
+            </div>
+            <div class="rank-chart-row is-primary">
+              <div>
+                <strong>Ridge</strong>
+                <span>预注册主模型</span>
+              </div>
+              <span class="rank-track"><span style="--bar-width: 83%"></span></span>
+              <code>0.2606</code>
+            </div>
+            <div class="rank-chart-row is-negative">
+              <div>
+                <strong>Historical mean</strong>
+                <span>历史均值基准</span>
+              </div>
+              <span class="rank-track"><span style="--bar-width: 7%"></span></span>
+              <code>-0.0206</code>
+            </div>
+            <p class="small-note">
+              条形长度按图中最大 Rank IC 缩放。负值表示当前分数方向与未来波动率排序方向相反。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
         <div class="container">
           <div class="section-header">
             <p class="eyebrow">审计</p>
