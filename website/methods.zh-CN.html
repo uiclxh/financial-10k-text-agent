@@ -37,6 +37,32 @@
       </section>
 
       <section class="section">
+        <div class="container split-section">
+          <div>
+            <p class="eyebrow">防泄漏控制</p>
+            <h2>预测只能使用当时已知的信息</h2>
+            <p>
+              核心规则很简单：所有文本特征和模型选择都必须在预测时间之前可获得。
+              测试窗口只在训练和验证完成后用于最终评价。
+            </p>
+          </div>
+          <div class="leakage-flow-card" aria-label="防泄漏流程图">
+            <div class="leakage-step"><span>1</span><strong>Filing timestamp</strong><small>SEC acceptance time 定义信息可得时间。</small></div>
+            <div class="leakage-arrow" aria-hidden="true">↓</div>
+            <div class="leakage-step"><span>2</span><strong>Section parsing</strong><small>先抽取 10-K 章节，再构造未来标签。</small></div>
+            <div class="leakage-arrow" aria-hidden="true">↓</div>
+            <div class="leakage-step"><span>3</span><strong>训练窗口特征</strong><small>TF-IDF 词表只在训练窗口内部拟合。</small></div>
+            <div class="leakage-arrow" aria-hidden="true">↓</div>
+            <div class="leakage-step"><span>4</span><strong>滚动切分</strong><small>训练、验证、测试窗口相互分离。</small></div>
+            <div class="leakage-arrow" aria-hidden="true">↓</div>
+            <div class="leakage-step"><span>5</span><strong>验证窗口调参</strong><small>超参数在测试评价前已经确定。</small></div>
+            <div class="leakage-arrow" aria-hidden="true">↓</div>
+            <div class="leakage-step"><span>6</span><strong>Test Rank IC + audit</strong><small>最终结果同时报告覆盖率和边界审计。</small></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
         <div class="container">
           <div class="section-header">
             <p class="eyebrow">方法流程</p>

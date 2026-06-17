@@ -39,6 +39,33 @@
       </section>
 
       <section class="section">
+        <div class="container split-section">
+          <div>
+            <p class="eyebrow">Leakage control</p>
+            <h2>Only Past Information Enters the Forecast</h2>
+            <p>
+              The central rule is simple: every text feature and model decision
+              must be available before the prediction timestamp. The test window
+              is used only after fitting and validation are complete.
+            </p>
+          </div>
+          <div class="leakage-flow-card" aria-label="Leakage-safe flow diagram">
+            <div class="leakage-step"><span>1</span><strong>Filing timestamp</strong><small>SEC acceptance time defines availability.</small></div>
+            <div class="leakage-arrow" aria-hidden="true">↓</div>
+            <div class="leakage-step"><span>2</span><strong>Section parsing</strong><small>10-K sections are extracted before labels.</small></div>
+            <div class="leakage-arrow" aria-hidden="true">↓</div>
+            <div class="leakage-step"><span>3</span><strong>Train-window features</strong><small>TF-IDF vocabulary is fit inside training windows only.</small></div>
+            <div class="leakage-arrow" aria-hidden="true">↓</div>
+            <div class="leakage-step"><span>4</span><strong>Rolling split</strong><small>Train / validation / test windows are separated.</small></div>
+            <div class="leakage-arrow" aria-hidden="true">↓</div>
+            <div class="leakage-step"><span>5</span><strong>Validation-only tuning</strong><small>Hyperparameters are chosen before test evaluation.</small></div>
+            <div class="leakage-arrow" aria-hidden="true">↓</div>
+            <div class="leakage-step"><span>6</span><strong>Test Rank IC + audit</strong><small>Results are reported with coverage and boundary checks.</small></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
         <div class="container">
           <div class="section-header">
             <p class="eyebrow">Method pipeline</p>

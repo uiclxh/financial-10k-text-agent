@@ -31,70 +31,51 @@
             <span class="badge">Applied financial NLP research</span>
             <h1>Financial 10-K Text Agent</h1>
             <p class="hero-subtitle">
-              An auditable financial NLP research pipeline for testing whether SEC
-              10-K disclosures contain out-of-sample predictive information about
-              future volatility and abnormal-return targets.
+              Auditable financial NLP pipeline for out-of-sample volatility
+              prediction from SEC 10-K disclosures.
             </p>
-            <p class="hero-support">
-              This project sits at the intersection of financial NLP, empirical
-              asset pricing, rolling out-of-sample validation, and research audit.
-              It is not a RAG demo, generic sentiment classifier, or AI trading bot.
-            </p>
-            <div class="action-rail" aria-label="Project links">
-              <p class="action-rail-title">Quick links</p>
-              <a class="action-link is-primary" href="results.html">
-                <span>Results</span><small>Primary finding and artifacts</small>
-              </a>
-              <a
-                class="action-link"
-                href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1"
-              >
-                <span>Result Package</span><small>Compact public evidence files</small>
-              </a>
-              <a class="action-link" href="methods.html">
-                <span>Methods</span><small>Leakage controls and audit design</small>
-              </a>
-              <a class="action-link" href="https://github.com/uiclxh/financial-10k-text-agent">
-                <span>GitHub</span><small>Source code and release history</small>
-              </a>
-              <a
-                class="action-link"
-                href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md"
-              >
-                <span>Summary</span><small>Working-paper positioning</small>
-              </a>
+            <div class="hero-proof-grid" aria-label="Headline evidence">
+              <div class="proof-card">
+                <strong>500</strong>
+                <span>SEC 10-K filings</span>
+              </div>
+              <div class="proof-card">
+                <strong>4,716</strong>
+                <span>OOS predictions</span>
+              </div>
+              <div class="proof-card">
+                <strong>0.2606</strong>
+                <span>Primary Rank IC</span>
+              </div>
             </div>
           </div>
 
-          <aside class="hero-panel" aria-label="Current run summary">
-            <p class="eyebrow">Current public package</p>
-            <p class="run-id">50_company_public_fmp_alpha_2016_2025_v1</p>
-            <div class="mini-chart" aria-label="Result scale preview">
-              <div class="mini-row">
-                <span>Filings</span>
-                <span class="bar" style="--bar-width: 100%"></span>
-                <strong>500</strong>
+          <aside class="hero-visual" aria-label="Rank IC preview">
+            <p class="eyebrow">Result snapshot</p>
+            <h2>Volatility Rank IC</h2>
+            <div class="hero-rank-chart">
+              <div class="hero-rank-row">
+                <span>XGBoost</span>
+                <span class="rank-track"><span style="--bar-width: 100%"></span></span>
+                <strong>0.3133</strong>
               </div>
-              <div class="mini-row">
-                <span>Labels</span>
-                <span class="bar" style="--bar-width: 92%"></span>
-                <strong>1,500</strong>
+              <div class="hero-rank-row">
+                <span>Industry mean</span>
+                <span class="rank-track"><span style="--bar-width: 94%"></span></span>
+                <strong>0.2952</strong>
               </div>
-              <div class="mini-row">
-                <span>OOS predictions</span>
-                <span class="bar" style="--bar-width: 86%"></span>
-                <strong>4,716</strong>
+              <div class="hero-rank-row is-primary">
+                <span>Ridge primary</span>
+                <span class="rank-track"><span style="--bar-width: 83%"></span></span>
+                <strong>0.2606</strong>
               </div>
-              <div class="mini-row">
-                <span>Specs</span>
-                <span class="bar" style="--bar-width: 70%"></span>
-                <strong>568</strong>
+              <div class="hero-rank-row is-negative">
+                <span>Historical mean</span>
+                <span class="rank-track"><span style="--bar-width: 7%"></span></span>
+                <strong>-0.0206</strong>
               </div>
             </div>
-            <div class="status-strip">
-              <span>100% eligible OOS coverage</span>
-              <span>0 audit failures</span>
-            </div>
+            <p class="small-note">Primary claim is volatility-prediction evidence, not tradable alpha.</p>
           </aside>
         </div>
       </section>
@@ -114,6 +95,13 @@
             <div class="metric-card"><div class="metric-number">520k+</div><div class="metric-label">Feature records</div></div>
             <div class="metric-card"><div class="metric-number">568</div><div class="metric-label">Tested specifications</div></div>
             <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">Eligible OOS coverage</div></div>
+            <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">Audit failures</div></div>
+          </div>
+          <div class="project-link-strip" aria-label="Project navigation">
+            <a href="results.html">Results</a>
+            <a href="methods.html">Methods / Audit</a>
+            <a href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1">Result Package</a>
+            <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
           </div>
         </div>
       </section>
@@ -270,13 +258,22 @@
             <p class="eyebrow">Contribution</p>
             <h2>My Contributions</h2>
           </div>
-          <div class="contribution-grid">
-            <div class="contribution-card"><strong>Research Design</strong><p>Defined the empirical question, primary target, and preregistered result structure.</p></div>
-            <div class="contribution-card"><strong>Data Engineering</strong><p>Built document, price, label, and split artifacts across a 50-firm 10-K panel.</p></div>
-            <div class="contribution-card"><strong>NLP Features</strong><p>Implemented dictionary tone and train-window-only TF-IDF/SVD features.</p></div>
-            <div class="contribution-card"><strong>Modeling</strong><p>Compared baselines, Ridge, and XGBoost under rolling OOS evaluation.</p></div>
-            <div class="contribution-card"><strong>Research Audit</strong><p>Added coverage, leakage, multiple-testing, and artifact-integrity reports.</p></div>
-            <div class="contribution-card"><strong>Interpretation</strong><p>Reported volatility-prediction evidence while treating portfolio results as diagnostics.</p></div>
+          <div class="capability-table-wrap">
+            <table class="capability-table">
+              <thead>
+                <tr>
+                  <th>Capability</th>
+                  <th>Evidence in this project</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Empirical Finance Design</td><td>Preregistered target, rolling OOS validation, event-time labels.</td></tr>
+                <tr><td>Data Engineering</td><td>50-firm 10-K panel, labels, splits, manifests, and checksums.</td></tr>
+                <tr><td>Financial NLP</td><td>Loughran-McDonald tone, TF-IDF/SVD, train-window-only vocabulary.</td></tr>
+                <tr><td>Model Evaluation</td><td>Ridge/XGBoost comparison, Rank IC, Newey-West diagnostics, multiple testing.</td></tr>
+                <tr><td>Research Audit</td><td>Coverage waterfall, leakage checks, prediction scale guard, artifact integrity.</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
