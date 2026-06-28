@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from text_factor_lab.backtest.evaluation import BACKTEST_VERSION
+from text_factor_lab.models import MODEL_TRAINING_VERSION
 from text_factor_lab.orchestration import RunManager
 from text_factor_lab.schemas import (
     DocumentManifestRecord,
@@ -343,6 +345,53 @@ def test_run_pipeline_executes_available_artifact_chain(temp_config: Path) -> No
     assert stages["labels"] == "skipped_existing"
     assert stages["models"] == "completed"
     assert stages["report"] == "completed"
+
+
+def test_run_pipeline_recomputes_stale_model_and_evaluation_artifacts(
+    temp_config: Path,
+) -> None:
+    manager = RunManager.from_config_path(temp_config)
+    write_midstream_artifacts(manager.run_dir)
+    manager.initialize_run()
+    first_report = manager.run_pipeline()
+    assert first_report["blocked_reason"] is None
+
+    manifests = json.loads(manager.model_manifest_path.read_text(encoding="utf-8"))
+    for manifest in manifests:
+        manifest["model_version"] = "model-training-v0"
+    manager.model_manifest_path.write_text(
+        json.dumps(manifests, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    metrics = json.loads(manager.evaluation_metrics_path.read_text(encoding="utf-8"))
+    for metric in metrics:
+        metric["evaluation_version"] = "backtest-evaluation-v0"
+    manager.evaluation_metrics_path.write_text(
+        json.dumps(metrics, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    second_report = manager.run_pipeline()
+    stages = {stage["stage"]: stage["status"] for stage in second_report["stages"]}
+    refreshed_manifests = json.loads(
+        manager.model_manifest_path.read_text(encoding="utf-8")
+    )
+    refreshed_metrics = json.loads(
+        manager.evaluation_metrics_path.read_text(encoding="utf-8")
+    )
+
+    assert second_report["blocked_reason"] is None
+    assert stages["models"] == "completed"
+    assert stages["evaluation"] == "completed"
+    assert all(
+        manifest["model_version"] == MODEL_TRAINING_VERSION
+        for manifest in refreshed_manifests
+    )
+    assert all(
+        metric["evaluation_version"] == BACKTEST_VERSION
+        for metric in refreshed_metrics
+    )
 
 
 def test_run_pipeline_records_blocked_stage_when_inputs_are_missing(

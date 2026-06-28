@@ -7,12 +7,14 @@ from pathlib import Path
 import yaml
 
 from text_factor_lab.audit import audit_run
+from text_factor_lab.backtest.evaluation import BACKTEST_VERSION
 from text_factor_lab.inference import (
     build_inference_artifacts,
     write_multiple_testing_report_json,
     write_specification_registry_json,
     write_tested_specifications_jsonl,
 )
+from text_factor_lab.models import MODEL_TRAINING_VERSION
 from text_factor_lab.schemas import (
     EvaluationMetricRecord,
     LabelRecord,
@@ -102,7 +104,7 @@ def model_manifest_record(label: LabelRecord, *, model_name: str = "ridge") -> M
         model_name=model_name,
         model_family=family,
         model_level=level,
-        model_version="model-training-v0",
+        model_version=MODEL_TRAINING_VERSION,
         hyperparameters={"alpha": 1.0},
         random_seed=42,
         training_window="2010-01-01..2018-12-31",
@@ -119,10 +121,16 @@ def model_manifest_record(label: LabelRecord, *, model_name: str = "ridge") -> M
     )
 
 
-def metric_record(label: LabelRecord) -> EvaluationMetricRecord:
+def metric_record(
+    label: LabelRecord,
+    *,
+    model_name: str = "ridge",
+    rank_ic: float = 0.0,
+) -> EvaluationMetricRecord:
     return EvaluationMetricRecord(
+        evaluation_version=BACKTEST_VERSION,
         run_id="audit_test_run",
-        model_id="ridge::CAR_1_20::split",
+        model_id=f"{model_name}::CAR_1_20::split",
         split_id="split",
         target_name=label.target_name,
         role="test",
@@ -132,7 +140,10 @@ def metric_record(label: LabelRecord) -> EvaluationMetricRecord:
         r_squared=0.0,
         directional_accuracy=1.0,
         pearson_ic=0.0,
-        rank_ic=0.0,
+        rank_ic=rank_ic,
+        aggregation_method="pooled_window_metrics_with_date_ic_diagnostics",
+        ic_grouping="pooled_fallback",
+        ic_observation_count=1,
         created_at_utc=utc(2020, 2, 1),
     )
 
@@ -316,7 +327,10 @@ def write_complete_audit_artifacts(run_dir: Path, *, bad_prediction_label: bool 
             tuning_log_record(label, model_name="historical_mean"),
         ],
     )
-    metrics = [metric_record(label)]
+    metrics = [
+        metric_record(label),
+        metric_record(label, model_name="historical_mean"),
+    ]
     backtests = [backtest_record(label)]
     write_json_array(run_dir / "evaluation_metrics.json", metrics)
     write_json_array(run_dir / "backtest_results.json", backtests)
@@ -397,6 +411,57 @@ def test_audit_run_rejects_missing_prediction_alignment(tmp_path: Path) -> None:
     assert any(check.check_id == "prediction_label_alignment" for check in report.checks)
     status = json.loads((run_dir / "run_status.json").read_text(encoding="utf-8"))
     assert status["status"] == "rejected"
+
+
+def test_audit_passes_rank_ic_method_and_constant_baseline_checks(tmp_path: Path) -> None:
+    run_dir = tmp_path / "runs" / "audit_test_run"
+    write_complete_audit_artifacts(run_dir)
+
+    report = audit_run(run_id="audit_test_run", run_dir=run_dir)
+    checks = {check.check_id: check for check in report.checks}
+
+    assert checks["rank_ic_tie_policy"].status == "pass"
+    assert checks["constant_baseline_rank_ic"].status == "pass"
+    assert checks["evaluation_method_metadata"].status == "pass"
+
+
+def test_audit_rejects_nonzero_historical_mean_rank_ic(tmp_path: Path) -> None:
+    run_dir = tmp_path / "runs" / "audit_test_run"
+    write_complete_audit_artifacts(run_dir)
+    metrics_path = run_dir / "evaluation_metrics.json"
+    metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+    baseline = next(
+        metric for metric in metrics if metric["model_id"].startswith("historical_mean")
+    )
+    baseline["rank_ic"] = 0.25
+    baseline["rank_ic_t_stat"] = 3.0
+    metrics_path.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
+
+    report = audit_run(run_id="audit_test_run", run_dir=run_dir)
+    check = next(
+        check for check in report.checks if check.check_id == "constant_baseline_rank_ic"
+    )
+
+    assert check.status == "fail"
+    assert report.audit_status == "fail"
+    assert report.formal_result_allowed is False
+
+
+def test_audit_rejects_inconsistent_evaluation_method_metadata(tmp_path: Path) -> None:
+    run_dir = tmp_path / "runs" / "audit_test_run"
+    write_complete_audit_artifacts(run_dir)
+    metrics_path = run_dir / "evaluation_metrics.json"
+    metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+    metrics[0]["aggregation_method"] = "single_window"
+    metrics_path.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
+
+    report = audit_run(run_id="audit_test_run", run_dir=run_dir)
+    check = next(
+        check for check in report.checks if check.check_id == "evaluation_method_metadata"
+    )
+
+    assert check.status == "fail"
+    assert report.audit_status == "fail"
 
 
 def test_formal_audit_requires_valid_licensed_data_manifest(tmp_path: Path) -> None:

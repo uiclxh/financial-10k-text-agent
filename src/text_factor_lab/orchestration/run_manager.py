@@ -711,12 +711,7 @@ class RunManager:
         return True
 
     def _run_model_stage(self, records: list[dict[str, Any]]) -> bool:
-        if (
-            self.predictions_path.exists()
-            and self.model_prediction_failures_path.exists()
-            and self.model_manifest_path.exists()
-            and self.tuning_log_path.exists()
-        ):
+        if self._model_artifacts_are_current():
             self.update_status("trained")
             self._append_stage(records, stage="models", status="skipped_existing")
             return True
@@ -800,21 +795,7 @@ class RunManager:
         return True
 
     def _run_evaluation_stage(self, records: list[dict[str, Any]]) -> bool:
-        if (
-            self.evaluation_metrics_path.exists()
-            and self.backtest_results_path.exists()
-            and self.portfolio_weights_path.exists()
-            and self.portfolio_returns_path.exists()
-            and self.portfolio_metrics_path.exists()
-            and self.factor_panel_path.exists()
-            and self.monthly_portfolio_weights_path.exists()
-            and self.monthly_portfolio_returns_path.exists()
-            and self.monthly_portfolio_metrics_path.exists()
-            and self.delisting_application_report_path.exists()
-            and self.tested_specifications_path.exists()
-            and self.multiple_testing_report_path.exists()
-            and self.specification_registry_path.exists()
-        ):
+        if self._evaluation_artifacts_are_current():
             self.update_status("evaluated")
             self._append_stage(records, stage="evaluation", status="skipped_existing")
             return True
@@ -1039,6 +1020,53 @@ class RunManager:
 
     def _inputs_exist(self, *paths: Path) -> bool:
         return all(path.exists() for path in paths)
+
+    def _model_artifacts_are_current(self) -> bool:
+        required = (
+            self.predictions_path,
+            self.model_prediction_failures_path,
+            self.model_manifest_path,
+            self.tuning_log_path,
+        )
+        if not self._inputs_exist(*required):
+            return False
+        try:
+            from text_factor_lab.models import MODEL_TRAINING_VERSION
+
+            manifests = json.loads(self.model_manifest_path.read_text(encoding="utf-8"))
+        except (ImportError, json.JSONDecodeError, OSError):
+            return False
+        return bool(manifests) and all(
+            record.get("model_version") == MODEL_TRAINING_VERSION for record in manifests
+        )
+
+    def _evaluation_artifacts_are_current(self) -> bool:
+        required = (
+            self.evaluation_metrics_path,
+            self.backtest_results_path,
+            self.portfolio_weights_path,
+            self.portfolio_returns_path,
+            self.portfolio_metrics_path,
+            self.factor_panel_path,
+            self.monthly_portfolio_weights_path,
+            self.monthly_portfolio_returns_path,
+            self.monthly_portfolio_metrics_path,
+            self.delisting_application_report_path,
+            self.tested_specifications_path,
+            self.multiple_testing_report_path,
+            self.specification_registry_path,
+        )
+        if not self._inputs_exist(*required):
+            return False
+        try:
+            from text_factor_lab.backtest.evaluation import BACKTEST_VERSION
+
+            metrics = json.loads(self.evaluation_metrics_path.read_text(encoding="utf-8"))
+        except (ImportError, json.JSONDecodeError, OSError):
+            return False
+        return bool(metrics) and all(
+            record.get("evaluation_version") == BACKTEST_VERSION for record in metrics
+        )
 
     def _resolve_raw_filing_path(
         self,

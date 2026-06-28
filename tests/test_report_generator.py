@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+from text_factor_lab.backtest.evaluation import BACKTEST_VERSION
 from text_factor_lab.reports import generate_run_report
 from text_factor_lab.schemas import (
     AuditCheckRecord,
@@ -151,6 +152,7 @@ def model_manifest_record(label: LabelRecord) -> ModelManifestRecord:
 
 def metric_record(label: LabelRecord) -> EvaluationMetricRecord:
     return EvaluationMetricRecord(
+        evaluation_version=BACKTEST_VERSION,
         run_id="report_test_run",
         model_id="ridge::CAR_1_20::split",
         split_id="ALL_SPLITS",

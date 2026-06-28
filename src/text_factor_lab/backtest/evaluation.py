@@ -27,7 +27,7 @@ from text_factor_lab.schemas import (
     PredictionRecord,
 )
 
-BACKTEST_VERSION = "backtest-evaluation-v0"
+BACKTEST_VERSION = "backtest-evaluation-v1-tie-aware-rank-ic"
 PortfolioSignalDirection = Literal[
     "long_high_score",
     "long_low_score",
@@ -299,6 +299,7 @@ def _evaluation_metric(
         pooled_rank=rank,
     )
     return EvaluationMetricRecord(
+        evaluation_version=BACKTEST_VERSION,
         run_id=run_id,
         model_id=model_id,
         split_id=split_id,
@@ -384,6 +385,7 @@ def _aggregate_metric_from_split_metrics(
     pearson_values = np.array([record.pearson_ic for record in rows], dtype=float)
     rank_values = np.array([record.rank_ic for record in rows], dtype=float)
     return EvaluationMetricRecord(
+        evaluation_version=BACKTEST_VERSION,
         run_id=run_id,
         model_id=model_id,
         split_id=split_id,
@@ -472,7 +474,8 @@ def _ic_diagnostic_series(
         rows_by_date[row.prediction.event_date].append(row)
     pearson_values: list[float] = []
     rank_values: list[float] = []
-    for date_rows in rows_by_date.values():
+    for event_date in sorted(rows_by_date):
+        date_rows = rows_by_date[event_date]
         if len(date_rows) < min_cross_section:
             continue
         y_true = np.array([row.label.target_value for row in date_rows], dtype=float)

@@ -139,6 +139,8 @@ def test_build_evaluation_artifacts_computes_metrics_and_backtests() -> None:
     assert test_metric.observation_count == 5
     assert test_metric.rank_ic > 0
     assert test_metric.directional_accuracy >= 0
+    assert test_metric.rank_method == "average"
+    assert test_metric.constant_prediction_policy == "return_zero"
     assert test_metric.aggregation_method == "pooled_window_metrics_with_date_ic_diagnostics"
     assert test_metric.ic_observation_count >= 1
     assert any(record.split_id == "ALL_SPLITS" for record in result.metrics)
@@ -164,6 +166,68 @@ def test_build_evaluation_artifacts_computes_metrics_and_backtests() -> None:
     assert portfolio_return.active_position_count == 2
     assert result.portfolio_metrics[0].observation_count == 1
     assert result.portfolio_metrics[0].newey_west_lag == 0
+
+
+def test_constant_baseline_has_zero_ic_diagnostics_and_all_splits_metric() -> None:
+    labels: list[LabelRecord] = []
+    predictions: list[PredictionRecord] = []
+    split_specs = [
+        ("train_2010_2014__val_2015_2015__test_2016_2016", 2016),
+        ("train_2010_2015__val_2016_2016__test_2017_2017", 2017),
+    ]
+    for split_id, year in split_specs:
+        split_labels = [
+            label(f"sec:{year}:a", f"A{year}", year, 0.1),
+            label(f"sec:{year}:b", f"B{year}", year, 0.4),
+        ]
+        labels.extend(split_labels)
+        for label_record in split_labels:
+            predictions.append(
+                prediction(
+                    label_record,
+                    model_id=f"historical_mean::CAR_1_20::{split_id}",
+                    role="test",
+                    value=0.25,
+                ).model_copy(
+                    update={
+                        "split_id": split_id,
+                        "feature_version": f"features-v0:{split_id}",
+                    }
+                )
+            )
+
+    result = build_evaluation_artifacts(
+        run_id="constant_baseline_test",
+        predictions=predictions,
+        labels=labels,
+        newey_west_lag=1,
+    )
+
+    split_metrics = [
+        record
+        for record in result.metrics
+        if record.role == "test" and record.split_id != "ALL_SPLITS"
+    ]
+    assert len(split_metrics) == 2
+    for metric in split_metrics:
+        assert metric.rank_ic == 0.0
+        assert metric.rank_ic_t_stat == 0.0
+        assert metric.rank_ic_newey_west_t_stat == 0.0
+        assert metric.ic_grouping == "event_date_cross_section"
+
+    aggregate = next(
+        record
+        for record in result.metrics
+        if record.role == "test" and record.split_id == "ALL_SPLITS"
+    )
+    assert aggregate.rank_ic == 0.0
+    assert aggregate.rank_ic_t_stat == 0.0
+    assert aggregate.rank_ic_newey_west_t_stat == 0.0
+    assert aggregate.rank_method == "average"
+    assert aggregate.constant_prediction_policy == "return_zero"
+    assert aggregate.aggregation_method == "split_mean_ic_weighted_error_metrics"
+    assert aggregate.ic_grouping == "split"
+    assert aggregate.split_count == 2
 
 
 def test_portfolio_time_series_tracks_rebalance_turnover() -> None:

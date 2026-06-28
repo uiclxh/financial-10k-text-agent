@@ -22,7 +22,7 @@ from text_factor_lab.schemas import (
     TuningLogRecord,
 )
 
-MODEL_TRAINING_VERSION = "model-training-v0"
+MODEL_TRAINING_VERSION = "model-training-v1-tie-aware-rank-ic"
 DEFAULT_RIDGE_ALPHA_GRID = [0.01, 0.1, 1.0, 10.0, 100.0]
 DEFAULT_XGBOOST_GRID = [
     {"n_estimators": 50, "max_depth": 2, "learning_rate": 0.05},
@@ -814,9 +814,21 @@ def rank_ic(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 
 
 def _rank_values(values: np.ndarray) -> np.ndarray:
+    values = np.asarray(values, dtype=float)
     order = np.argsort(values, kind="mergesort")
+    sorted_values = values[order]
     ranks = np.empty(len(values), dtype=float)
-    ranks[order] = np.arange(len(values), dtype=float)
+
+    start = 0
+    while start < len(values):
+        end = start + 1
+        while end < len(values) and sorted_values[end] == sorted_values[start]:
+            end += 1
+
+        average_rank = (start + end - 1) / 2.0
+        ranks[order[start:end]] = average_rank
+        start = end
+
     return ranks
 
 

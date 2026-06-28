@@ -12,6 +12,7 @@ EvaluationRole = Literal["validation", "test", "all"]
 
 
 class EvaluationMetricRecord(StrictBaseModel):
+    evaluation_version: str = Field(min_length=1)
     run_id: str = Field(min_length=1)
     model_id: str = Field(min_length=1)
     split_id: str = Field(min_length=1)
@@ -24,6 +25,8 @@ class EvaluationMetricRecord(StrictBaseModel):
     directional_accuracy: float = Field(ge=0, le=1)
     pearson_ic: float
     rank_ic: float
+    rank_method: Literal["average"] = "average"
+    constant_prediction_policy: Literal["return_zero"] = "return_zero"
     aggregation_method: str = "single_window"
     split_count: int = Field(default=1, ge=0)
     ic_grouping: str = "pooled"

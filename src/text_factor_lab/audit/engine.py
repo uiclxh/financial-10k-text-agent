@@ -192,8 +192,17 @@ def audit_run(
                 artifacts.vocabulary,
             ),
             _model_manifest_check(run_id, artifacts.model_manifest),
+            _model_manifest_version_check(run_id, artifacts.model_manifest),
             _model_selection_leakage_check(run_id, artifacts.tuning_log),
             _evaluation_check(run_id, artifacts.evaluation_metrics, artifacts.backtest_results),
+            _rank_ic_tie_policy_check(run_id, artifacts.evaluation_metrics),
+            _constant_baseline_rank_ic_check(
+                run_id,
+                artifacts.evaluation_metrics,
+                artifacts.predictions,
+                enabled_models=config.models.enabled,
+            ),
+            _evaluation_method_metadata_check(run_id, artifacts.evaluation_metrics),
             _delisting_application_check(
                 run_id,
                 artifacts.delisting_application_report,
@@ -815,6 +824,34 @@ def _model_manifest_check(
     )
 
 
+def _model_manifest_version_check(
+    run_id: str,
+    model_manifest: list[ModelManifestRecord],
+) -> AuditCheckRecord:
+    from text_factor_lab.models import MODEL_TRAINING_VERSION
+
+    invalid = [
+        record.model_id
+        for record in model_manifest
+        if record.model_version != MODEL_TRAINING_VERSION
+    ]
+    return _check(
+        run_id,
+        "model_manifest_version",
+        "model",
+        "fail" if invalid or not model_manifest else "pass",
+        (
+            f"All model manifests use {MODEL_TRAINING_VERSION}."
+            if model_manifest and not invalid
+            else "Model manifests are missing or stale for: "
+            + (", ".join(sorted(set(invalid))) if invalid else "all models")
+        ),
+        ["model_manifest.json"],
+        observed_value=len(invalid) if model_manifest else "missing_manifests",
+        threshold=0,
+    )
+
+
 def _feature_manifest_fit_scope_check(
     run_id: str,
     feature_manifest: list[FeatureManifestRecord],
@@ -974,6 +1011,147 @@ def _evaluation_check(
         "Evaluation metrics and backtest results are present",
         ["evaluation_metrics.json", "backtest_results.json"],
         observed_value=f"metrics={len(metrics)}, backtests={len(backtests)}",
+    )
+
+
+def _rank_ic_tie_policy_check(
+    run_id: str,
+    metrics: list[EvaluationMetricRecord],
+) -> AuditCheckRecord:
+    invalid = [
+        metric.model_id
+        for metric in metrics
+        if metric.rank_method != "average"
+        or metric.constant_prediction_policy != "return_zero"
+    ]
+    return _check(
+        run_id,
+        "rank_ic_tie_policy",
+        "evaluation",
+        "fail" if invalid else "pass",
+        (
+            "Rank IC uses average ranks for ties and returns zero for constant predictions."
+            if not invalid
+            else "Rank IC tie or constant-prediction policy is invalid for: "
+            + ", ".join(sorted(set(invalid)))
+        ),
+        ["evaluation_metrics.json"],
+        observed_value=len(invalid),
+        threshold=0,
+    )
+
+
+def _constant_baseline_rank_ic_check(
+    run_id: str,
+    metrics: list[EvaluationMetricRecord],
+    predictions: list[PredictionRecord],
+    *,
+    enabled_models: list[str],
+    tolerance: float = 1e-12,
+) -> AuditCheckRecord:
+    if "historical_mean" not in enabled_models:
+        return _check(
+            run_id,
+            "constant_baseline_rank_ic",
+            "evaluation",
+            "pass",
+            "Historical-mean baseline is not enabled; constant-baseline IC check "
+            "is not applicable.",
+            ["config_snapshot.yaml"],
+            observed_value="not_applicable",
+        )
+
+    baseline_metrics = [
+        metric
+        for metric in metrics
+        if metric.model_id.split("::", maxsplit=1)[0] == "historical_mean"
+    ]
+    violations = [
+        metric.model_id
+        for metric in baseline_metrics
+        if any(
+            abs(value) > tolerance
+            for value in (
+                metric.rank_ic,
+                metric.rank_ic_t_stat,
+                metric.rank_ic_newey_west_t_stat,
+            )
+        )
+    ]
+
+    prediction_groups: dict[tuple[str, str, str | None], set[float]] = {}
+    for prediction in predictions:
+        if prediction.model_id.split("::", maxsplit=1)[0] != "historical_mean":
+            continue
+        key = (prediction.model_id, prediction.split_id, prediction.role)
+        prediction_groups.setdefault(key, set()).add(prediction.prediction_value)
+    non_constant_groups = [
+        f"{model_id}:{split_id}:{role}"
+        for (model_id, split_id, role), values in prediction_groups.items()
+        if len(values) > 1
+    ]
+
+    if not baseline_metrics:
+        violations.append("missing_historical_mean_metrics")
+    violations.extend(non_constant_groups)
+    return _check(
+        run_id,
+        "constant_baseline_rank_ic",
+        "evaluation",
+        "fail" if violations else "pass",
+        (
+            "Historical-mean predictions are constant and all split/ALL_SPLITS Rank IC "
+            "statistics are zero."
+            if not violations
+            else "Historical-mean baseline produced invalid ranking diagnostics: "
+            + ", ".join(sorted(set(violations)))
+        ),
+        ["predictions.jsonl", "evaluation_metrics.json"],
+        observed_value=len(violations),
+        threshold=0,
+    )
+
+
+def _evaluation_method_metadata_check(
+    run_id: str,
+    metrics: list[EvaluationMetricRecord],
+) -> AuditCheckRecord:
+    from text_factor_lab.backtest.evaluation import BACKTEST_VERSION
+
+    invalid: list[str] = []
+    for metric in metrics:
+        if metric.evaluation_version != BACKTEST_VERSION:
+            valid = False
+        elif metric.split_id == "ALL_SPLITS":
+            valid = (
+                metric.aggregation_method == "split_mean_ic_weighted_error_metrics"
+                and metric.ic_grouping == "split"
+                and metric.split_count >= 1
+            )
+        else:
+            valid = (
+                metric.aggregation_method
+                == "pooled_window_metrics_with_date_ic_diagnostics"
+                and metric.ic_grouping in {"event_date_cross_section", "pooled_fallback"}
+                and metric.split_count == 1
+            )
+        if not valid:
+            invalid.append(metric.model_id)
+
+    return _check(
+        run_id,
+        "evaluation_method_metadata",
+        "evaluation",
+        "fail" if invalid or not metrics else "pass",
+        (
+            "Evaluation aggregation and IC-grouping metadata match the registered method."
+            if metrics and not invalid
+            else "Evaluation method metadata is missing or inconsistent for: "
+            + (", ".join(sorted(set(invalid))) if invalid else "all metrics")
+        ),
+        ["evaluation_metrics.json"],
+        observed_value=len(invalid) if metrics else "missing_metrics",
+        threshold=0,
     )
 
 

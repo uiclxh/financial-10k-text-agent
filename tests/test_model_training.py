@@ -4,10 +4,12 @@ import json
 from datetime import UTC, date, datetime
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from text_factor_lab.models import (
     build_model_artifacts,
+    rank_ic,
     read_features_jsonl,
     read_labels_jsonl,
     read_split_assignments_jsonl,
@@ -196,6 +198,28 @@ def test_build_model_artifacts_outputs_predictions_manifests_and_tuning_logs() -
     )
     assert ridge_tuning.validation_metric == "validation_rank_ic"
     assert ridge_tuning.selected_parameters["alpha"] in {0.1, 1.0}
+
+    labels_by_id = {record.label_id: record for record in labels}
+    historical_predictions = [
+        record
+        for record in result.predictions
+        if record.model_id.startswith("historical_mean")
+    ]
+    for role in ("validation", "test"):
+        role_predictions = [
+            record for record in historical_predictions if record.role == role
+        ]
+        prediction_values = np.array(
+            [record.prediction_value for record in role_predictions],
+            dtype=float,
+        )
+        target_values = np.array(
+            [labels_by_id[record.label_id].target_value for record in role_predictions],
+            dtype=float,
+        )
+
+        assert len(np.unique(prediction_values)) == 1
+        assert rank_ic(target_values, prediction_values) == 0.0
 
 
 def test_build_models_cli_writes_artifacts(tmp_path: Path, capsys) -> None:

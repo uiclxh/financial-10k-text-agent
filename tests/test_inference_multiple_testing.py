@@ -4,6 +4,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+from text_factor_lab.backtest.evaluation import BACKTEST_VERSION
 from text_factor_lab.inference import (
     build_inference_artifacts,
     write_multiple_testing_report_json,
@@ -33,6 +34,7 @@ def metric(
     target_name: str = "CAR_1_20",
 ) -> EvaluationMetricRecord:
     return EvaluationMetricRecord(
+        evaluation_version=BACKTEST_VERSION,
         run_id="inference_test_run",
         model_id=model_id,
         split_id=split_id,
