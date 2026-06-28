@@ -1016,9 +1016,12 @@ tr:last-child td {
 
 .leakage-step {
   display: grid;
+  grid-template-areas:
+    "index title"
+    "index description";
   grid-template-columns: 34px minmax(0, 1fr);
   gap: 12px;
-  align-items: center;
+  align-items: start;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: #fbfdff;
@@ -1026,6 +1029,7 @@ tr:last-child td {
 }
 
 .leakage-step span {
+  grid-area: index;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1038,12 +1042,15 @@ tr:last-child td {
 }
 
 .leakage-step strong {
+  grid-area: title;
   display: block;
   color: var(--text-main);
 }
 
 .leakage-step small {
+  grid-area: description;
   display: block;
+  min-width: 0;
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.45;
