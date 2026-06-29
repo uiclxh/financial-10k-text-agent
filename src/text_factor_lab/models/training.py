@@ -12,6 +12,7 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 
 from text_factor_lab.features import document_id_from_label_id
+from text_factor_lab.ranking import average_ranks
 from text_factor_lab.schemas import (
     FeatureRecord,
     LabelRecord,
@@ -814,22 +815,7 @@ def rank_ic(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 
 
 def _rank_values(values: np.ndarray) -> np.ndarray:
-    values = np.asarray(values, dtype=float)
-    order = np.argsort(values, kind="mergesort")
-    sorted_values = values[order]
-    ranks = np.empty(len(values), dtype=float)
-
-    start = 0
-    while start < len(values):
-        end = start + 1
-        while end < len(values) and sorted_values[end] == sorted_values[start]:
-            end += 1
-
-        average_rank = (start + end - 1) / 2.0
-        ranks[order[start:end]] = average_rank
-        start = end
-
-    return ranks
+    return average_ranks(values)
 
 
 def _constant_predictions(

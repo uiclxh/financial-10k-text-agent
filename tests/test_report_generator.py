@@ -292,6 +292,10 @@ def test_generate_run_report_writes_markdown_summary_and_status(tmp_path: Path) 
     assert "Empirical Report" in empirical
     assert "Economic Interpretation" in empirical
     assert "Factor Card" in factor_card
+    assert "Preregistered Portfolio Result" in factor_card
+    assert "## Best Backtest" not in factor_card
+    assert "not the preregistered primary test" in factor_card
+    assert "tie-aware quantiles" in markdown
     assert "Appendix Tables" in appendix
     summary = json.loads(result.report_summary_path.read_text(encoding="utf-8"))
     assert summary["evaluation"]["best_prediction_metric"]["rank_ic"] == 0.6

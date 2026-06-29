@@ -16,6 +16,7 @@ from text_factor_lab.backtest.monthly import (
 )
 from text_factor_lab.data.prices import PricePanel, ReturnType
 from text_factor_lab.models import rank_ic
+from text_factor_lab.ranking import average_ranks, tie_aware_extreme_indices
 from text_factor_lab.schemas import (
     EvaluationMetricRecord,
     FactorPanelRecord,
@@ -27,7 +28,7 @@ from text_factor_lab.schemas import (
     PredictionRecord,
 )
 
-BACKTEST_VERSION = "backtest-evaluation-v1-tie-aware-rank-ic"
+BACKTEST_VERSION = "backtest-evaluation-v2-tie-aware-portfolio"
 PortfolioSignalDirection = Literal[
     "long_high_score",
     "long_low_score",
@@ -255,12 +256,9 @@ def _resolved_signal_directions(
 def _direction_from_validation_rows(
     rows: list[ScoredPrediction],
 ) -> ResolvedSignalDirection:
-    if len(rows) < 2:
+    low_rows, high_rows = _tie_aware_extreme_rows(rows)
+    if not low_rows or not high_rows:
         return "long_high_score"
-    sorted_rows = sorted(rows, key=lambda row: row.prediction.factor_score)
-    leg_size = max(1, int(len(sorted_rows) * 0.2))
-    low_rows = sorted_rows[:leg_size]
-    high_rows = sorted_rows[-leg_size:]
     high_minus_low = float(
         np.mean([row.label.target_value for row in high_rows])
         - np.mean([row.label.target_value for row in low_rows])
@@ -271,6 +269,17 @@ def _direction_from_validation_rows(
 def _is_volatility_target(target_name: str) -> bool:
     return "volatility" in target_name.lower() or target_name.lower().startswith(
         "realized_vol"
+    )
+
+
+def _tie_aware_extreme_rows(
+    rows: list[ScoredPrediction],
+) -> tuple[list[ScoredPrediction], list[ScoredPrediction]]:
+    scores = np.array([row.prediction.factor_score for row in rows], dtype=float)
+    low_indices, high_indices = tie_aware_extreme_indices(scores)
+    return (
+        [rows[int(index)] for index in low_indices],
+        [rows[int(index)] for index in high_indices],
     )
 
 
@@ -533,12 +542,9 @@ def _portfolio_backtest(
     signal_direction: ResolvedSignalDirection,
     target_aware_policy: TargetAwarePortfolioPolicy,
 ) -> PortfolioBacktestRecord | None:
-    if len(rows) < 2:
+    short_rows, long_rows = _tie_aware_extreme_rows(rows)
+    if not short_rows or not long_rows:
         return None
-    sorted_rows = sorted(rows, key=lambda row: row.prediction.factor_score)
-    leg_size = max(1, int(len(sorted_rows) * 0.2))
-    short_rows = sorted_rows[:leg_size]
-    long_rows = sorted_rows[-leg_size:]
     if signal_direction == "long_low_score":
         long_rows, short_rows = short_rows, long_rows
     long_return = float(np.mean([row.label.target_value for row in long_rows]))
@@ -789,10 +795,9 @@ def _portfolio_weights_for_rebalance(
             variant=variant,
             created_at_utc=created_at_utc,
         )
-    sorted_rows = sorted(rows, key=lambda row: row.prediction.factor_score)
-    leg_size = max(1, int(len(sorted_rows) * 0.2))
-    short_rows = sorted_rows[:leg_size]
-    long_rows = sorted_rows[-leg_size:]
+    short_rows, long_rows = _tie_aware_extreme_rows(rows)
+    if not short_rows or not long_rows:
+        return []
     selected_weights = _leg_weights(
         long_rows=long_rows,
         short_rows=short_rows,
@@ -802,8 +807,16 @@ def _portfolio_weights_for_rebalance(
         target_aware_policy=variant.target_aware_policy,
         target_name=target_name,
     )
+    rank_values = average_ranks(
+        np.array([row.prediction.factor_score for row in rows], dtype=float),
+        one_based=True,
+    )
+    ranks_by_id = {
+        id(row): float(rank_value)
+        for row, rank_value in zip(rows, rank_values, strict=True)
+    }
     records: list[PortfolioWeightRecord] = []
-    for rank_index, row in enumerate(sorted_rows, start=1):
+    for row in rows:
         if id(row) not in selected_weights:
             continue
         raw_weight = selected_weights[id(row)]
@@ -829,7 +842,7 @@ def _portfolio_weights_for_rebalance(
                 industry=row.prediction.industry,
                 market_cap=row.prediction.market_cap,
                 factor_score=row.prediction.factor_score,
-                rank=rank_index,
+                rank=ranks_by_id[id(row)],
                 quantile=quantile,
                 side=side,
                 raw_weight=raw_weight,
@@ -861,23 +874,31 @@ def _sector_neutral_weights_for_rebalance(
         for sector, sector_rows in rows_by_sector.items()
         if len(sector_rows) >= 2
     }
-    if not eligible_sectors:
-        return []
-    gross_allocation = 2.0 / len(eligible_sectors)
-    selected_weights: dict[int, float] = {}
-    ranks_by_id = {
-        id(row): rank
-        for rank, row in enumerate(
-            sorted(rows, key=lambda item: item.prediction.factor_score),
-            start=1,
-        )
+    sector_extremes = {
+        sector: _tie_aware_extreme_rows(sector_rows)
+        for sector, sector_rows in eligible_sectors.items()
     }
-    for sector_rows in eligible_sectors.values():
-        sorted_rows = sorted(sector_rows, key=lambda row: row.prediction.factor_score)
-        leg_size = max(1, int(len(sorted_rows) * 0.2))
+    sector_extremes = {
+        sector: extremes
+        for sector, extremes in sector_extremes.items()
+        if extremes[0] and extremes[1]
+    }
+    if not sector_extremes:
+        return []
+    gross_allocation = 2.0 / len(sector_extremes)
+    selected_weights: dict[int, float] = {}
+    rank_values = average_ranks(
+        np.array([row.prediction.factor_score for row in rows], dtype=float),
+        one_based=True,
+    )
+    ranks_by_id = {
+        id(row): float(rank_value)
+        for row, rank_value in zip(rows, rank_values, strict=True)
+    }
+    for short_rows, long_rows in sector_extremes.values():
         sector_weights = _leg_weights(
-            long_rows=sorted_rows[-leg_size:],
-            short_rows=sorted_rows[:leg_size],
+            long_rows=long_rows,
+            short_rows=short_rows,
             weighting=variant.weighting,
             gross_allocation=gross_allocation,
             signal_direction=variant.signal_direction,

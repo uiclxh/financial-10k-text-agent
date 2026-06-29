@@ -40,10 +40,18 @@ def test_e2e_smoke_config_runs_full_pipeline(tmp_path: Path) -> None:
         for line in (run_dir / "portfolio_returns.jsonl").read_text(encoding="utf-8").splitlines()
         if line.strip()
     }
-    assert portfolio_return_sources == {"daily_price_panel"}
+    assert portfolio_return_sources == set()
+    audit = json.loads((run_dir / "audit_report.json").read_text(encoding="utf-8"))
+    evaluation_check = next(
+        check
+        for check in audit["checks"]
+        if check["check_id"] == "evaluation_outputs_present"
+    )
+    assert evaluation_check["status"] == "pass"
+    assert "tie-aware eligibility policy" in evaluation_check["message"]
     position_accounting = {
         json.loads(line)["position_accounting"]
         for line in (run_dir / "portfolio_returns.jsonl").read_text(encoding="utf-8").splitlines()
         if line.strip()
     }
-    assert position_accounting == {"drifted_daily_positions"}
+    assert position_accounting == set()

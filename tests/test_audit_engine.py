@@ -334,6 +334,8 @@ def write_complete_audit_artifacts(run_dir: Path, *, bad_prediction_label: bool 
     backtests = [backtest_record(label)]
     write_json_array(run_dir / "evaluation_metrics.json", metrics)
     write_json_array(run_dir / "backtest_results.json", backtests)
+    write_json_array(run_dir / "portfolio_metrics.json", [])
+    write_json_array(run_dir / "monthly_portfolio_metrics.json", [])
     (run_dir / "delisting_application_report.json").write_text(
         json.dumps(
             {
@@ -458,6 +460,25 @@ def test_audit_rejects_inconsistent_evaluation_method_metadata(tmp_path: Path) -
     report = audit_run(run_id="audit_test_run", run_dir=run_dir)
     check = next(
         check for check in report.checks if check.check_id == "evaluation_method_metadata"
+    )
+
+    assert check.status == "fail"
+    assert report.audit_status == "fail"
+
+
+def test_audit_rejects_historical_mean_portfolio_artifacts(tmp_path: Path) -> None:
+    run_dir = tmp_path / "runs" / "audit_test_run"
+    write_complete_audit_artifacts(run_dir)
+    backtests_path = run_dir / "backtest_results.json"
+    backtests = json.loads(backtests_path.read_text(encoding="utf-8"))
+    historical_backtest = dict(backtests[0])
+    historical_backtest["model_id"] = "historical_mean::CAR_1_20::split"
+    backtests.append(historical_backtest)
+    backtests_path.write_text(json.dumps(backtests, indent=2) + "\n", encoding="utf-8")
+
+    report = audit_run(run_id="audit_test_run", run_dir=run_dir)
+    check = next(
+        check for check in report.checks if check.check_id == "constant_baseline_portfolio"
     )
 
     assert check.status == "fail"

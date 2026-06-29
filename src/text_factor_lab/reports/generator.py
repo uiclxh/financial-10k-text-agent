@@ -582,6 +582,8 @@ def _render_markdown(summary: dict[str, Any]) -> str:
         "",
         _metrics_table(summary["evaluation"]["test_metrics"]),
         "",
+        _ranking_objective_section(summary["evaluation"]["test_metrics"]),
+        "",
         "## Prediction Distribution Diagnostics",
         "",
         _prediction_distribution_section(
@@ -601,8 +603,8 @@ def _render_markdown(summary: dict[str, Any]) -> str:
         f"- Newey-West lag: {summary['backtest']['newey_west_lag']}.",
         (
             "- Portfolio ranking uses `factor_score` ordering to form ranks and "
-            "quantiles; raw prediction magnitude is diagnostic, not the equal-weight "
-            "ranking weight."
+            "tie-aware quantiles. Tied boundary groups are never split, and a "
+            "constant-score cross-section does not form a long-short portfolio."
         ),
         "",
         _backtest_table(summary["backtest"]["top_backtests"]),
@@ -721,6 +723,8 @@ def _render_empirical_report(summary: dict[str, Any]) -> str:
         "",
         _metrics_table(summary["evaluation"]["test_metrics"]),
         "",
+        _ranking_objective_section(summary["evaluation"]["test_metrics"]),
+        "",
         "## 8. Portfolio Construction",
         "",
         (
@@ -777,7 +781,6 @@ def _render_empirical_report(summary: dict[str, Any]) -> str:
 
 def _render_factor_card(summary: dict[str, Any]) -> str:
     best_metric = summary["evaluation"]["best_prediction_metric"]
-    best_backtest = summary["backtest"]["best_backtest"]
     signal_policy = summary["specification_registry"]["signal_direction_policy"]
     lines = [
         f"# Factor Card - {summary['run_id']}",
@@ -831,13 +834,21 @@ def _render_factor_card(summary: dict[str, Any]) -> str:
             f"{_inline_list(summary['backtest']['portfolio_position_accounting'])} |"
         ),
         "",
-        "## Best Prediction",
+        "## Best Observed Exploratory Ranking Result",
         "",
         _single_metric_block(best_metric),
         "",
-        "## Best Backtest",
+        _ranking_objective_section(summary["evaluation"]["test_metrics"]),
         "",
-        _single_backtest_block(best_backtest),
+        "## Preregistered Portfolio Result",
+        "",
+        _primary_portfolio_block(summary["specification_registry"]),
+        "",
+        (
+            "Some split-level portfolio diagnostics may show high Sharpe ratios, but "
+            "they are not the preregistered primary test and can remain statistically "
+            "weak after Newey-West adjustment."
+        ),
         "",
         "## Evidence Level",
         "",
@@ -1055,23 +1066,38 @@ def _top_test_metrics(
 
 
 def _best_backtest(backtests: list[PortfolioBacktestRecord]) -> PortfolioBacktestRecord | None:
-    if not backtests:
+    eligible = [
+        record
+        for record in backtests
+        if record.model_id.split("::", 1)[0] != "historical_mean"
+    ]
+    if not eligible:
         return None
-    return sorted(backtests, key=lambda item: (-item.net_long_short_return, item.model_id))[0]
+    return sorted(eligible, key=lambda item: (-item.net_long_short_return, item.model_id))[0]
 
 
 def _top_backtests(
     backtests: list[PortfolioBacktestRecord],
     limit: int = 10,
 ) -> list[PortfolioBacktestRecord]:
-    return sorted(backtests, key=lambda item: (-item.net_long_short_return, item.model_id))[:limit]
+    eligible = [
+        record
+        for record in backtests
+        if record.model_id.split("::", 1)[0] != "historical_mean"
+    ]
+    return sorted(eligible, key=lambda item: (-item.net_long_short_return, item.model_id))[:limit]
 
 
 def _top_portfolio_metrics(
     records: list[PortfolioMetricRecord],
     limit: int = 12,
 ) -> list[PortfolioMetricRecord]:
-    return sorted(records, key=lambda item: (-item.sharpe_ratio, item.model_id))[:limit]
+    eligible = [
+        record
+        for record in records
+        if record.model_id.split("::", 1)[0] != "historical_mean"
+    ]
+    return sorted(eligible, key=lambda item: (-item.sharpe_ratio, item.model_id))[:limit]
 
 
 def _conclusion_level(
@@ -1356,19 +1382,36 @@ def _interpretation_policy(
                     "but formal text-factor and trading-alpha claims are not supported."
                 ),
             }
+        volatility_ranking = "volatility" in best_prediction.target_name.lower()
         return {
             "evidence_level": "exploratory_prediction_evidence_not_formal_trading_alpha",
             "economic_interpretation": (
-                "The run shows positive out-of-sample prediction evidence, but audit "
-                "or data-source boundaries prevent a formal trading-alpha conclusion."
+                (
+                    "The strongest evidence concerns cross-sectional ranking of future "
+                    "realized volatility, not minimum-RMSE point forecasting. Industry "
+                    "risk structure remains a strong baseline, so the current run does "
+                    "not fully isolate the incremental contribution of text."
+                )
+                if volatility_ranking
+                else (
+                    "The run shows positive out-of-sample prediction evidence, but audit "
+                    "or data-source boundaries prevent a formal trading-alpha conclusion."
+                )
             ),
             "usage_boundary": (
                 "Report as exploratory prediction evidence and disclose tested "
                 "specifications, data-source boundaries, and portfolio limitations."
             ),
             "conclusion_text": (
-                "Exploratory prediction evidence is present, but formal trading-alpha "
-                "evidence is not established."
+                (
+                    "Exploratory volatility-ranking evidence is present; return prediction "
+                    "is weaker and formal trading-alpha evidence is not established."
+                )
+                if volatility_ranking
+                else (
+                    "Exploratory prediction evidence is present, but formal trading-alpha "
+                    "evidence is not established."
+                )
             ),
         }
     if prediction_positive and backtest_positive and adjusted_discovery:
@@ -1515,6 +1558,77 @@ def _metrics_table(rows: list[dict[str, Any]]) -> str:
             f"{_fmt(row['rmse'])} | {_fmt(row['directional_accuracy'])} |"
         )
     return "\n".join(lines)
+
+
+def _ranking_objective_section(rows: list[dict[str, Any]]) -> str:
+    volatility_rows = [
+        row for row in rows if "volatility" in str(row.get("target_name", "")).lower()
+    ]
+    if not volatility_rows:
+        return (
+            "Prediction metrics should be interpreted according to the registered "
+            "target and evaluation objective."
+        )
+
+    best_rank = max(volatility_rows, key=lambda row: float(row.get("rank_ic", 0.0)))
+    best_rmse = min(volatility_rows, key=lambda row: float(row.get("rmse", float("inf"))))
+    industry = next(
+        (
+            row
+            for row in volatility_rows
+            if str(row.get("model_id", "")).split("::", 1)[0] == "industry_mean"
+        ),
+        None,
+    )
+    lines = [
+        (
+            "The model is evaluated primarily as a cross-sectional ranking signal, "
+            "not as a minimum-RMSE volatility point forecast."
+        ),
+        (
+            f"The highest volatility Rank IC is `{_fmt(best_rank.get('rank_ic'))}` "
+            f"from `{best_rank.get('model_id')}`, while the lowest volatility RMSE is "
+            f"`{_fmt(best_rmse.get('rmse'))}` from `{best_rmse.get('model_id')}`."
+        ),
+    ]
+    if industry is not None:
+        lines.append(
+            "The industry-mean baseline remains strong "
+            f"(Rank IC `{_fmt(industry.get('rank_ic'))}`), so the current experiment "
+            "does not fully isolate the incremental contribution of text from industry "
+            "risk structure."
+        )
+    lines.append(
+        "ALL_SPLITS Rank IC is an aggregation across rolling out-of-sample splits, "
+        "not a complete monthly cross-sectional IC time series."
+    )
+    return "\n\n".join(lines)
+
+
+def _primary_portfolio_block(specification_registry: dict[str, Any]) -> str:
+    primary = next(
+        (
+            spec
+            for spec in specification_registry.get("primary_specifications", [])
+            if spec.get("metric_name") == "portfolio_sharpe"
+        ),
+        None,
+    )
+    if primary is None:
+        return "No preregistered primary portfolio specification was available."
+    return "\n".join(
+        [
+            f"- Model: `{primary.get('model_id')}`.",
+            f"- Target: `{primary.get('target_name')}`.",
+            f"- Portfolio: `{primary.get('portfolio_method')}`.",
+            f"- Sharpe ratio: `{_fmt(primary.get('raw_metric'))}`.",
+            f"- Raw p-value: `{_fmt(primary.get('raw_p_value'))}`.",
+            (
+                "- Interpretation: diagnostic only; the preregistered portfolio test "
+                "does not establish formal tradable alpha."
+            ),
+        ]
+    )
 
 
 def _backtest_table(rows: list[dict[str, Any]]) -> str:
@@ -1857,7 +1971,14 @@ def _single_backtest_block(row: dict[str, Any] | None) -> str:
 def _limitations_text(summary: dict[str, Any]) -> str:
     limitations = [
         "Universe quality must be reviewed before formal empirical claims.",
-        "Current portfolio diagnostics still rely on available event-window artifacts.",
+        (
+            "Portfolio diagnostics apply a tie-aware eligibility policy, but remain "
+            "secondary to the preregistered prediction test."
+        ),
+        (
+            "Industry-neutral or residualized prediction tests are still needed to "
+            "isolate the incremental contribution of text."
+        ),
         "Deflated Sharpe, CPCV/PBO, bootstrap intervals, and clustered errors are not included.",
     ]
     if not summary["multiple_testing"]["available"]:

@@ -10,6 +10,11 @@ from typing import Any, Literal
 import numpy as np
 
 from text_factor_lab.data.prices import PricePanel, ReturnType
+from text_factor_lab.ranking import (
+    average_ranks,
+    tie_aware_extreme_indices,
+    tie_aware_quantiles,
+)
 from text_factor_lab.schemas import (
     FactorPanelRecord,
     PortfolioMetricRecord,
@@ -314,10 +319,19 @@ def _active_factor_panel_rows(
         latest_by_ticker.values(),
         key=lambda item: (item[0].prediction.factor_score, item[0].prediction.ticker),
     )
-    count = len(active_rows)
+    scores = np.array(
+        [row.prediction.factor_score for row, _ in active_rows],
+        dtype=float,
+    )
+    ranks = average_ranks(scores, one_based=True)
+    quantiles = tie_aware_quantiles(scores)
     records: list[FactorPanelRecord] = []
-    for rank_index, (row, age_days) in enumerate(active_rows, start=1):
-        quantile = min(5, max(1, int(np.ceil(rank_index * 5.0 / max(count, 1)))))
+    for (row, age_days), rank_value, quantile in zip(
+        active_rows,
+        ranks,
+        quantiles,
+        strict=True,
+    ):
         records.append(
             FactorPanelRecord(
                 run_id=run_id,
@@ -333,8 +347,8 @@ def _active_factor_panel_rows(
                 signal_event_date=row.prediction.event_date,
                 signal_age_days=age_days,
                 factor_score=row.prediction.factor_score,
-                rank=rank_index,
-                quantile=quantile,
+                rank=float(rank_value),
+                quantile=int(quantile),
                 is_active=True,
                 created_at_utc=created_at_utc,
             )
@@ -415,7 +429,11 @@ def _sector_neutral_panel_weights(
     for row in panel_rows:
         if row.sector:
             by_sector[row.sector].append(row)
-    eligible = {sector: rows for sector, rows in by_sector.items() if len(rows) >= 2}
+    eligible = {
+        sector: rows
+        for sector, rows in by_sector.items()
+        if _panel_has_distinct_extremes(rows)
+    }
     if not eligible:
         return {}
     gross_allocation = 2.0 / len(eligible)
@@ -443,12 +461,12 @@ def _panel_leg_weights(
     target_aware_policy: TargetAwarePortfolioPolicy,
     target_name: str,
 ) -> dict[str, float]:
-    if len(rows) < 2:
+    scores = np.array([row.factor_score for row in rows], dtype=float)
+    short_indices, long_indices = tie_aware_extreme_indices(scores)
+    if len(short_indices) == 0 or len(long_indices) == 0:
         return {}
-    sorted_rows = sorted(rows, key=lambda item: item.factor_score)
-    leg_size = max(1, int(len(sorted_rows) * 0.2))
-    short_rows = sorted_rows[:leg_size]
-    long_rows = sorted_rows[-leg_size:]
+    short_rows = [rows[int(index)] for index in short_indices]
+    long_rows = [rows[int(index)] for index in long_indices]
     if signal_direction == "long_low_score":
         long_rows, short_rows = short_rows, long_rows
     use_risk_scaled = (
@@ -470,6 +488,12 @@ def _panel_leg_weights(
     ):
         weights[row.ticker] = -weight
     return weights
+
+
+def _panel_has_distinct_extremes(rows: list[FactorPanelRecord]) -> bool:
+    scores = np.array([row.factor_score for row in rows], dtype=float)
+    low_indices, high_indices = tie_aware_extreme_indices(scores)
+    return len(low_indices) > 0 and len(high_indices) > 0
 
 
 def _side_weights(

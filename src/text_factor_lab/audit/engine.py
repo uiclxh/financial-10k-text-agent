@@ -27,6 +27,7 @@ from text_factor_lab.schemas import (
     ModelPredictionFailureRecord,
     MultipleTestingReportRecord,
     PortfolioBacktestRecord,
+    PortfolioMetricRecord,
     PredictionRecord,
     RunStatusRecord,
     SplitAssignmentRecord,
@@ -57,6 +58,8 @@ class AuditArtifactPaths:
     tuning_log: Path
     evaluation_metrics: Path
     backtest_results: Path
+    portfolio_metrics: Path
+    monthly_portfolio_metrics: Path
     delisting_application_report: Path
     tested_specifications: Path
     multiple_testing_report: Path
@@ -87,6 +90,8 @@ class AuditArtifactPaths:
             tuning_log=base / "tuning_log.json",
             evaluation_metrics=base / "evaluation_metrics.json",
             backtest_results=base / "backtest_results.json",
+            portfolio_metrics=base / "portfolio_metrics.json",
+            monthly_portfolio_metrics=base / "monthly_portfolio_metrics.json",
             delisting_application_report=base / "delisting_application_report.json",
             tested_specifications=base / "tested_specifications.jsonl",
             multiple_testing_report=base / "multiple_testing_report.json",
@@ -116,6 +121,8 @@ class LoadedAuditArtifacts:
     tuning_log: list[TuningLogRecord]
     evaluation_metrics: list[EvaluationMetricRecord]
     backtest_results: list[PortfolioBacktestRecord]
+    portfolio_metrics: list[PortfolioMetricRecord]
+    monthly_portfolio_metrics: list[PortfolioMetricRecord]
     delisting_application_report: dict[str, object] | None
     tested_specifications: list[TestedSpecificationRecord]
     multiple_testing_report: MultipleTestingReportRecord | None
@@ -201,6 +208,12 @@ def audit_run(
                 artifacts.evaluation_metrics,
                 artifacts.predictions,
                 enabled_models=config.models.enabled,
+            ),
+            _constant_baseline_portfolio_check(
+                run_id,
+                artifacts.backtest_results,
+                artifacts.portfolio_metrics,
+                artifacts.monthly_portfolio_metrics,
             ),
             _evaluation_method_metadata_check(run_id, artifacts.evaluation_metrics),
             _delisting_application_check(
@@ -327,6 +340,20 @@ def _load_artifacts(
     backtest_results = _load_json_array_artifact(
         run_id, paths.backtest_results, PortfolioBacktestRecord, checks, required=True
     )
+    portfolio_metrics = _load_json_array_artifact(
+        run_id,
+        paths.portfolio_metrics,
+        PortfolioMetricRecord,
+        checks,
+        required=False,
+    )
+    monthly_portfolio_metrics = _load_json_array_artifact(
+        run_id,
+        paths.monthly_portfolio_metrics,
+        PortfolioMetricRecord,
+        checks,
+        required=False,
+    )
     delisting_application_report = _load_optional_json_object(
         run_id,
         paths.delisting_application_report,
@@ -367,6 +394,8 @@ def _load_artifacts(
         tuning_log=tuning_log,
         evaluation_metrics=evaluation_metrics,
         backtest_results=backtest_results,
+        portfolio_metrics=portfolio_metrics,
+        monthly_portfolio_metrics=monthly_portfolio_metrics,
         delisting_application_report=delisting_application_report,
         tested_specifications=tested_specifications,
         multiple_testing_report=multiple_testing_report,
@@ -993,13 +1022,13 @@ def _evaluation_check(
     metrics: list[EvaluationMetricRecord],
     backtests: list[PortfolioBacktestRecord],
 ) -> AuditCheckRecord:
-    if not metrics or not backtests:
+    if not metrics:
         return _check(
             run_id,
             "evaluation_outputs_present",
             "evaluation",
             "fail",
-            "Evaluation metrics and backtest results must both be present",
+            "Evaluation metrics must be present.",
             ["evaluation_metrics.json", "backtest_results.json"],
             observed_value=f"metrics={len(metrics)}, backtests={len(backtests)}",
         )
@@ -1008,7 +1037,14 @@ def _evaluation_check(
         "evaluation_outputs_present",
         "evaluation",
         "pass",
-        "Evaluation metrics and backtest results are present",
+        (
+            "Evaluation metrics are present; "
+            + (
+                "eligible portfolio backtests are present."
+                if backtests
+                else "no portfolio passed the tie-aware eligibility policy."
+            )
+        ),
         ["evaluation_metrics.json", "backtest_results.json"],
         observed_value=f"metrics={len(metrics)}, backtests={len(backtests)}",
     )
@@ -1108,6 +1144,38 @@ def _constant_baseline_rank_ic_check(
         ),
         ["predictions.jsonl", "evaluation_metrics.json"],
         observed_value=len(violations),
+        threshold=0,
+    )
+
+
+def _constant_baseline_portfolio_check(
+    run_id: str,
+    backtests: list[PortfolioBacktestRecord],
+    portfolio_metrics: list[PortfolioMetricRecord],
+    monthly_portfolio_metrics: list[PortfolioMetricRecord],
+) -> AuditCheckRecord:
+    invalid = [
+        record.model_id
+        for record in [*backtests, *portfolio_metrics, *monthly_portfolio_metrics]
+        if record.model_id.split("::", maxsplit=1)[0] == "historical_mean"
+    ]
+    return _check(
+        run_id,
+        "constant_baseline_portfolio",
+        "evaluation",
+        "fail" if invalid else "pass",
+        (
+            "No portfolio was constructed from the constant historical-mean signal."
+            if not invalid
+            else "Constant historical-mean scores produced invalid portfolio artifacts: "
+            + ", ".join(sorted(set(invalid)))
+        ),
+        [
+            "backtest_results.json",
+            "portfolio_metrics.json",
+            "monthly_portfolio_metrics.json",
+        ],
+        observed_value=len(invalid),
         threshold=0,
     )
 

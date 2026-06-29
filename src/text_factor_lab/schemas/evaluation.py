@@ -123,7 +123,7 @@ class PortfolioWeightRecord(StrictBaseModel):
     industry: str | None = None
     market_cap: float | None = Field(default=None, gt=0)
     factor_score: float
-    rank: int = Field(ge=1)
+    rank: float = Field(ge=1)
     quantile: int = Field(ge=1)
     side: Literal["long", "short", "neutral"]
     raw_weight: float
@@ -282,7 +282,7 @@ class FactorPanelRecord(StrictBaseModel):
     signal_event_date: date
     signal_age_days: int = Field(ge=0)
     factor_score: float
-    rank: int = Field(ge=1)
+    rank: float = Field(ge=1)
     quantile: int = Field(ge=1, le=5)
     is_active: bool = True
     created_at_utc: datetime

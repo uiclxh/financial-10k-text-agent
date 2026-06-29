@@ -230,6 +230,63 @@ def test_constant_baseline_has_zero_ic_diagnostics_and_all_splits_metric() -> No
     assert aggregate.split_count == 2
 
 
+def test_constant_baseline_does_not_create_portfolio_or_extreme_quantiles() -> None:
+    labels = [
+        label(f"sec:test:{ticker}", ticker, 2016, target).model_copy(
+            update={
+                "label_start_date": date(2016, 3, 2),
+                "label_end_date": date(2016, 5, 31),
+            }
+        )
+        for ticker, target in zip(
+            ["AAA", "BBB", "CCC", "DDD"],
+            [-0.2, 0.0, 0.2, 0.4],
+            strict=True,
+        )
+    ]
+    predictions = [
+        prediction(
+            label_record,
+            model_id="historical_mean::CAR_1_20::split",
+            role="test",
+            value=0.25,
+        )
+        for label_record in labels
+    ]
+    price_rows = [
+        (day.date().isoformat(), ticker, 100.0)
+        for ticker in ["AAA", "BBB", "CCC", "DDD"]
+        for day in pd.bdate_range("2016-03-01", "2016-05-31")
+    ]
+    price_panel = build_price_panel(
+        pd.DataFrame(price_rows, columns=["date", "ticker", "adj_close"])
+    )
+
+    result = build_evaluation_artifacts(
+        run_id="constant_portfolio_test",
+        predictions=predictions,
+        labels=labels,
+        price_panel=price_panel,
+        newey_west_lag=1,
+    )
+
+    assert result.backtests == []
+    assert result.portfolio_weights == []
+    assert result.portfolio_returns == []
+    assert result.portfolio_metrics == []
+    assert result.factor_panel
+    assert result.monthly_portfolio_weights == []
+    assert result.monthly_portfolio_returns == []
+    assert result.monthly_portfolio_metrics == []
+    for rebalance_date in {record.rebalance_date for record in result.factor_panel}:
+        date_rows = [
+            record for record in result.factor_panel if record.rebalance_date == rebalance_date
+        ]
+        assert len({record.factor_score for record in date_rows}) == 1
+        assert len({record.rank for record in date_rows}) == 1
+        assert {record.quantile for record in date_rows} == {3}
+
+
 def test_portfolio_time_series_tracks_rebalance_turnover() -> None:
     labels = [
         label("sec:test:a", "AAA", 2016, -0.2),
