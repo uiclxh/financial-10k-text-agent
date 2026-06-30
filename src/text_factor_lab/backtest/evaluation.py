@@ -28,7 +28,7 @@ from text_factor_lab.schemas import (
     PredictionRecord,
 )
 
-BACKTEST_VERSION = "backtest-evaluation-v3-industry-neutral-ic"
+BACKTEST_VERSION = "backtest-evaluation-v4-stable-industry-neutral-ic"
 PortfolioSignalDirection = Literal[
     "long_high_score",
     "long_low_score",
@@ -566,8 +566,21 @@ def industry_neutral_residuals(
         group_index = np.asarray(indices, dtype=int)
         residual_true[group_index] -= float(np.mean(y_true[group_index]))
         residual_pred[group_index] -= float(np.mean(y_pred[group_index]))
+    residual_true = _zero_numerical_residuals(residual_true, y_true)
+    residual_pred = _zero_numerical_residuals(residual_pred, y_pred)
     singleton_count = sum(len(indices) == 1 for indices in grouped_indices.values())
     return residual_true, residual_pred, len(grouped_indices), singleton_count
+
+
+def _zero_numerical_residuals(
+    residuals: np.ndarray,
+    source_values: np.ndarray,
+) -> np.ndarray:
+    source_scale = max(float(np.max(np.abs(source_values), initial=0.0)), 1.0)
+    tolerance = np.finfo(float).eps * source_scale * 32.0
+    cleaned = residuals.copy()
+    cleaned[np.abs(cleaned) <= tolerance] = 0.0
+    return cleaned
 
 
 def _industry_neutral_ic_diagnostic_series(

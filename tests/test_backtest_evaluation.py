@@ -213,6 +213,9 @@ def test_constant_baseline_has_zero_ic_diagnostics_and_all_splits_metric() -> No
         assert metric.rank_ic == 0.0
         assert metric.rank_ic_t_stat == 0.0
         assert metric.rank_ic_newey_west_t_stat == 0.0
+        assert metric.industry_neutral_rank_ic == 0.0
+        assert metric.industry_neutral_rank_ic_t_stat == 0.0
+        assert metric.industry_neutral_rank_ic_newey_west_t_stat == 0.0
         assert metric.ic_grouping == "event_date_cross_section"
 
     aggregate = next(
@@ -223,6 +226,9 @@ def test_constant_baseline_has_zero_ic_diagnostics_and_all_splits_metric() -> No
     assert aggregate.rank_ic == 0.0
     assert aggregate.rank_ic_t_stat == 0.0
     assert aggregate.rank_ic_newey_west_t_stat == 0.0
+    assert aggregate.industry_neutral_rank_ic == 0.0
+    assert aggregate.industry_neutral_rank_ic_t_stat == 0.0
+    assert aggregate.industry_neutral_rank_ic_newey_west_t_stat == 0.0
     assert aggregate.rank_method == "average"
     assert aggregate.constant_prediction_policy == "return_zero"
     assert aggregate.aggregation_method == "split_mean_ic_weighted_error_metrics"

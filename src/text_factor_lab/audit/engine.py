@@ -1147,6 +1147,9 @@ def _constant_baseline_rank_ic_check(
                 metric.rank_ic,
                 metric.rank_ic_t_stat,
                 metric.rank_ic_newey_west_t_stat,
+                metric.industry_neutral_rank_ic,
+                metric.industry_neutral_rank_ic_t_stat,
+                metric.industry_neutral_rank_ic_newey_west_t_stat,
             )
         )
     ]

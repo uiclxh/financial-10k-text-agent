@@ -150,7 +150,17 @@ def _sample_rank_ic(rows: list[BootstrapRow], industry_neutral: bool) -> float:
             group_index = np.asarray(indices, dtype=int)
             y_true[group_index] -= float(np.mean(y_true[group_index]))
             y_pred[group_index] -= float(np.mean(y_pred[group_index]))
+        y_true = _zero_numerical_residuals(y_true)
+        y_pred = _zero_numerical_residuals(y_pred)
     return rank_ic(y_true, y_pred)
+
+
+def _zero_numerical_residuals(values: np.ndarray) -> np.ndarray:
+    scale = max(float(np.max(np.abs(values), initial=0.0)), 1.0)
+    tolerance = np.finfo(float).eps * scale * 32.0
+    cleaned = values.copy()
+    cleaned[np.abs(cleaned) <= tolerance] = 0.0
+    return cleaned
 
 
 def _cluster_bootstrap(
