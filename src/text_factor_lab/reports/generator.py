@@ -2144,6 +2144,15 @@ def _single_backtest_block(row: dict[str, Any] | None) -> str:
 
 
 def _limitations_text(summary: dict[str, Any]) -> str:
+    primary_neutral = next(
+        (
+            row
+            for row in summary["evaluation"]["test_metrics"]
+            if row.get("model_id")
+            == "ridge::realized_volatility_1_20::ALL_SPLITS"
+        ),
+        {},
+    )
     limitations = [
         "Universe quality must be reviewed before formal empirical claims.",
         (
@@ -2151,10 +2160,18 @@ def _limitations_text(summary: dict[str, Any]) -> str:
             "secondary to the preregistered prediction test."
         ),
         (
-            "Industry-neutral or residualized prediction tests are still needed to "
-            "isolate the incremental contribution of text."
+            "Industry-neutral Rank IC is descriptive rather than causal and is "
+            "estimated from sparse groups: "
+            f"{primary_neutral.get('industry_neutral_singleton_group_count', 0)} "
+            "split-industry groups contain only one observation."
         ),
-        "Deflated Sharpe, CPCV/PBO, bootstrap intervals, and clustered errors are not included.",
+        (
+            "Split bootstrap has only "
+            f"{summary['evaluation']['primary_rank_ic_bootstrap'].get('split_count', 0)} "
+            "OOS split clusters; event-date and ticker-cluster intervals are reported "
+            "as complementary sensitivity checks."
+        ),
+        "Deflated Sharpe and CPCV/PBO are not included.",
     ]
     if not summary["multiple_testing"]["available"]:
         limitations.append("Multiple-testing artifacts were not available for this report.")
