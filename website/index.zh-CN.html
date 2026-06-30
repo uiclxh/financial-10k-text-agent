@@ -6,7 +6,7 @@
     <title>Financial 10-K Text Agent</title>
     <meta
       name="description"
-      content="一个可审计的金融 NLP 研究流水线，用于检验 SEC 10-K 文本是否包含样本外预测信息。"
+      content="用于检验 SEC 10-K 披露文本能否排序未来实现波动率的可审计金融 NLP 流水线。"
     >
     <link rel="stylesheet" href="assets/styles.css">
   </head>
@@ -25,143 +25,191 @@
     </header>
 
     <main id="main">
-      <section class="hero">
-        <div class="container hero-grid">
-          <div class="hero-copy">
-            <span class="badge">应用型金融 NLP 研究</span>
-            <h1>Financial 10-K Text Agent</h1>
-            <p class="hero-subtitle">
-              基于 SEC 10-K 披露文本，构建可审计的金融 NLP 流水线，用于样本外未来波动率预测。
-            </p>
-            <div class="hero-cta" aria-label="主要项目入口">
-              <a class="btn btn-primary" href="results.zh-CN.html">查看结果</a>
-              <a class="btn btn-secondary" href="methods.zh-CN.html">阅读方法</a>
-              <a class="btn btn-secondary" href="https://github.com/uiclxh/financial-10k-text-agent">打开 GitHub</a>
-            </div>
-            <div class="hero-proof-grid" aria-label="核心证据">
-              <div class="proof-card">
-                <strong>500</strong>
-                <span>SEC 10-K 年报</span>
-              </div>
-              <div class="proof-card">
-                <strong>4,716</strong>
-                <span>样本外预测</span>
-              </div>
-              <div class="proof-card">
-                <strong>0.2606</strong>
-                <span>主结果 Rank IC</span>
+      <section class="hero retention-hero">
+        <div class="container">
+          <div class="hero-grid">
+            <div class="hero-copy">
+              <span class="badge">应用级金融 NLP · v4 证据</span>
+              <h1>Financial 10-K Text Agent</h1>
+              <p class="hero-hook">10-K 文本能够排序未来波动率，但尚未证明可交易 alpha。</p>
+              <p class="hero-subtitle">
+                一套可审计的研究流水线，用于检验 SEC 10-K 披露文本是否包含
+                对未来 20 个交易日实现波动率的样本外信息。
+              </p>
+              <div class="hero-cta" aria-label="主要项目入口">
+                <a class="btn btn-primary" href="results.zh-CN.html">查看结果</a>
+                <a class="btn btn-secondary" href="methods.zh-CN.html">查看审计轨迹</a>
+                <a class="btn btn-secondary" href="https://github.com/uiclxh/financial-10k-text-agent">打开 GitHub</a>
               </div>
             </div>
+            <aside class="claim-boundary-card" aria-label="核心结论">
+              <p class="eyebrow">核心结论</p>
+              <h2>有预测证据，但不是交易结论</h2>
+              <p>
+                文本特征对未来波动率排序呈现探索性证据；收益预测较弱，
+                预注册组合检验也未建立可交易 alpha。
+              </p>
+              <strong>不是交易机器人，也不是 RAG 演示。</strong>
+            </aside>
           </div>
-
-          <aside class="hero-visual" aria-label="Rank IC 预览">
-            <p class="eyebrow">结果快照</p>
-            <h2>波动率 Rank IC</h2>
-            <div class="hero-rank-chart">
-              <div class="hero-rank-row">
-                <span>XGBoost</span>
-                <span class="rank-track"><span style="--bar-width: 100%"></span></span>
-                <strong>0.3133</strong>
-              </div>
-              <div class="hero-rank-row">
-                <span>Industry mean</span>
-                <span class="rank-track"><span style="--bar-width: 94%"></span></span>
-                <strong>0.2952</strong>
-              </div>
-              <div class="hero-rank-row is-primary">
-                <span>Ridge 主模型</span>
-                <span class="rank-track"><span style="--bar-width: 83%"></span></span>
-                <strong>0.2606</strong>
-              </div>
-              <div class="hero-rank-row is-negative">
-                <span>Historical mean</span>
-                <span class="rank-track"><span style="--bar-width: 7%"></span></span>
-                <strong>-0.0206</strong>
-              </div>
-            </div>
-            <p class="small-note">主张是波动率预测证据，不是可交易 alpha。</p>
-          </aside>
+          <div class="hero-kpi-grid" aria-label="v4 核心指标">
+            <div class="proof-card"><strong>500</strong><span>SEC 10-K 年报</span></div>
+            <div class="proof-card"><strong>8,133</strong><span>样本外预测</span></div>
+            <div class="proof-card"><strong>0.3668</strong><span>最佳波动率 Rank IC</span></div>
+            <div class="proof-card"><strong>0</strong><span>审计失败</span></div>
+          </div>
         </div>
       </section>
 
       <section class="section">
         <div class="container">
           <div class="section-header">
-            <p class="eyebrow">规模</p>
-            <h2>当前版本核心指标</h2>
+            <p class="eyebrow">当前版本</p>
+            <h2>50 家公司应用级结果包 v4</h2>
+            <p><code>50_company_public_fmp_alpha_2016_2025_v4</code></p>
           </div>
-          <div class="metric-grid">
-            <div class="metric-card"><div class="metric-number">50</div><div class="metric-label">公司</div></div>
-            <div class="metric-card"><div class="metric-number">500</div><div class="metric-label">SEC 10-K 年报</div></div>
-            <div class="metric-card"><div class="metric-number">FY2016-FY2025</div><div class="metric-label">样本区间</div></div>
-            <div class="metric-card"><div class="metric-number">1,500</div><div class="metric-label">预测标签</div></div>
-            <div class="metric-card"><div class="metric-number">4,716</div><div class="metric-label">样本外预测</div></div>
+          <div class="metric-grid compact">
+            <div class="metric-card"><div class="metric-number">1,500</div><div class="metric-label">标签</div></div>
             <div class="metric-card"><div class="metric-number">520k+</div><div class="metric-label">特征记录</div></div>
-            <div class="metric-card"><div class="metric-number">568</div><div class="metric-label">测试规格</div></div>
-            <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">合格样本外覆盖率</div></div>
-            <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">审计失败</div></div>
-          </div>
-          <div class="project-link-strip" aria-label="项目导航">
-            <a href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v1">下载结果包</a>
-            <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md">Working Paper</a>
-            <a href="results.zh-CN.html#reproducibility">本地运行</a>
+            <div class="metric-card"><div class="metric-number">594</div><div class="metric-label">测试规格</div></div>
+            <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">主预测覆盖率</div></div>
           </div>
         </div>
       </section>
 
       <section class="section muted">
         <div class="container">
-          <div class="thirty-card">
-            <div>
-              <p class="eyebrow">30 秒读懂</p>
-              <h2>这个项目证明了什么</h2>
+          <div class="section-header">
+            <p class="eyebrow">结果快照</p>
+            <h2>波动率排序证据</h2>
+            <p>最强观察结果属于探索性比较；预注册 Ridge 主结果保持正向。</p>
+          </div>
+          <div class="home-result-layout">
+            <div class="model-chart-card">
+              <div class="rank-chart-row is-exploratory">
+                <div><strong>仅 TF-IDF/SVD</strong><span>探索性最佳</span></div>
+                <span class="rank-track"><span style="--bar-width: 100%"></span></span><code>0.3668</code>
+              </div>
+              <div class="rank-chart-row">
+                <div><strong>行业 + 文本</strong><span>增量诊断</span></div>
+                <span class="rank-track"><span style="--bar-width: 90%"></span></span><code>0.3296</code>
+              </div>
+              <div class="rank-chart-row">
+                <div><strong>行业均值</strong><span>经济基准</span></div>
+                <span class="rank-track"><span style="--bar-width: 80%"></span></span><code>0.2924</code>
+              </div>
+              <div class="rank-chart-row is-primary">
+                <div><strong>组合文本 Ridge</strong><span>预注册主结果</span></div>
+                <span class="rank-track"><span style="--bar-width: 65%"></span></span><code>0.2395</code>
+              </div>
             </div>
-            <p>
-              本项目在 500 份 SEC 10-K 年报上构建防泄漏的金融 NLP 流水线，
-              检验披露文本是否能预测未来 realized volatility。预注册 Ridge
-              模型达到 <code>0.2606</code> 的 Rank IC，结论限定为预测证据，
-              不是可交易 alpha。
-            </p>
+            <div class="claim-pair">
+              <article class="claim-card claim-positive">
+                <span>主预测</span>
+                <strong>Rank IC 0.2395</strong>
+                <p>原始 p 值 <code>0.00067</code>，支持正向探索性波动率排序证据。</p>
+              </article>
+              <article class="claim-card claim-negative">
+                <span>主组合</span>
+                <strong>Sharpe -0.8539</strong>
+                <p>原始 p 值 <code>0.1147</code>，未建立可交易 alpha。</p>
+              </article>
+            </div>
+          </div>
+          <div class="table-wrap chart-fallback">
+            <table>
+              <thead><tr><th>特征集</th><th>角色</th><th>Rank IC</th></tr></thead>
+              <tbody>
+                <tr><td>仅 TF-IDF/SVD</td><td>探索性最佳</td><td class="numeric">0.3668</td></tr>
+                <tr><td>行业 + 文本</td><td>诊断</td><td class="numeric">0.3296</td></tr>
+                <tr><td>行业均值</td><td>基准</td><td class="numeric">0.2924</td></tr>
+                <tr><td>组合文本 Ridge</td><td>预注册主结果</td><td class="numeric">0.2395</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">项目价值</p>
+            <h2>不止于情绪分数和文档搜索</h2>
+          </div>
+          <div class="capability-card-grid">
+            <div class="capability-card"><strong>前瞻标签</strong><p>把年报文本与未来波动率、异常收益目标对齐。</p></div>
+            <div class="capability-card"><strong>滚动样本外设计</strong><p>按时间分离训练、验证和测试窗口。</p></div>
+            <div class="capability-card"><strong>仅训练期特征</strong><p>每个 split 的 TF-IDF/SVD 词表只在训练窗口拟合。</p></div>
+            <div class="capability-card"><strong>证据层级</strong><p>严格区分预注册主结论与探索性模型比较。</p></div>
+            <div class="capability-card"><strong>研究审计</strong><p>披露 parser 问题、bootstrap 不确定性、覆盖率和多重检验。</p></div>
           </div>
         </div>
       </section>
 
       <section class="section muted">
+        <div class="container">
+          <div class="section-header">
+            <p class="eyebrow">证据阶梯</p>
+            <h2>哪些结论经受住了检查</h2>
+          </div>
+          <div class="evidence-ladder">
+            <article><span>1</span><div><strong>文本能够排序未来波动率</strong><p>仅 TF-IDF/SVD 的 Ridge 达到 Rank IC <code>0.3668</code>。</p></div></article>
+            <article><span>2</span><div><strong>行业结构不能解释全部信号</strong><p>TF-IDF/SVD 行业中性 Rank IC 为 <code>0.3416</code>，行业基准中性化后为零。</p></div></article>
+            <article><span>3</span><div><strong>Bootstrap 让结论保持克制</strong><p>事件日和 ticker-cluster 检验支持原始主 Rank IC 为正；split bootstrap 不确定。</p></div></article>
+            <article><span>4</span><div><strong>交易 alpha 尚未成立</strong><p>预注册月度组合收益为负且统计上不显著。</p></div></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
         <div class="container">
           <div class="section-header">
             <p class="eyebrow">流水线</p>
-            <h2>从 SEC 年报到审计结果</h2>
+            <h2>从 SEC 年报到可审计证据</h2>
           </div>
           <div class="pipeline-flow" aria-label="研究流水线">
-            <div class="pipeline-node"><strong>SEC 年报</strong><span>官方时间戳</span></div>
+            <div class="pipeline-node"><strong>SEC 年报</strong><span>提交时间戳</span></div>
             <div class="pipeline-arrow" aria-hidden="true">→</div>
-            <div class="pipeline-node"><strong>文本解析</strong><span>核心章节</span></div>
+            <div class="pipeline-node"><strong>Parser 审查</strong><span>章节质量标记</span></div>
             <div class="pipeline-arrow" aria-hidden="true">→</div>
-            <div class="pipeline-node"><strong>标签构建</strong><span>未来目标</span></div>
+            <div class="pipeline-node"><strong>标签</strong><span>未来目标</span></div>
             <div class="pipeline-arrow" aria-hidden="true">→</div>
-            <div class="pipeline-node"><strong>样本切分</strong><span>滚动 OOS</span></div>
+            <div class="pipeline-node"><strong>滚动切分</strong><span>embargo + OOS</span></div>
             <div class="pipeline-arrow" aria-hidden="true">→</div>
             <div class="pipeline-node"><strong>文本特征</strong><span>仅训练窗口</span></div>
             <div class="pipeline-arrow" aria-hidden="true">→</div>
-            <div class="pipeline-node"><strong>模型</strong><span>Ridge / XGBoost</span></div>
+            <div class="pipeline-node"><strong>诊断</strong><span>消融 + bootstrap</span></div>
             <div class="pipeline-arrow" aria-hidden="true">→</div>
-            <div class="pipeline-node"><strong>审计</strong><span>覆盖率 + 检验</span></div>
+            <div class="pipeline-node"><strong>审计</strong><span>结论 + 边界</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section muted">
+        <div class="container split-section">
+          <div>
+            <p class="eyebrow">查看证据</p>
+            <h2>沿公开审计轨迹向下核验</h2>
+            <p>精简、合规的公开 artifacts 将每个核心数字连接到可复现证据文件。</p>
+          </div>
+          <div class="artifact-list">
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4"><span>v4 结果包</span><span>全部公开 artifacts</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/factor_card.md"><span>因子卡片</span><span>最快结果摘要</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/feature_ablation_summary.json"><span>特征消融</span><span>文本与行业对照</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/primary_rank_ic_bootstrap_report.json"><span>Bootstrap 报告</span><span>聚类置信区间</span></a>
+            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/parser_manual_review_appendix.md"><span>Parser 审查</span><span>人工质量附录</span></a>
           </div>
         </div>
       </section>
 
       <section class="section">
         <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">个人贡献</p>
-            <h2>我的贡献</h2>
-          </div>
-          <div class="capability-card-grid">
-            <div class="capability-card"><strong>实证金融设计</strong><p>预注册目标、滚动样本外验证、事件时间标签。</p></div>
-            <div class="capability-card"><strong>数据工程</strong><p>50 家公司 10-K 面板、标签、切分、manifest、checksums。</p></div>
-            <div class="capability-card"><strong>金融 NLP</strong><p>LM 语调、TF-IDF、SVD 特征和训练窗口词表。</p></div>
-            <div class="capability-card"><strong>模型评价</strong><p>Ridge、XGBoost、Rank IC、Newey-West、多重检验。</p></div>
-            <div class="capability-card"><strong>研究审计</strong><p>覆盖率检查、泄漏检查、可复现文件。</p></div>
+          <div class="boundary-box">
+            <h2>使用边界</h2>
+            <p>
+              这是应用级探索性研究，不等同于 CRSP/WRDS 正式资产定价证据、
+              无幸存者偏差复制、生产交易系统、已证明的可交易 alpha 或投资建议。
+            </p>
           </div>
         </div>
       </section>
@@ -172,11 +220,10 @@
         <p>公开结果摘要仅用于研究展示。</p>
         <nav class="footer-links" aria-label="页脚导航">
           <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
-          <a href="results.zh-CN.html">结果页</a>
+          <a href="results.zh-CN.html">结果</a>
           <a href="methods.zh-CN.html">方法</a>
           <a href="results.zh-CN.html#reproducibility">本地运行</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT 许可</a>
-          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper_positioning.md">Working Paper</a>
         </nav>
       </div>
     </footer>
