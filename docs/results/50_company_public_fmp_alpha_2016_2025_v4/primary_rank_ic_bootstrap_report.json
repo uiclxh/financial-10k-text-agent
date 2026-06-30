@@ -1,0 +1,85 @@
+{
+  "aggregation_method": "Mean of split-level tie-aware Rank IC values; bootstrap resampling preserves each selected cluster as a block.",
+  "confidence_level": 0.95,
+  "created_at_utc": "2026-06-30T02:56:59.198952+00:00",
+  "event_date_count": 104,
+  "industry_neutral_method": "Within each sampled OOS split, target and prediction are separately demeaned by industry before tie-aware Rank IC is computed.",
+  "iterations": 2000,
+  "oos_observation_count": 197,
+  "primary_model_name": "ridge",
+  "primary_target_name": "realized_volatility_1_20",
+  "random_seed": 42,
+  "report_version": "primary-rank-ic-bootstrap-v0",
+  "rows": [
+    {
+      "bootstrap_method": "split_bootstrap",
+      "bootstrap_standard_error": 0.10692325495808302,
+      "ci_lower_95": -0.005000000000000001,
+      "ci_upper_95": 0.4840786314525811,
+      "cluster_count": 4,
+      "estimand": "all_splits_rank_ic",
+      "iterations": 2000,
+      "point_estimate": 0.2395393157262905,
+      "two_sided_zero_p_value": 0.111
+    },
+    {
+      "bootstrap_method": "event_date_bootstrap",
+      "bootstrap_standard_error": 0.07592565649456506,
+      "ci_lower_95": 0.07187280889155644,
+      "ci_upper_95": 0.3743104398263222,
+      "cluster_count": 104,
+      "estimand": "all_splits_rank_ic",
+      "iterations": 2000,
+      "point_estimate": 0.2395393157262905,
+      "two_sided_zero_p_value": 0.005
+    },
+    {
+      "bootstrap_method": "ticker_cluster_bootstrap",
+      "bootstrap_standard_error": 0.062021280258318254,
+      "ci_lower_95": 0.10913896042048224,
+      "ci_upper_95": 0.35215124137255766,
+      "cluster_count": 49,
+      "estimand": "all_splits_rank_ic",
+      "iterations": 2000,
+      "point_estimate": 0.2395393157262905,
+      "two_sided_zero_p_value": 0.001
+    },
+    {
+      "bootstrap_method": "split_bootstrap",
+      "bootstrap_standard_error": 0.1439835203777118,
+      "ci_lower_95": -0.11565547128927411,
+      "ci_upper_95": 0.5202044607772857,
+      "cluster_count": 4,
+      "estimand": "industry_neutral_all_splits_rank_ic",
+      "iterations": 2000,
+      "point_estimate": 0.20227449474400577,
+      "two_sided_zero_p_value": 0.117
+    },
+    {
+      "bootstrap_method": "event_date_bootstrap",
+      "bootstrap_standard_error": 0.14926284751520946,
+      "ci_lower_95": -0.15462503946811,
+      "ci_upper_95": 0.4273114159548375,
+      "cluster_count": 104,
+      "estimand": "industry_neutral_all_splits_rank_ic",
+      "iterations": 2000,
+      "point_estimate": 0.20227449474400577,
+      "two_sided_zero_p_value": 0.366
+    },
+    {
+      "bootstrap_method": "ticker_cluster_bootstrap",
+      "bootstrap_standard_error": 0.15356201928278615,
+      "ci_lower_95": -0.1787054272326186,
+      "ci_upper_95": 0.4180581653631519,
+      "cluster_count": 49,
+      "estimand": "industry_neutral_all_splits_rank_ic",
+      "iterations": 2000,
+      "point_estimate": 0.20227449474400577,
+      "two_sided_zero_p_value": 0.357
+    }
+  ],
+  "run_id": "50_company_public_fmp_alpha_2016_2025_v4",
+  "split_count": 4,
+  "status": "completed",
+  "ticker_count": 49
+}

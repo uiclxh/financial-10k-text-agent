@@ -6,21 +6,24 @@ licensed intermediate data.
 
 ## Latest Result Package
 
-[50_company_public_fmp_alpha_2016_2025_v1](50_company_public_fmp_alpha_2016_2025_v1/README.md)
+[50_company_public_fmp_alpha_2016_2025_v4](50_company_public_fmp_alpha_2016_2025_v4/README.md)
 
 Current public applied-grade pilot:
 
 - 50 U.S. large-cap companies.
 - FY2016-FY2025 SEC 10-K filings.
-- 500 filings, 1,500 labels, 4,716 OOS predictions.
-- 520k+ feature records and 568 tested specifications.
+- 500 filings, 1,500 labels, 8,133 OOS predictions.
+- 520k+ feature records and 594 tested specifications.
 - Preregistered primary prediction: Ridge on `realized_volatility_1_20`,
-  Rank IC `0.2606`, raw p-value `0.00017`.
+  Rank IC `0.2395`, raw p-value `0.00067`.
+- Best exploratory result: TF-IDF/SVD-only Ridge Rank IC `0.3668`.
+- Industry-neutral, feature-ablation, and clustered-bootstrap diagnostics.
 - 0 audit failures and 2 audit warnings.
 - Portfolio outputs are diagnostic only; no formal tradable-alpha claim.
 
 ## Historical Result Packages
 
+- [50_company_public_fmp_alpha_2016_2025_v1](50_company_public_fmp_alpha_2016_2025_v1/README.md)
 - [10_company_public_fmp_alpha_2016_2025_v1](10_company_public_fmp_alpha_2016_2025_v1/README.md)
 - `large_universe_90_company_final_summary.md`
 - `large_universe_90_company_final_summary.json`
