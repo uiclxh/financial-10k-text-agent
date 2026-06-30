@@ -748,7 +748,7 @@ class RunManager:
         )
         from text_factor_lab.models import (
             build_model_artifacts,
-            read_features_jsonl,
+            iter_features_jsonl,
             read_labels_jsonl,
             read_split_assignments_jsonl,
             write_model_manifest_json,
@@ -762,7 +762,7 @@ class RunManager:
         result = build_model_artifacts(
             run_id=self.config.run.run_id,
             labels=labels,
-            features=read_features_jsonl(self.features_path),
+            features=iter_features_jsonl(self.features_path),
             split_assignments=read_split_assignments_jsonl(self.split_assignments_path),
             models=self.config.models.enabled,
             random_seed=self.config.run.random_seed,

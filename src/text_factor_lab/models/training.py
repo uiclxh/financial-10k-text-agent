@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import sys
 from collections import defaultdict
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -60,12 +62,14 @@ class ModelRow:
 
 
 def read_features_jsonl(path: str | Path) -> list[FeatureRecord]:
-    records: list[FeatureRecord] = []
+    return list(iter_features_jsonl(path))
+
+
+def iter_features_jsonl(path: str | Path) -> Iterator[FeatureRecord]:
     with Path(path).open("r", encoding="utf-8") as file:
         for line in file:
             if line.strip():
-                records.append(FeatureRecord.model_validate(json.loads(line)))
-    return records
+                yield FeatureRecord.model_validate(json.loads(line))
 
 
 def read_labels_jsonl(path: str | Path) -> list[LabelRecord]:
@@ -90,7 +94,7 @@ def build_model_artifacts(
     *,
     run_id: str,
     labels: list[LabelRecord],
-    features: list[FeatureRecord],
+    features: Iterable[FeatureRecord],
     split_assignments: list[SplitAssignmentRecord],
     models: list[ModelName],
     random_seed: int,
@@ -346,11 +350,11 @@ def build_model_artifacts(
 def _build_rows_by_split_target_role(
     *,
     labels_by_id: dict[str, LabelRecord],
-    features: list[FeatureRecord],
+    features: Iterable[FeatureRecord],
     split_assignments: list[SplitAssignmentRecord],
 ) -> dict[str, dict[str, dict[str, list[ModelRow]]]]:
-    features_by_document = _features_by_document_split_role(features)
-    metadata_by_document = _metadata_by_document(features)
+    features_by_document, metadata_by_document = _feature_payloads(features)
+    row_feature_cache: dict[tuple[str, str, str], dict[str, float]] = {}
     grouped: dict[str, dict[str, dict[str, list[ModelRow]]]] = defaultdict(
         lambda: defaultdict(lambda: defaultdict(list))
     )
@@ -359,12 +363,16 @@ def _build_rows_by_split_target_role(
         if label is None:
             continue
         document_id = document_id_from_label_id(assignment.label_id)
-        row_features = _features_for_assignment(
-            features_by_document=features_by_document,
-            document_id=document_id,
-            split_id=assignment.split_id,
-            role=assignment.role,
-        )
+        feature_cache_key = (document_id, assignment.split_id, assignment.role)
+        row_features = row_feature_cache.get(feature_cache_key)
+        if row_features is None:
+            row_features = _features_for_assignment(
+                features_by_document=features_by_document,
+                document_id=document_id,
+                split_id=assignment.split_id,
+                role=assignment.role,
+            )
+            row_feature_cache[feature_cache_key] = row_features
         grouped[assignment.split_id][assignment.target_name][assignment.role].append(
             ModelRow(
                 label=label,
@@ -381,19 +389,39 @@ def _build_rows_by_split_target_role(
     return grouped
 
 
-def _metadata_by_document(features: list[FeatureRecord]) -> dict[str, dict[str, str]]:
+def _feature_payloads(
+    features: Iterable[FeatureRecord],
+) -> tuple[
+    dict[str, dict[str, dict[str, float]]],
+    dict[str, dict[str, str]],
+]:
+    grouped: dict[str, dict[str, dict[str, float]]] = defaultdict(
+        lambda: defaultdict(dict)
+    )
     metadata: dict[str, dict[str, str]] = defaultdict(dict)
     for feature in features:
+        document_id = sys.intern(feature.source_document_id)
         normalized_name = feature.feature_name.lower()
-        if feature.feature_family != "metadata":
+        if feature.feature_family == "metadata":
+            if normalized_name in {"sector", "metadata__sector"}:
+                metadata[document_id]["sector"] = str(feature.feature_value)
+            elif normalized_name in {"industry", "metadata__industry"}:
+                metadata[document_id]["industry"] = str(feature.feature_value)
+            elif normalized_name in {"market_cap", "metadata__market_cap"}:
+                metadata[document_id]["market_cap"] = str(feature.feature_value)
             continue
-        if normalized_name in {"sector", "metadata__sector"}:
-            metadata[feature.source_document_id]["sector"] = str(feature.feature_value)
-        elif normalized_name in {"industry", "metadata__industry"}:
-            metadata[feature.source_document_id]["industry"] = str(feature.feature_value)
-        elif normalized_name in {"market_cap", "metadata__market_cap"}:
-            metadata[feature.source_document_id]["market_cap"] = str(feature.feature_value)
-    return metadata
+        if isinstance(feature.feature_value, str):
+            continue
+        if feature.feature_family in {"tfidf", "tfidf_svd"}:
+            split_id, role = _tfidf_split_role(feature.feature_version)
+            if split_id is None or role is None:
+                continue
+            key = sys.intern(f"{feature.feature_family}::{split_id}::{role}")
+        else:
+            key = "global"
+        feature_name = sys.intern(feature.feature_name)
+        grouped[document_id][key][feature_name] = float(feature.feature_value)
+    return grouped, metadata
 
 
 def _optional_float(value: str | None) -> float | None:
@@ -404,26 +432,6 @@ def _optional_float(value: str | None) -> float | None:
     except ValueError:
         return None
     return parsed if parsed > 0 else None
-
-
-def _features_by_document_split_role(
-    features: list[FeatureRecord],
-) -> dict[str, dict[str, dict[str, float]]]:
-    grouped: dict[str, dict[str, dict[str, float]]] = defaultdict(lambda: defaultdict(dict))
-    for feature in features:
-        if isinstance(feature.feature_value, str):
-            continue
-        if feature.feature_family in {"tfidf", "tfidf_svd"}:
-            split_id, role = _tfidf_split_role(feature.feature_version)
-            if split_id is None or role is None:
-                continue
-            key = f"{feature.feature_family}::{split_id}::{role}"
-        else:
-            key = "global"
-        grouped[feature.source_document_id][key][feature.feature_name] = float(
-            feature.feature_value
-        )
-    return grouped
 
 
 def _tfidf_split_role(feature_version: str) -> tuple[str | None, str | None]:

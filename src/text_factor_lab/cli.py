@@ -517,7 +517,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "build-models":
         from text_factor_lab.models import (
             build_model_artifacts,
-            read_features_jsonl,
+            iter_features_jsonl,
             read_labels_jsonl,
             read_split_assignments_jsonl,
             write_model_manifest_json,
@@ -529,7 +529,7 @@ def main(argv: list[str] | None = None) -> int:
         result = build_model_artifacts(
             run_id=args.run_id,
             labels=read_labels_jsonl(args.labels),
-            features=read_features_jsonl(args.features),
+            features=iter_features_jsonl(args.features),
             split_assignments=read_split_assignments_jsonl(args.split_assignments),
             models=args.model or ["historical_mean", "ridge"],
             random_seed=args.random_seed,
