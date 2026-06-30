@@ -75,10 +75,14 @@ class RunManager:
         self.section_length_quality_report_path = (
             self.run_dir / "section_length_quality_report.json"
         )
+        self.parser_manual_review_appendix_path = (
+            self.run_dir / "parser_manual_review_appendix.md"
+        )
         self.predictions_path = self.run_dir / "predictions.jsonl"
         self.prediction_distribution_report_path = (
             self.run_dir / "prediction_distribution_report.json"
         )
+        self.feature_ablation_summary_path = self.run_dir / "feature_ablation_summary.json"
         self.model_prediction_failures_path = self.run_dir / "model_prediction_failures.jsonl"
         self.model_manifest_path = self.run_dir / "model_manifest.json"
         self.tuning_log_path = self.run_dir / "tuning_log.json"
@@ -95,6 +99,9 @@ class RunManager:
         self.tested_specifications_path = self.run_dir / "tested_specifications.jsonl"
         self.multiple_testing_report_path = self.run_dir / "multiple_testing_report.json"
         self.specification_registry_path = self.run_dir / "specification_registry.json"
+        self.primary_rank_ic_bootstrap_report_path = (
+            self.run_dir / "primary_rank_ic_bootstrap_report.json"
+        )
         self.audit_report_path = self.run_dir / "audit_report.json"
         self.parsing_quality_report_path = self.run_dir / "parsing_quality_report.json"
 
@@ -492,7 +499,9 @@ class RunManager:
             return False
 
         from text_factor_lab.diagnostics import (
+            build_parser_manual_review_appendix,
             build_section_length_quality_report,
+            write_parser_manual_review_appendix,
             write_section_length_quality_report_json,
         )
         from text_factor_lab.features import read_document_manifest_jsonl
@@ -532,6 +541,10 @@ class RunManager:
             section_length_report,
             self.section_length_quality_report_path,
         )
+        write_parser_manual_review_appendix(
+            build_parser_manual_review_appendix(section_length_report),
+            self.parser_manual_review_appendix_path,
+        )
         self.update_status("parsed")
         self._append_stage(
             records,
@@ -542,6 +555,7 @@ class RunManager:
                 self.parsed_sections_path,
                 self.parsing_quality_report_path,
                 self.section_length_quality_report_path,
+                self.parser_manual_review_appendix_path,
             ],
             metrics=quality_payload,
         )
@@ -752,6 +766,11 @@ class RunManager:
             split_assignments=read_split_assignments_jsonl(self.split_assignments_path),
             models=self.config.models.enabled,
             random_seed=self.config.run.random_seed,
+            ridge_feature_ablation_sets=(
+                self.config.models.feature_ablation.ridge_feature_sets
+                if self.config.models.feature_ablation.enabled
+                else []
+            ),
         )
         write_predictions_jsonl(result.predictions, self.predictions_path)
         write_model_prediction_failures_jsonl(
@@ -823,7 +842,9 @@ class RunManager:
         from text_factor_lab.data import load_price_panel_csv
         from text_factor_lab.inference import (
             build_inference_artifacts,
+            build_primary_rank_ic_bootstrap_report,
             write_multiple_testing_report_json,
+            write_primary_rank_ic_bootstrap_report_json,
             write_specification_registry_json,
             write_tested_specifications_jsonl,
         )
@@ -836,10 +857,12 @@ class RunManager:
             else None
         )
 
+        prediction_records = read_predictions_jsonl(self.predictions_path)
+        label_records = read_labels_jsonl(self.labels_path)
         result = build_evaluation_artifacts(
             run_id=self.config.run.run_id,
-            predictions=read_predictions_jsonl(self.predictions_path),
-            labels=read_labels_jsonl(self.labels_path),
+            predictions=prediction_records,
+            labels=label_records,
             price_panel=price_panel,
             portfolio_return_type=self.config.labels.portfolio_return_type,
             transaction_cost_bps_one_way=self.config.backtest.transaction_cost_bps_one_way,
@@ -850,6 +873,15 @@ class RunManager:
             ),
         )
         write_evaluation_metrics_json(result.metrics, self.evaluation_metrics_path)
+        from text_factor_lab.diagnostics import (
+            build_feature_ablation_summary,
+            write_feature_ablation_summary_json,
+        )
+
+        write_feature_ablation_summary_json(
+            build_feature_ablation_summary(result.metrics),
+            self.feature_ablation_summary_path,
+        )
         write_backtest_results_json(result.backtests, self.backtest_results_path)
         write_portfolio_weights_jsonl(result.portfolio_weights, self.portfolio_weights_path)
         write_portfolio_returns_jsonl(result.portfolio_returns, self.portfolio_returns_path)
@@ -889,6 +921,16 @@ class RunManager:
             inference_result.specification_registry,
             self.specification_registry_path,
         )
+        write_primary_rank_ic_bootstrap_report_json(
+            build_primary_rank_ic_bootstrap_report(
+                run_id=self.config.run.run_id,
+                predictions=prediction_records,
+                labels=label_records,
+                iterations=2000,
+                random_seed=self.config.run.random_seed,
+            ),
+            self.primary_rank_ic_bootstrap_report_path,
+        )
         self.update_status("evaluated")
         self._append_stage(
             records,
@@ -896,6 +938,7 @@ class RunManager:
             status="completed",
             outputs=[
                 self.evaluation_metrics_path,
+                self.feature_ablation_summary_path,
                 self.backtest_results_path,
                 self.portfolio_weights_path,
                 self.portfolio_returns_path,
@@ -908,6 +951,7 @@ class RunManager:
                 self.tested_specifications_path,
                 self.multiple_testing_report_path,
                 self.specification_registry_path,
+                self.primary_rank_ic_bootstrap_report_path,
             ],
             metrics={
                 "metrics": len(result.metrics),
@@ -1043,6 +1087,7 @@ class RunManager:
     def _evaluation_artifacts_are_current(self) -> bool:
         required = (
             self.evaluation_metrics_path,
+            self.feature_ablation_summary_path,
             self.backtest_results_path,
             self.portfolio_weights_path,
             self.portfolio_returns_path,
@@ -1055,6 +1100,7 @@ class RunManager:
             self.tested_specifications_path,
             self.multiple_testing_report_path,
             self.specification_registry_path,
+            self.primary_rank_ic_bootstrap_report_path,
         )
         if not self._inputs_exist(*required):
             return False

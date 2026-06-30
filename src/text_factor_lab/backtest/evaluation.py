@@ -28,7 +28,7 @@ from text_factor_lab.schemas import (
     PredictionRecord,
 )
 
-BACKTEST_VERSION = "backtest-evaluation-v2-tie-aware-portfolio"
+BACKTEST_VERSION = "backtest-evaluation-v3-industry-neutral-ic"
 PortfolioSignalDirection = Literal[
     "long_high_score",
     "long_low_score",
@@ -131,7 +131,7 @@ def build_evaluation_artifacts(
                 ic_newey_west_lag=newey_west_lag,
             )
         )
-        if role == "test":
+        if role == "test" and not _is_prediction_only_ablation(model_id):
             backtest = _portfolio_backtest(
                 run_id=run_id,
                 model_id=model_id,
@@ -221,6 +221,15 @@ def _group_scored_predictions(
     return grouped
 
 
+def _is_prediction_only_ablation(model_id: str) -> bool:
+    model_name = model_id.split("::", 1)[0]
+    return model_name in {
+        "ridge_dictionary_only",
+        "ridge_tfidf_svd_only",
+        "ridge_industry_plus_text",
+    }
+
+
 def _resolved_signal_directions(
     grouped: dict[tuple[str, str, str, str], list[ScoredPrediction]],
     requested_direction: PortfolioSignalDirection,
@@ -302,10 +311,23 @@ def _evaluation_metric(
     directional_accuracy = _directional_accuracy(y_true, y_pred)
     pearson = pearson_ic(y_true, y_pred)
     rank = rank_ic(y_true, y_pred)
+    (
+        neutral_true,
+        neutral_pred,
+        neutral_group_count,
+        neutral_singleton_count,
+    ) = industry_neutral_residuals(rows)
+    neutral_rank = rank_ic(neutral_true, neutral_pred)
     pearson_series, rank_series, ic_grouping = _ic_diagnostic_series(
         rows,
         pooled_pearson=pearson,
         pooled_rank=rank,
+    )
+    neutral_rank_series = _industry_neutral_ic_diagnostic_series(
+        rows,
+        neutral_true=neutral_true,
+        neutral_pred=neutral_pred,
+        pooled_rank=neutral_rank,
     )
     return EvaluationMetricRecord(
         evaluation_version=BACKTEST_VERSION,
@@ -332,6 +354,15 @@ def _evaluation_metric(
             ic_newey_west_lag,
         ),
         rank_ic_newey_west_t_stat=newey_west_t_stat(rank_series, ic_newey_west_lag),
+        industry_neutral_rank_ic=neutral_rank,
+        industry_neutral_rank_ic_t_stat=_mean_t_stat(neutral_rank_series),
+        industry_neutral_rank_ic_newey_west_t_stat=newey_west_t_stat(
+            neutral_rank_series,
+            ic_newey_west_lag,
+        ),
+        industry_neutral_ic_observation_count=len(neutral_rank_series),
+        industry_neutral_group_count=neutral_group_count,
+        industry_neutral_singleton_group_count=neutral_singleton_count,
         created_at_utc=datetime.now(UTC),
     )
 
@@ -393,6 +424,10 @@ def _aggregate_metric_from_split_metrics(
     )
     pearson_values = np.array([record.pearson_ic for record in rows], dtype=float)
     rank_values = np.array([record.rank_ic for record in rows], dtype=float)
+    neutral_rank_values = np.array(
+        [record.industry_neutral_rank_ic for record in rows],
+        dtype=float,
+    )
     return EvaluationMetricRecord(
         evaluation_version=BACKTEST_VERSION,
         run_id=run_id,
@@ -420,6 +455,21 @@ def _aggregate_metric_from_split_metrics(
             ic_newey_west_lag,
         ),
         rank_ic_newey_west_t_stat=newey_west_t_stat(rank_values, ic_newey_west_lag),
+        industry_neutral_rank_ic=(
+            float(np.mean(neutral_rank_values)) if len(neutral_rank_values) else 0.0
+        ),
+        industry_neutral_rank_ic_t_stat=_mean_t_stat(neutral_rank_values),
+        industry_neutral_rank_ic_newey_west_t_stat=newey_west_t_stat(
+            neutral_rank_values,
+            ic_newey_west_lag,
+        ),
+        industry_neutral_ic_observation_count=len(neutral_rank_values),
+        industry_neutral_group_count=sum(
+            record.industry_neutral_group_count for record in rows
+        ),
+        industry_neutral_singleton_group_count=sum(
+            record.industry_neutral_singleton_group_count for record in rows
+        ),
         created_at_utc=datetime.now(UTC),
     )
 
@@ -494,6 +544,52 @@ def _ic_diagnostic_series(
     if pearson_values or rank_values:
         return np.array(pearson_values), np.array(rank_values), "event_date_cross_section"
     return np.array([pooled_pearson]), np.array([pooled_rank]), "pooled_fallback"
+
+
+def industry_neutral_residuals(
+    rows: list[ScoredPrediction],
+) -> tuple[np.ndarray, np.ndarray, int, int]:
+    """Demean targets and predictions within OOS industry groups."""
+    y_true = np.array([row.label.target_value for row in rows], dtype=float)
+    y_pred = np.array([row.prediction.prediction_value for row in rows], dtype=float)
+    industries = [
+        row.prediction.industry or row.prediction.sector or "__MISSING_INDUSTRY__"
+        for row in rows
+    ]
+    grouped_indices: dict[str, list[int]] = defaultdict(list)
+    for index, industry in enumerate(industries):
+        grouped_indices[industry].append(index)
+
+    residual_true = y_true.copy()
+    residual_pred = y_pred.copy()
+    for indices in grouped_indices.values():
+        group_index = np.asarray(indices, dtype=int)
+        residual_true[group_index] -= float(np.mean(y_true[group_index]))
+        residual_pred[group_index] -= float(np.mean(y_pred[group_index]))
+    singleton_count = sum(len(indices) == 1 for indices in grouped_indices.values())
+    return residual_true, residual_pred, len(grouped_indices), singleton_count
+
+
+def _industry_neutral_ic_diagnostic_series(
+    rows: list[ScoredPrediction],
+    *,
+    neutral_true: np.ndarray,
+    neutral_pred: np.ndarray,
+    pooled_rank: float,
+    min_cross_section: int = 2,
+) -> np.ndarray:
+    indices_by_date: dict[date, list[int]] = defaultdict(list)
+    for index, row in enumerate(rows):
+        indices_by_date[row.prediction.event_date].append(index)
+    rank_values: list[float] = []
+    for event_date in sorted(indices_by_date):
+        indices = np.asarray(indices_by_date[event_date], dtype=int)
+        if len(indices) < min_cross_section:
+            continue
+        rank_values.append(rank_ic(neutral_true[indices], neutral_pred[indices]))
+    if rank_values:
+        return np.asarray(rank_values, dtype=float)
+    return np.asarray([pooled_rank], dtype=float)
 
 
 def _r_squared(y_true: np.ndarray, y_pred: np.ndarray) -> float:

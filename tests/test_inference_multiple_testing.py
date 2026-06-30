@@ -150,11 +150,11 @@ def test_build_inference_artifacts_records_specs_and_adjustments() -> None:
         ],
     )
 
-    assert len(result.tested_specifications) == 8
-    assert result.multiple_testing_report.specification_count == 8
+    assert len(result.tested_specifications) == 11
+    assert result.multiple_testing_report.specification_count == 11
     assert result.multiple_testing_report.primary_specification_count == 2
     assert result.multiple_testing_report.robustness_specification_count > 0
-    assert result.multiple_testing_report.family_count == 6
+    assert result.multiple_testing_report.family_count == 8
     assert result.multiple_testing_report.role_family_counts["primary"] == 2
     assert result.multiple_testing_report.role_family_counts["robustness"] >= 1
     assert any(
@@ -197,6 +197,11 @@ def test_build_inference_artifacts_records_specs_and_adjustments() -> None:
     assert len(rank_family.holm_adjusted_p_values) == 2
     assert len(rank_family.bh_fdr_adjusted_p_values) == 2
     assert all(0 <= value <= 1 for value in rank_family.bh_fdr_adjusted_p_values)
+    assert any(
+        spec.metric_name == "industry_neutral_rank_ic"
+        and spec.specification_role == "robustness"
+        for spec in result.tested_specifications
+    )
 
 
 def test_inference_writers_round_trip(tmp_path: Path) -> None:
@@ -221,9 +226,9 @@ def test_inference_writers_round_trip(tmp_path: Path) -> None:
     report = MultipleTestingReportRecord.model_validate(
         json.loads(report_path.read_text(encoding="utf-8"))
     )
-    assert len(specs) == 2
-    assert report.p_value_count == 2
+    assert len(specs) == 3
+    assert report.p_value_count == 3
     registry = json.loads(registry_path.read_text(encoding="utf-8"))
     assert registry["registry_version"] == "specification-registry-v1"
     assert registry["preregistration"]["status"] == "pre_registered"
-    assert registry["specification_count"] == 2
+    assert registry["specification_count"] == 3

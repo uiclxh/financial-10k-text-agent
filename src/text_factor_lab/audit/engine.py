@@ -64,6 +64,9 @@ class AuditArtifactPaths:
     tested_specifications: Path
     multiple_testing_report: Path
     specification_registry: Path
+    feature_ablation_summary: Path
+    primary_rank_ic_bootstrap_report: Path
+    parser_manual_review_appendix: Path
     coverage_waterfall: Path
     coverage_failures: Path
     coverage_by_target: Path
@@ -96,6 +99,11 @@ class AuditArtifactPaths:
             tested_specifications=base / "tested_specifications.jsonl",
             multiple_testing_report=base / "multiple_testing_report.json",
             specification_registry=base / "specification_registry.json",
+            feature_ablation_summary=base / "feature_ablation_summary.json",
+            primary_rank_ic_bootstrap_report=(
+                base / "primary_rank_ic_bootstrap_report.json"
+            ),
+            parser_manual_review_appendix=base / "parser_manual_review_appendix.md",
             coverage_waterfall=base / "coverage_waterfall.json",
             coverage_failures=base / "coverage_failures.jsonl",
             coverage_by_target=base / "coverage_by_target.csv",
@@ -216,6 +224,7 @@ def audit_run(
                 artifacts.monthly_portfolio_metrics,
             ),
             _evaluation_method_metadata_check(run_id, artifacts.evaluation_metrics),
+            _research_robustness_artifacts_check(run_id, paths),
             _delisting_application_check(
                 run_id,
                 artifacts.delisting_application_report,
@@ -1047,6 +1056,33 @@ def _evaluation_check(
         ),
         ["evaluation_metrics.json", "backtest_results.json"],
         observed_value=f"metrics={len(metrics)}, backtests={len(backtests)}",
+    )
+
+
+def _research_robustness_artifacts_check(
+    run_id: str,
+    paths: AuditArtifactPaths,
+) -> AuditCheckRecord:
+    required = [
+        paths.feature_ablation_summary,
+        paths.primary_rank_ic_bootstrap_report,
+        paths.parser_manual_review_appendix,
+    ]
+    missing = [path.name for path in required if not path.exists()]
+    return _check(
+        run_id,
+        "research_robustness_artifacts",
+        "evaluation",
+        "warn" if missing else "pass",
+        (
+            "Industry-increment, feature-ablation, bootstrap, and parser-review "
+            "diagnostics are available."
+            if not missing
+            else "Missing robustness artifacts: " + ", ".join(missing)
+        ),
+        [path.name for path in required],
+        observed_value=len(missing),
+        threshold=0,
     )
 
 

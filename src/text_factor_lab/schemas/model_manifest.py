@@ -13,6 +13,7 @@ class ModelManifestRecord(StrictBaseModel):
     model_family: str = Field(min_length=1)
     model_level: int = Field(ge=0)
     model_version: str = Field(min_length=1)
+    feature_set: str = Field(default="combined_text", min_length=1)
     hyperparameters: dict
     random_seed: int
     training_window: str = Field(min_length=1)

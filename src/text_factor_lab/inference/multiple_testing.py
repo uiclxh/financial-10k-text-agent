@@ -80,6 +80,28 @@ def _specifications_from_metrics(
                 created_at_utc=created_at_utc,
             )
         )
+        records.append(
+            _specification(
+                run_id=run_id,
+                target_name=metric.target_name,
+                split_id=metric.split_id,
+                model_id=metric.model_id,
+                portfolio_method="prediction_metric_industry_neutral",
+                weighting="not_applicable",
+                signal_direction="not_applicable",
+                target_aware_policy="none",
+                sector_neutral=True,
+                transaction_cost_bps_one_way=None,
+                metric_name="industry_neutral_rank_ic",
+                raw_metric=metric.industry_neutral_rank_ic,
+                raw_p_value=_correlation_p_value(
+                    metric.industry_neutral_rank_ic,
+                    metric.observation_count,
+                ),
+                p_value_method="fisher_z_industry_neutral_rank_ic",
+                created_at_utc=created_at_utc,
+            )
+        )
     return records
 
 
@@ -188,7 +210,7 @@ def _specification(
         label_window=_label_window(target_name),
         text_source="10-K",
         section="all_available_sections",
-        feature_method="configured_feature_set",
+        feature_method=_feature_method(model_name),
         model_name=model_name,
         model_id=model_id,
         hyperparameter_grid_id=f"{model_name}_grid",
@@ -499,6 +521,26 @@ def _model_name(model_id: str) -> str:
     return model_id.split("::", 1)[0]
 
 
+def _feature_method(model_name: str) -> str:
+    return {
+        "historical_mean": "historical_target_mean",
+        "industry_mean": "industry_only",
+        "ridge": "combined_text",
+        "ridge_dictionary_only": "dictionary_only",
+        "ridge_tfidf_svd_only": "tfidf_svd_only",
+        "ridge_industry_plus_text": "industry_plus_text",
+        "xgboost": "combined_text",
+    }.get(model_name, "configured_feature_set")
+
+
+def _is_ablation_model(model_name: str) -> bool:
+    return model_name in {
+        "ridge_dictionary_only",
+        "ridge_tfidf_svd_only",
+        "ridge_industry_plus_text",
+    }
+
+
 def _primary_target_rank(target_name: str) -> int:
     try:
         return PRIMARY_TARGET_PREFERENCE.index(target_name)
@@ -543,9 +585,29 @@ def _specification_role(
                 "Robustness prediction specification: all-split Rank IC for an "
                 "allowed target/model variant.",
             )
+        if split_id == "ALL_SPLITS" and _is_ablation_model(model_name):
+            return (
+                "robustness",
+                "Feature-ablation robustness specification with identical rolling "
+                "splits and validation-only Ridge tuning budget.",
+            )
         return (
             "exploratory",
             "Exploratory prediction specification: split-level or non-primary metric.",
+        )
+
+    if metric_name == "industry_neutral_rank_ic":
+        if split_id == "ALL_SPLITS" and (
+            allowed_model or _is_ablation_model(model_name)
+        ):
+            return (
+                "robustness",
+                "Industry-neutral robustness specification: targets and predictions "
+                "are demeaned within OOS industry groups before Rank IC is computed.",
+            )
+        return (
+            "exploratory",
+            "Split-level industry-neutral Rank IC retained as an exploratory diagnostic.",
         )
 
     if metric_name == "portfolio_sharpe":

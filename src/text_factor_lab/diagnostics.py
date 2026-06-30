@@ -10,7 +10,12 @@ from typing import Any
 
 import numpy as np
 
-from text_factor_lab.schemas import LabelRecord, ParsedSectionRecord, PredictionRecord
+from text_factor_lab.schemas import (
+    EvaluationMetricRecord,
+    LabelRecord,
+    ParsedSectionRecord,
+    PredictionRecord,
+)
 
 WORD_PATTERN = re.compile(r"[A-Za-z][A-Za-z\-']*")
 CORE_SECTION_KEYS = {"item_1a", "item_7"}
@@ -110,6 +115,102 @@ def write_section_length_quality_report_json(report: dict[str, Any], path: str |
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def build_parser_manual_review_appendix(report: dict[str, Any]) -> str:
+    rows = list(report.get("rows", []))
+    manual_rows = [
+        row for row in rows if row.get("quality_flag") == "manual_check_lt_100_words"
+    ]
+    excluded_rows = [
+        row for row in rows if row.get("excluded_from_section_level_features") is True
+    ]
+    short_included_rows = [
+        row
+        for row in rows
+        if int(row.get("word_count", 0)) < 500
+        and row.get("excluded_from_section_level_features") is not True
+    ]
+    lines = [
+        "# Parser Manual Review Appendix",
+        "",
+        "## Review Policy",
+        "",
+        "- `item_1a` and `item_7` below 100 words require manual review and are "
+        "excluded from their section-level feature scopes.",
+        "- Core sections from 100 to 499 words remain included but carry a warning.",
+        "- Short non-core sections remain included and are disclosed below.",
+        "- Exclusion does not remove the filing from the experiment. Combined/full "
+        "scope is reconstructed from the filing's remaining accepted sections, so "
+        "the main analysis retains the document while omitting suspect snippets. "
+        "This protects the main result from malformed boundaries but can reduce the "
+        "text available for affected filings.",
+        "",
+        "## Summary",
+        "",
+        f"- Parsed section records: `{report.get('section_count', len(rows))}`.",
+        f"- Manual-review records: `{len(manual_rows)}`.",
+        f"- Excluded section-level records: `{len(excluded_rows)}`.",
+        f"- Short but included records: `{len(short_included_rows)}`.",
+        "",
+        "## Manual Check Below 100 Words",
+        "",
+        _parser_review_table(manual_rows),
+        "",
+        "## Excluded From Section-Level Features",
+        "",
+        _parser_review_table(excluded_rows),
+        "",
+        "## Short But Included",
+        "",
+        _parser_review_table(short_included_rows),
+        "",
+        "## Main-Scope Interpretation",
+        "",
+        "The primary combined-text result does not rely on treating a malformed short "
+        "section as valid evidence. Affected section snippets are removed before "
+        "feature construction, while other accepted sections from the same filing "
+        "remain available. Section-specific ablations must nevertheless disclose the "
+        "reduced coverage shown in this appendix.",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def write_parser_manual_review_appendix(
+    markdown: str,
+    path: str | Path,
+) -> None:
+    output = Path(path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(markdown, encoding="utf-8")
+
+
+def _parser_review_table(rows: list[dict[str, Any]]) -> str:
+    if not rows:
+        return "No rows matched this review category."
+    lines = [
+        "| Ticker | Section | Words | Chars | Flag | Excluded | Document ID |",
+        "| --- | --- | ---: | ---: | --- | --- | --- |",
+    ]
+    for row in sorted(
+        rows,
+        key=lambda item: (
+            str(item.get("ticker", "")),
+            str(item.get("document_id", "")),
+            str(item.get("section", "")),
+        ),
+    ):
+        document_id = str(row.get("document_id", "")).replace("|", "\\|")
+        lines.append(
+            "| "
+            f"{row.get('ticker', '')} | {row.get('section', '')} | "
+            f"{row.get('word_count', 0)} | {row.get('char_count', 0)} | "
+            f"{row.get('quality_flag', '')} | "
+            f"{row.get('excluded_from_section_level_features', False)} | "
+            f"`{document_id}` |"
+        )
+    return "\n".join(lines)
+
+
 def build_prediction_distribution_report(
     *,
     predictions: list[PredictionRecord],
@@ -164,6 +265,66 @@ def build_prediction_distribution_report(
 
 
 def write_prediction_distribution_report_json(
+    report: dict[str, Any],
+    path: str | Path,
+) -> None:
+    output = Path(path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def build_feature_ablation_summary(
+    metrics: list[EvaluationMetricRecord],
+) -> dict[str, Any]:
+    feature_sets = {
+        "industry_mean": ("industry_only", "industry_mean"),
+        "ridge_dictionary_only": ("dictionary_only", "ridge"),
+        "ridge_tfidf_svd_only": ("tfidf_svd_only", "ridge"),
+        "ridge": ("combined_text", "ridge"),
+        "ridge_industry_plus_text": ("industry_plus_text", "ridge"),
+    }
+    rows: list[dict[str, Any]] = []
+    for metric in metrics:
+        if metric.role != "test" or metric.split_id != "ALL_SPLITS":
+            continue
+        model_name = metric.model_id.split("::", 1)[0]
+        if model_name not in feature_sets:
+            continue
+        feature_set, estimator = feature_sets[model_name]
+        rows.append(
+            {
+                "feature_set": feature_set,
+                "estimator": estimator,
+                "model_id": metric.model_id,
+                "target_name": metric.target_name,
+                "observation_count": metric.observation_count,
+                "rank_ic": metric.rank_ic,
+                "industry_neutral_rank_ic": metric.industry_neutral_rank_ic,
+                "rank_ic_newey_west_t_stat": metric.rank_ic_newey_west_t_stat,
+                "industry_neutral_rank_ic_newey_west_t_stat": (
+                    metric.industry_neutral_rank_ic_newey_west_t_stat
+                ),
+                "rmse": metric.rmse,
+            }
+        )
+    rows.sort(key=lambda row: (row["target_name"], row["feature_set"]))
+    return {
+        "report_version": "feature-ablation-v0",
+        "created_at_utc": datetime.now(UTC).isoformat(),
+        "comparison_policy": (
+            "Ridge variants use identical rolling splits, validation-only alpha "
+            "selection, and tuning budgets. industry_only is the training-window "
+            "industry-mean economic baseline rather than a Ridge fit."
+        ),
+        "primary_incremental_question": (
+            "Whether text retains ranking information after industry neutralization "
+            "and whether industry_plus_text improves on industry_only."
+        ),
+        "rows": rows,
+    }
+
+
+def write_feature_ablation_summary_json(
     report: dict[str, Any],
     path: str | Path,
 ) -> None:

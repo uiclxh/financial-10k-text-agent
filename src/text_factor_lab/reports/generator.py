@@ -40,7 +40,10 @@ class ReportArtifactPaths:
     feature_manifest: Path
     vocabulary_manifest: Path
     section_length_quality_report: Path
+    parser_manual_review_appendix: Path
     prediction_distribution_report: Path
+    feature_ablation_summary: Path
+    primary_rank_ic_bootstrap_report: Path
     portfolio_metrics: Path
     monthly_portfolio_metrics: Path
     multiple_testing_report: Path
@@ -80,7 +83,12 @@ class ReportArtifactPaths:
             feature_manifest=base / "feature_manifest.json",
             vocabulary_manifest=base / "vocabulary_manifest.json",
             section_length_quality_report=base / "section_length_quality_report.json",
+            parser_manual_review_appendix=base / "parser_manual_review_appendix.md",
             prediction_distribution_report=base / "prediction_distribution_report.json",
+            feature_ablation_summary=base / "feature_ablation_summary.json",
+            primary_rank_ic_bootstrap_report=(
+                base / "primary_rank_ic_bootstrap_report.json"
+            ),
             portfolio_metrics=base / "portfolio_metrics.json",
             monthly_portfolio_metrics=base / "monthly_portfolio_metrics.json",
             multiple_testing_report=base / "multiple_testing_report.json",
@@ -225,6 +233,12 @@ def _load_report_artifacts(paths: ReportArtifactPaths) -> dict[str, Any]:
         "prediction_distribution_report": _read_optional_json_object(
             paths.prediction_distribution_report
         ),
+        "feature_ablation_summary": _read_optional_json_object(
+            paths.feature_ablation_summary
+        ),
+        "primary_rank_ic_bootstrap_report": _read_optional_json_object(
+            paths.primary_rank_ic_bootstrap_report
+        ),
         "portfolio_metrics": [
             PortfolioMetricRecord.model_validate(item)
             for item in _read_optional_json_array(paths.portfolio_metrics)
@@ -306,6 +320,10 @@ def _build_summary(
     vocabulary_manifest = artifacts["vocabulary_manifest"]
     section_length_quality_report = artifacts["section_length_quality_report"] or {}
     prediction_distribution_report = artifacts["prediction_distribution_report"] or {}
+    feature_ablation_summary = artifacts["feature_ablation_summary"] or {}
+    primary_rank_ic_bootstrap_report = (
+        artifacts["primary_rank_ic_bootstrap_report"] or {}
+    )
 
     best_prediction = _best_prediction_metric(metrics)
     best_backtest = _best_backtest(backtests)
@@ -403,6 +421,8 @@ def _build_summary(
             "metric_count": len(metrics),
             "best_prediction_metric": _metric_summary(best_prediction) if best_prediction else None,
             "test_metrics": [_metric_summary(metric) for metric in _top_test_metrics(metrics)],
+            "feature_ablation": feature_ablation_summary,
+            "primary_rank_ic_bootstrap": primary_rank_ic_bootstrap_report,
         },
         "backtest": {
             "result_count": len(backtests),
@@ -452,6 +472,9 @@ def _build_summary(
                     )
                 ),
                 "rules": section_length_quality_report.get("rules", {}),
+                "manual_review_appendix_path": str(
+                    paths.parser_manual_review_appendix
+                ),
             },
             "prediction_distribution": {
                 "available": bool(prediction_distribution_report),
@@ -482,6 +505,13 @@ def _build_summary(
             "empirical_report_path": str(paths.empirical_report),
             "factor_card_path": str(paths.factor_card),
             "appendix_tables_path": str(paths.appendix_tables),
+            "parser_manual_review_appendix_path": str(
+                paths.parser_manual_review_appendix
+            ),
+            "feature_ablation_summary_path": str(paths.feature_ablation_summary),
+            "primary_rank_ic_bootstrap_report_path": str(
+                paths.primary_rank_ic_bootstrap_report
+            ),
             "report_summary_path": str(paths.report_summary),
             "commands": [
                 f"python -m text_factor_lab audit --run-id {run_id} --run-dir {paths.run_dir}",
@@ -583,6 +613,18 @@ def _render_markdown(summary: dict[str, Any]) -> str:
         _metrics_table(summary["evaluation"]["test_metrics"]),
         "",
         _ranking_objective_section(summary["evaluation"]["test_metrics"]),
+        "",
+        "## Industry-Neutral Incremental Signal",
+        "",
+        _industry_neutral_interpretation(summary["evaluation"]["test_metrics"]),
+        "",
+        "## Feature Ablation",
+        "",
+        _feature_ablation_table(summary["evaluation"]["feature_ablation"]),
+        "",
+        "## Primary Rank IC Bootstrap",
+        "",
+        _bootstrap_table(summary["evaluation"]["primary_rank_ic_bootstrap"]),
         "",
         "## Prediction Distribution Diagnostics",
         "",
@@ -725,6 +767,18 @@ def _render_empirical_report(summary: dict[str, Any]) -> str:
         "",
         _ranking_objective_section(summary["evaluation"]["test_metrics"]),
         "",
+        "## 7.1 Industry-Neutral Incremental Signal",
+        "",
+        _industry_neutral_interpretation(summary["evaluation"]["test_metrics"]),
+        "",
+        "## 7.2 Feature Ablation",
+        "",
+        _feature_ablation_table(summary["evaluation"]["feature_ablation"]),
+        "",
+        "## 7.3 Bootstrap Confidence Intervals",
+        "",
+        _bootstrap_table(summary["evaluation"]["primary_rank_ic_bootstrap"]),
+        "",
         "## 8. Portfolio Construction",
         "",
         (
@@ -840,6 +894,16 @@ def _render_factor_card(summary: dict[str, Any]) -> str:
         "",
         _ranking_objective_section(summary["evaluation"]["test_metrics"]),
         "",
+        "## Incremental Text Diagnostics",
+        "",
+        _industry_neutral_interpretation(summary["evaluation"]["test_metrics"]),
+        "",
+        _feature_ablation_table(summary["evaluation"]["feature_ablation"]),
+        "",
+        "## Primary Rank IC Confidence Intervals",
+        "",
+        _bootstrap_table(summary["evaluation"]["primary_rank_ic_bootstrap"]),
+        "",
         "## Preregistered Portfolio Result",
         "",
         _primary_portfolio_block(summary["specification_registry"]),
@@ -920,6 +984,14 @@ def _render_appendix_tables(summary: dict[str, Any]) -> str:
         "",
         _metrics_table(summary["evaluation"]["test_metrics"]),
         "",
+        "## Table 3B Industry-Neutral And Feature-Ablation Results",
+        "",
+        _feature_ablation_table(summary["evaluation"]["feature_ablation"]),
+        "",
+        "## Table 3C Primary Rank IC Bootstrap Confidence Intervals",
+        "",
+        _bootstrap_table(summary["evaluation"]["primary_rank_ic_bootstrap"]),
+        "",
         "## Table 4 Portfolio Return Summary",
         "",
         _backtest_table(summary["backtest"]["top_backtests"]),
@@ -984,6 +1056,10 @@ def _section_length_quality_section(summary: dict[str, Any]) -> str:
                 "- Feature policy: `item_1a` / `item_7` sections below 100 words "
                 "are excluded from section-level features until manually reviewed; "
                 "other text scopes remain available."
+            ),
+            (
+                "- Manual-review appendix: "
+                f"`{summary.get('manual_review_appendix_path')}`."
             ),
         ]
     )
@@ -1186,6 +1262,19 @@ def _metric_summary(metric: EvaluationMetricRecord) -> dict[str, Any]:
         "rank_ic_t_stat": metric.rank_ic_t_stat,
         "pearson_ic_newey_west_t_stat": metric.pearson_ic_newey_west_t_stat,
         "rank_ic_newey_west_t_stat": metric.rank_ic_newey_west_t_stat,
+        "industry_neutral_rank_ic": metric.industry_neutral_rank_ic,
+        "industry_neutral_rank_ic_t_stat": metric.industry_neutral_rank_ic_t_stat,
+        "industry_neutral_rank_ic_newey_west_t_stat": (
+            metric.industry_neutral_rank_ic_newey_west_t_stat
+        ),
+        "industry_neutral_ic_observation_count": (
+            metric.industry_neutral_ic_observation_count
+        ),
+        "industry_neutral_group_count": metric.industry_neutral_group_count,
+        "industry_neutral_singleton_group_count": (
+            metric.industry_neutral_singleton_group_count
+        ),
+        "industry_neutral_method": metric.industry_neutral_method,
     }
 
 
@@ -1543,9 +1632,9 @@ def _metrics_table(rows: list[dict[str, Any]]) -> str:
     if not rows:
         return "No out-of-sample prediction metrics were available."
     lines = [
-        "| Model | Split | Target | N | Agg | IC Group | Rank IC | Rank IC t | "
-        "Rank IC NW t | RMSE | Direction |",
-        "| --- | --- | --- | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: |",
+        "| Model | Split | Target | N | Agg | IC Group | Rank IC | Neutral Rank IC | "
+        "Rank IC NW t | Neutral NW t | RMSE | Direction |",
+        "| --- | --- | --- | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in rows:
         lines.append(
@@ -1553,8 +1642,9 @@ def _metrics_table(rows: list[dict[str, Any]]) -> str:
             f"{row['model_id']} | {row['split_id']} | {row['target_name']} | "
             f"{row['observation_count']} | {row['aggregation_method']} | "
             f"{row['ic_grouping']} | {_fmt(row['rank_ic'])} | "
-            f"{_fmt(row['rank_ic_t_stat'])} | "
+            f"{_fmt(row['industry_neutral_rank_ic'])} | "
             f"{_fmt(row['rank_ic_newey_west_t_stat'])} | "
+            f"{_fmt(row['industry_neutral_rank_ic_newey_west_t_stat'])} | "
             f"{_fmt(row['rmse'])} | {_fmt(row['directional_accuracy'])} |"
         )
     return "\n".join(lines)
@@ -1603,6 +1693,91 @@ def _ranking_objective_section(rows: list[dict[str, Any]]) -> str:
         "not a complete monthly cross-sectional IC time series."
     )
     return "\n\n".join(lines)
+
+
+def _industry_neutral_interpretation(rows: list[dict[str, Any]]) -> str:
+    volatility_rows = [
+        row
+        for row in rows
+        if row.get("split_id") == "ALL_SPLITS"
+        and "volatility" in str(row.get("target_name", "")).lower()
+    ]
+    if not volatility_rows:
+        return "No ALL_SPLITS volatility rows were available for industry neutralization."
+    lines = [
+        (
+            "Industry-neutral Rank IC separately demeans realized targets and model "
+            "predictions within each OOS split-industry group before applying "
+            "tie-aware rank correlation. It is a descriptive incremental-signal "
+            "diagnostic, not a causal decomposition."
+        ),
+        "",
+        "| Model | Raw Rank IC | Industry-Neutral Rank IC | Neutral NW t | Groups | Singletons |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for row in sorted(
+        volatility_rows,
+        key=lambda item: -float(item.get("industry_neutral_rank_ic", 0.0)),
+    ):
+        lines.append(
+            "| "
+            f"{row.get('model_id')} | {_fmt(row.get('rank_ic'))} | "
+            f"{_fmt(row.get('industry_neutral_rank_ic'))} | "
+            f"{_fmt(row.get('industry_neutral_rank_ic_newey_west_t_stat'))} | "
+            f"{row.get('industry_neutral_group_count', 0)} | "
+            f"{row.get('industry_neutral_singleton_group_count', 0)} |"
+        )
+    return "\n".join(lines)
+
+
+def _feature_ablation_table(summary: dict[str, Any]) -> str:
+    rows = summary.get("rows", []) if summary else []
+    if not rows:
+        return "No feature-ablation artifact was available."
+    lines = [
+        str(summary.get("comparison_policy", "")),
+        "",
+        "| Feature Set | Estimator | Target | Rank IC | Neutral Rank IC | "
+        "Rank IC NW t | Neutral NW t | RMSE |",
+        "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for row in rows:
+        lines.append(
+            "| "
+            f"{row.get('feature_set')} | {row.get('estimator')} | "
+            f"{row.get('target_name')} | {_fmt(row.get('rank_ic'))} | "
+            f"{_fmt(row.get('industry_neutral_rank_ic'))} | "
+            f"{_fmt(row.get('rank_ic_newey_west_t_stat'))} | "
+            f"{_fmt(row.get('industry_neutral_rank_ic_newey_west_t_stat'))} | "
+            f"{_fmt(row.get('rmse'))} |"
+        )
+    return "\n".join(lines)
+
+
+def _bootstrap_table(summary: dict[str, Any]) -> str:
+    rows = summary.get("rows", []) if summary else []
+    if not rows:
+        return "No primary Rank IC bootstrap artifact was available."
+    lines = [
+        (
+            f"Bootstrap uses `{summary.get('iterations')}` deterministic resamples "
+            f"(seed `{summary.get('random_seed')}`)."
+        ),
+        "",
+        "| Estimand | Method | Point | 95% CI | Bootstrap SE | Zero p | Clusters |",
+        "| --- | --- | ---: | --- | ---: | ---: | ---: |",
+    ]
+    for row in rows:
+        lines.append(
+            "| "
+            f"{row.get('estimand')} | {row.get('bootstrap_method')} | "
+            f"{_fmt(row.get('point_estimate'))} | "
+            f"[{_fmt(row.get('ci_lower_95'))}, {_fmt(row.get('ci_upper_95'))}] | "
+            f"{_fmt(row.get('bootstrap_standard_error'))} | "
+            f"{_fmt(row.get('two_sided_zero_p_value'))} | "
+            f"{row.get('cluster_count')} |"
+        )
+    return "\n".join(lines)
 
 
 def _primary_portfolio_block(specification_registry: dict[str, Any]) -> str:

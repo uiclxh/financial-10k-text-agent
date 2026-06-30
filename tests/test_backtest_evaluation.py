@@ -230,6 +230,81 @@ def test_constant_baseline_has_zero_ic_diagnostics_and_all_splits_metric() -> No
     assert aggregate.split_count == 2
 
 
+def test_industry_neutral_rank_ic_removes_pure_industry_level_signal() -> None:
+    labels = [
+        label(f"sec:test:{ticker}", ticker, 2016, target)
+        for ticker, target in [
+            ("A1", 1.0),
+            ("A2", 2.0),
+            ("B1", 10.0),
+            ("B2", 11.0),
+        ]
+    ]
+    predictions = [
+        prediction(
+            label_record,
+            model_id="ridge::CAR_1_20::split",
+            role="test",
+            value=1.0 if label_record.ticker.startswith("A") else 10.0,
+            sector="industry_a" if label_record.ticker.startswith("A") else "industry_b",
+        )
+        for label_record in labels
+    ]
+
+    result = build_evaluation_artifacts(
+        run_id="industry_neutral_test",
+        predictions=predictions,
+        labels=labels,
+        newey_west_lag=1,
+    )
+
+    metric = next(
+        row
+        for row in result.metrics
+        if row.role == "test" and row.split_id != "ALL_SPLITS"
+    )
+    assert metric.rank_ic > 0.8
+    assert metric.industry_neutral_rank_ic == 0.0
+    assert metric.industry_neutral_group_count == 2
+    assert metric.industry_neutral_singleton_group_count == 0
+
+
+def test_industry_neutral_rank_ic_retains_within_industry_signal() -> None:
+    labels = [
+        label(f"sec:test:{ticker}", ticker, 2016, target)
+        for ticker, target in [
+            ("A1", 1.0),
+            ("A2", 2.0),
+            ("B1", 10.0),
+            ("B2", 11.0),
+        ]
+    ]
+    predictions = [
+        prediction(
+            label_record,
+            model_id="ridge::CAR_1_20::split",
+            role="test",
+            value=label_record.target_value,
+            sector="industry_a" if label_record.ticker.startswith("A") else "industry_b",
+        )
+        for label_record in labels
+    ]
+
+    result = build_evaluation_artifacts(
+        run_id="industry_neutral_test",
+        predictions=predictions,
+        labels=labels,
+        newey_west_lag=1,
+    )
+
+    metric = next(
+        row
+        for row in result.metrics
+        if row.role == "test" and row.split_id != "ALL_SPLITS"
+    )
+    assert metric.industry_neutral_rank_ic == 1.0
+
+
 def test_constant_baseline_does_not_create_portfolio_or_extreme_quantiles() -> None:
     labels = [
         label(f"sec:test:{ticker}", ticker, 2016, target).model_copy(

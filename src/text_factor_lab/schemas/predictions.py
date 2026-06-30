@@ -32,6 +32,7 @@ class PredictionRecord(StrictBaseModel):
     sector: str | None = None
     industry: str | None = None
     market_cap: float | None = Field(default=None, gt=0)
+    feature_set: str = Field(default="combined_text", min_length=1)
     feature_version: str = Field(min_length=1)
     label_version: str = Field(min_length=1)
     training_window: str = Field(min_length=1)

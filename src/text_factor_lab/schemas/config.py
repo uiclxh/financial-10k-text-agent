@@ -164,9 +164,25 @@ class ModelsTuningConfig(StrictBaseModel):
     save_tuning_log: bool
 
 
+class FeatureAblationConfig(StrictBaseModel):
+    enabled: bool = False
+    ridge_feature_sets: list[
+        Literal["dictionary_only", "tfidf_svd_only", "industry_plus_text"]
+    ] = Field(
+        default_factory=lambda: [
+            "dictionary_only",
+            "tfidf_svd_only",
+            "industry_plus_text",
+        ]
+    )
+
+
 class ModelsConfig(StrictBaseModel):
     enabled: list[str] = Field(min_length=1)
     tuning: ModelsTuningConfig
+    feature_ablation: FeatureAblationConfig = Field(
+        default_factory=FeatureAblationConfig
+    )
 
 
 class BacktestConfig(StrictBaseModel):

@@ -23,7 +23,7 @@ from text_factor_lab.schemas import (
     TuningLogRecord,
 )
 
-MODEL_TRAINING_VERSION = "model-training-v1-tie-aware-rank-ic"
+MODEL_TRAINING_VERSION = "model-training-v2-feature-ablation"
 DEFAULT_RIDGE_ALPHA_GRID = [0.01, 0.1, 1.0, 10.0, 100.0]
 DEFAULT_XGBOOST_GRID = [
     {"n_estimators": 50, "max_depth": 2, "learning_rate": 0.05},
@@ -31,6 +31,13 @@ DEFAULT_XGBOOST_GRID = [
     {"n_estimators": 100, "max_depth": 2, "learning_rate": 0.03},
 ]
 ModelName = Literal["historical_mean", "industry_mean", "ridge", "xgboost"]
+RidgeFeatureSet = Literal[
+    "combined_text",
+    "dictionary_only",
+    "tfidf_svd_only",
+    "industry_plus_text",
+]
+INDUSTRY_DUMMY_PREFIX = "industry_dummy::"
 
 
 @dataclass(frozen=True)
@@ -88,6 +95,7 @@ def build_model_artifacts(
     models: list[ModelName],
     random_seed: int,
     ridge_alpha_grid: list[float] | None = None,
+    ridge_feature_ablation_sets: list[str] | None = None,
 ) -> ModelBuildResult:
     labels_by_id = {label.label_id: label for label in labels}
     rows_by_split_target_role = _build_rows_by_split_target_role(
@@ -202,6 +210,68 @@ def build_model_artifacts(
             predictions.extend(model_predictions)
             manifests.append(manifest)
             tuning_logs.append(tuning_log)
+
+            for feature_set in ridge_feature_ablation_sets or []:
+                ablation_feature_names = _feature_names_for_set(
+                    train_rows,
+                    feature_set,
+                )
+                model_name = f"ridge_{feature_set}"
+                if not ablation_feature_names:
+                    prediction_failures.extend(
+                        _prediction_failures(
+                            run_id=run_id,
+                            model_name=model_name,
+                            split_id=split_id,
+                            target_name=target_name,
+                            rows=[*validation_rows, *test_rows],
+                            failure_stage="missing_train_features",
+                            failure_reason=(
+                                f"No train-window features are available for "
+                                f"feature_set={feature_set}."
+                            ),
+                            recommended_fix=(
+                                "Rebuild the requested feature family or disable this "
+                                "ablation variant."
+                            ),
+                        )
+                    )
+                    continue
+                ablation_validation_rows, validation_failures = (
+                    _split_feature_valid_rows(
+                        run_id=run_id,
+                        model_name=model_name,
+                        split_id=split_id,
+                        target_name=target_name,
+                        rows=validation_rows,
+                    )
+                )
+                ablation_test_rows, test_failures = _split_feature_valid_rows(
+                    run_id=run_id,
+                    model_name=model_name,
+                    split_id=split_id,
+                    target_name=target_name,
+                    rows=test_rows,
+                )
+                prediction_failures.extend(validation_failures)
+                prediction_failures.extend(test_failures)
+                ablation_predictions, ablation_manifest, ablation_tuning = _fit_ridge(
+                    run_id=run_id,
+                    split_id=split_id,
+                    target_name=target_name,
+                    train_rows=train_rows,
+                    validation_rows=ablation_validation_rows,
+                    test_rows=ablation_test_rows,
+                    feature_names=ablation_feature_names,
+                    alpha_grid=alpha_grid,
+                    random_seed=random_seed,
+                    window_payload=window_payload,
+                    model_name=model_name,
+                    feature_set=feature_set,
+                )
+                predictions.extend(ablation_predictions)
+                manifests.append(ablation_manifest)
+                tuning_logs.append(ablation_tuning)
         elif "ridge" in models:
             prediction_failures.extend(
                 _prediction_failures(
@@ -388,11 +458,45 @@ def _feature_names_from_train_rows(train_rows: list[ModelRow]) -> list[str]:
     return sorted(names)
 
 
+def _feature_names_for_set(
+    train_rows: list[ModelRow],
+    feature_set: str,
+) -> list[str]:
+    all_names = _feature_names_from_train_rows(train_rows)
+    dictionary_names = [
+        name for name in all_names if name.startswith("dictionary_")
+    ]
+    tfidf_names = [
+        name
+        for name in all_names
+        if name.startswith("tfidf_") or name.startswith("tfidf_svd_")
+    ]
+    if feature_set == "dictionary_only":
+        return dictionary_names
+    if feature_set == "tfidf_svd_only":
+        return tfidf_names
+    if feature_set == "combined_text":
+        return sorted({*dictionary_names, *tfidf_names})
+    if feature_set == "industry_plus_text":
+        industry_names = sorted(
+            {
+                f"{INDUSTRY_DUMMY_PREFIX}{row.industry}"
+                for row in train_rows
+            }
+        )
+        return sorted({*dictionary_names, *tfidf_names, *industry_names})
+    raise ValueError(f"unsupported ridge feature_set: {feature_set}")
+
+
 def _matrix(rows: list[ModelRow], feature_names: list[str]) -> np.ndarray:
     matrix = np.zeros((len(rows), len(feature_names)), dtype=float)
     for row_index, row in enumerate(rows):
         for column_index, feature_name in enumerate(feature_names):
-            matrix[row_index, column_index] = row.features.get(feature_name, 0.0)
+            if feature_name.startswith(INDUSTRY_DUMMY_PREFIX):
+                expected_industry = feature_name.removeprefix(INDUSTRY_DUMMY_PREFIX)
+                matrix[row_index, column_index] = float(row.industry == expected_industry)
+            else:
+                matrix[row_index, column_index] = row.features.get(feature_name, 0.0)
     return matrix
 
 
@@ -423,6 +527,7 @@ def _fit_historical_mean(
         prediction_value=mean_value,
         feature_version=feature_version,
         window_payload=window_payload,
+        feature_set="historical_target_mean",
     )
     manifest = _model_manifest(
         model_id=f"historical_mean::{target_name}::{split_id}",
@@ -436,6 +541,7 @@ def _fit_historical_mean(
         feature_version=feature_version,
         label_version=train_rows[0].label.label_version,
         window_payload=window_payload,
+        feature_set="historical_target_mean",
     )
     tuning_log = TuningLogRecord(
         run_id=run_id,
@@ -482,6 +588,7 @@ def _fit_industry_mean(
         predictions=industry_predictions,
         feature_version=feature_version,
         window_payload=window_payload,
+        feature_set="industry_only",
     )
     manifest = _model_manifest(
         model_id=f"industry_mean::{target_name}::{split_id}",
@@ -499,6 +606,7 @@ def _fit_industry_mean(
         feature_version=feature_version,
         label_version=train_rows[0].label.label_version,
         window_payload=window_payload,
+        feature_set="industry_only",
     )
     tuning_log = TuningLogRecord(
         run_id=run_id,
@@ -555,7 +663,7 @@ def _split_feature_valid_rows(
 def _prediction_failures(
     *,
     run_id: str,
-    model_name: ModelName,
+    model_name: str,
     split_id: str,
     target_name: str,
     rows: list[ModelRow],
@@ -598,6 +706,8 @@ def _fit_ridge(
     alpha_grid: list[float],
     random_seed: int,
     window_payload: dict[str, str],
+    model_name: str = "ridge",
+    feature_set: str = "combined_text",
 ) -> tuple[list[PredictionRecord], ModelManifestRecord, TuningLogRecord]:
     x_train = _matrix(train_rows, feature_names)
     y_train = _targets(train_rows)
@@ -638,13 +748,14 @@ def _fit_ridge(
 
     predictions = _array_predictions(
         run_id=run_id,
-        model_id=f"ridge::{target_name}::{split_id}",
+        model_id=f"{model_name}::{target_name}::{split_id}",
         split_id=split_id,
         target_name=target_name,
         rows=validation_rows,
         predictions=best_validation_prediction if validation_rows else np.array([], dtype=float),
         feature_version=_feature_version(split_id),
         window_payload=window_payload,
+        feature_set=feature_set,
     )
     if test_rows:
         x_test = _matrix(test_rows, feature_names)
@@ -652,17 +763,18 @@ def _fit_ridge(
         predictions.extend(
             _array_predictions(
                 run_id=run_id,
-                model_id=f"ridge::{target_name}::{split_id}",
+                model_id=f"{model_name}::{target_name}::{split_id}",
                 split_id=split_id,
                 target_name=target_name,
                 rows=test_rows,
                 predictions=test_predictions,
                 feature_version=_feature_version(split_id),
                 window_payload=window_payload,
+                feature_set=feature_set,
             )
         )
     manifest = _model_manifest(
-        model_id=f"ridge::{target_name}::{split_id}",
+        model_id=f"{model_name}::{target_name}::{split_id}",
         model_name="ridge",
         model_family="linear_regularized",
         model_level=2,
@@ -673,6 +785,7 @@ def _fit_ridge(
         feature_version=_feature_version(split_id),
         label_version=train_rows[0].label.label_version,
         window_payload=window_payload,
+        feature_set=feature_set,
     )
     tuning_log = TuningLogRecord(
         run_id=run_id,
@@ -828,6 +941,7 @@ def _constant_predictions(
     prediction_value: float,
     feature_version: str,
     window_payload: dict[str, str],
+    feature_set: str = "historical_target_mean",
 ) -> list[PredictionRecord]:
     return _array_predictions(
         run_id=run_id,
@@ -838,6 +952,7 @@ def _constant_predictions(
         predictions=np.full(len(rows), prediction_value, dtype=float),
         feature_version=feature_version,
         window_payload=window_payload,
+        feature_set=feature_set,
     )
 
 
@@ -851,6 +966,7 @@ def _array_predictions(
     predictions: np.ndarray,
     feature_version: str,
     window_payload: dict[str, str],
+    feature_set: str = "combined_text",
 ) -> list[PredictionRecord]:
     records: list[PredictionRecord] = []
     for row, prediction in zip(rows, predictions, strict=True):
@@ -870,6 +986,7 @@ def _array_predictions(
                 sector=row.sector,
                 industry=row.industry,
                 market_cap=row.market_cap,
+                feature_set=feature_set,
                 feature_version=feature_version,
                 label_version=row.label.label_version,
                 training_window=window_payload["training_window"],
@@ -893,6 +1010,7 @@ def _model_manifest(
     feature_version: str,
     label_version: str,
     window_payload: dict[str, str],
+    feature_set: str = "combined_text",
 ) -> ModelManifestRecord:
     train_rows, validation_rows, test_rows = target_rows
     return ModelManifestRecord(
@@ -901,6 +1019,7 @@ def _model_manifest(
         model_family=model_family,
         model_level=model_level,
         model_version=MODEL_TRAINING_VERSION,
+        feature_set=feature_set,
         hyperparameters=hyperparameters,
         random_seed=random_seed,
         training_window=window_payload["training_window"],

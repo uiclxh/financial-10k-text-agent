@@ -222,6 +222,38 @@ def test_build_model_artifacts_outputs_predictions_manifests_and_tuning_logs() -
         assert rank_ic(target_values, prediction_values) == 0.0
 
 
+def test_ridge_feature_ablation_uses_distinct_feature_blocks() -> None:
+    labels, features, assignments = fixture_records()
+
+    result = build_model_artifacts(
+        run_id="ablation_test_run",
+        labels=labels,
+        features=features,
+        split_assignments=assignments,
+        models=["industry_mean", "ridge"],
+        random_seed=42,
+        ridge_alpha_grid=[0.1],
+        ridge_feature_ablation_sets=[
+            "dictionary_only",
+            "tfidf_svd_only",
+            "industry_plus_text",
+        ],
+    )
+
+    manifests_by_id = {
+        record.model_id.split("::", 1)[0]: record
+        for record in result.model_manifests
+    }
+    assert manifests_by_id["industry_mean"].feature_set == "industry_only"
+    assert manifests_by_id["ridge"].feature_set == "combined_text"
+    assert manifests_by_id["ridge_dictionary_only"].feature_set == "dictionary_only"
+    assert manifests_by_id["ridge_tfidf_svd_only"].feature_set == "tfidf_svd_only"
+    assert manifests_by_id["ridge_industry_plus_text"].feature_set == "industry_plus_text"
+    assert manifests_by_id["ridge_dictionary_only"].feature_count == 1
+    assert manifests_by_id["ridge_tfidf_svd_only"].feature_count == 1
+    assert manifests_by_id["ridge_industry_plus_text"].feature_count == 4
+
+
 def test_build_models_cli_writes_artifacts(tmp_path: Path, capsys) -> None:
     from text_factor_lab.cli import main
 

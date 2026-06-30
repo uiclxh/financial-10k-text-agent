@@ -35,6 +35,13 @@ class EvaluationMetricRecord(StrictBaseModel):
     rank_ic_t_stat: float = 0.0
     pearson_ic_newey_west_t_stat: float = 0.0
     rank_ic_newey_west_t_stat: float = 0.0
+    industry_neutral_rank_ic: float = 0.0
+    industry_neutral_rank_ic_t_stat: float = 0.0
+    industry_neutral_rank_ic_newey_west_t_stat: float = 0.0
+    industry_neutral_ic_observation_count: int = Field(default=0, ge=0)
+    industry_neutral_group_count: int = Field(default=0, ge=0)
+    industry_neutral_singleton_group_count: int = Field(default=0, ge=0)
+    industry_neutral_method: str = "within_split_oos_industry_demeaning"
     created_at_utc: datetime
 
     @field_validator(
@@ -47,6 +54,9 @@ class EvaluationMetricRecord(StrictBaseModel):
         "rank_ic_t_stat",
         "pearson_ic_newey_west_t_stat",
         "rank_ic_newey_west_t_stat",
+        "industry_neutral_rank_ic",
+        "industry_neutral_rank_ic_t_stat",
+        "industry_neutral_rank_ic_newey_west_t_stat",
     )
     @classmethod
     def validate_finite_metric(cls, value: float) -> float:
