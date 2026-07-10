@@ -53,7 +53,7 @@
               <span class="badge">应用型金融 NLP · v4 证据</span>
               <h1>Financial 10-K Text Agent</h1>
               <p class="hero-hook">10-K 文本能够排序未来波动率，但并不证明可交易 alpha。</p>
-              <p class="hero-subtitle">一个可审计的 SEC 10-K 文本研究流水线，用于样本外波动率预测和实证研究审计。</p>
+              <p class="hero-subtitle">一个可审计的金融 NLP 流水线，用于检验 SEC 10-K 披露是否包含对未来 20 日实现波动率的样本外信息。</p>
               <div class="hero-cta" aria-label="主要项目入口">
                 <a class="btn btn-primary" href="results.zh-CN.html">查看结果</a>
                 <a class="btn btn-secondary" href="methods.zh-CN.html">阅读方法</a>
@@ -111,9 +111,9 @@
         <div class="container">
           <div class="section-header"><p class="eyebrow">我的贡献</p><h2>我设计和实现了什么</h2><p>我从 SEC 年报抓取到样本外证据审计，搭建了完整研究流程。</p></div>
           <div class="capability-card-grid contribution-cards">
-            <article class="capability-card"><strong>研究设计</strong><p>滚动训练 / 验证 / 测试切分、前瞻标签、预注册规格和 embargo 防泄漏控制。</p></article>
-            <article class="capability-card"><strong>金融 NLP 流水线</strong><p>年报 section 解析、Loughran-McDonald 词典特征、训练期内 TF-IDF/SVD 和模型清单。</p></article>
-            <article class="capability-card"><strong>评估与审计</strong><p>Rank IC、特征消融、行业中性诊断、cluster bootstrap、覆盖率检查和自动报告。</p></article>
+            <article class="capability-card"><strong>研究设计</strong><p>滚动训练 / 验证 / 测试切分、前瞻标签、预注册规格和 embargo 防泄漏控制。</p><div class="evidence-links"><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/configs/text_factor_lab/50_company_public_fmp_alpha_v4.yaml">查看配置 ↗</a><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/specification_registry.json">规格注册表 ↗</a></div></article>
+            <article class="capability-card"><strong>金融 NLP 流水线</strong><p>年报 section 解析、Loughran-McDonald 词典特征、训练期内 TF-IDF/SVD 和模型清单。</p><div class="evidence-links"><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/src/text_factor_lab">查看实现 ↗</a></div></article>
+            <article class="capability-card"><strong>评估与审计</strong><p>Rank IC、特征消融、行业中性诊断、cluster bootstrap、覆盖率检查和自动报告。</p><div class="evidence-links"><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4">v4 结果包 ↗</a><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/tests">测试 ↗</a></div></article>
           </div>
           <p class="tech-stack">Python · scikit-learn · XGBoost · SEC EDGAR · pytest · Ruff · GitHub Actions</p>
         </div>
@@ -142,7 +142,7 @@
       <section class="section muted">
         <div class="container split-section">
           <div><p class="eyebrow">查看证据</p><h2>沿着公开审计链检查</h2><p>精简、合规的公开文件把每个核心数字连接到可复核证据。</p></div>
-          <div class="artifact-list"><a class="artifact-card" aria-label="v4 结果包 - 所有公开文件" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4"><span>v4 结果包</span><span>所有公开文件</span></a><a class="artifact-card" aria-label="因子卡片 - 最快结果摘要" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/factor_card.md"><span>因子卡片</span><span>最快结果摘要</span></a><a class="artifact-card" aria-label="特征消融 - 文本与行业对比" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/feature_ablation_summary.json"><span>特征消融</span><span>文本与行业对比</span></a><a class="artifact-card" aria-label="Bootstrap 报告 - 聚类置信区间" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/primary_rank_ic_bootstrap_report.json"><span>Bootstrap 报告</span><span>聚类置信区间</span></a><a class="artifact-card" aria-label="Parser 复核 - 人工质量附录" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/parser_manual_review_appendix.md"><span>Parser 复核</span><span>人工质量附录</span></a></div>
+          <div class="artifact-list"><a class="artifact-card" aria-label="阅读 Working Paper - 40 页研究论文 PDF" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/working_paper/auditing_predictive_information_in_sec_10k_text.pdf"><span>阅读 Working Paper</span><span>40 页研究论文 PDF</span></a><a class="artifact-card" aria-label="v4 结果包 - 所有公开文件" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4"><span>v4 结果包</span><span>所有公开文件</span></a><a class="artifact-card" aria-label="因子卡片 - 最快结果摘要" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/factor_card.md"><span>因子卡片</span><span>最快结果摘要</span></a><a class="artifact-card" aria-label="特征消融 - 文本与行业对比" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/feature_ablation_summary.json"><span>特征消融</span><span>文本与行业对比</span></a><a class="artifact-card" aria-label="Bootstrap 报告 - 聚类置信区间" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/primary_rank_ic_bootstrap_report.json"><span>Bootstrap 报告</span><span>聚类置信区间</span></a><a class="artifact-card" aria-label="Parser 复核 - 人工质量附录" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/parser_manual_review_appendix.md"><span>Parser 复核</span><span>人工质量附录</span></a></div>
         </div>
       </section>
       <section class="section"><div class="container"><div class="boundary-box"><h2>使用边界</h2><p>这是应用级探索性运行，不是 CRSP/WRDS 等价的正式资产定价证据，不是无幸存者偏差复现，不是生产交易系统，也不是投资建议。</p></div></div></section>

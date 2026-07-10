@@ -13,6 +13,11 @@ SITE = "https://www.filingfactor.tech"
 RUN_ID = "50_company_public_fmp_alpha_2016_2025_v4"
 RESULT_DIR = f"{REPO}/tree/main/docs/results/{RUN_ID}"
 RESULT_BLOB = f"{REPO}/blob/main/docs/results/{RUN_ID}"
+PAPER_URL = f"{REPO}/blob/main/docs/working_paper/auditing_predictive_information_in_sec_10k_text.pdf"
+CONFIG_URL = f"{REPO}/blob/main/configs/text_factor_lab/50_company_public_fmp_alpha_v4.yaml"
+SPEC_REGISTRY_URL = f"{RESULT_BLOB}/specification_registry.json"
+SOURCE_URL = f"{REPO}/tree/main/src/text_factor_lab"
+TESTS_URL = f"{REPO}/tree/main/tests"
 
 
 def page_path(page: str, zh: bool) -> str:
@@ -147,7 +152,7 @@ def home(zh: bool) -> str:
               <span class="badge">应用型金融 NLP · v4 证据</span>
               <h1>Financial 10-K Text Agent</h1>
               <p class="hero-hook">10-K 文本能够排序未来波动率，但并不证明可交易 alpha。</p>
-              <p class="hero-subtitle">一个可审计的 SEC 10-K 文本研究流水线，用于样本外波动率预测和实证研究审计。</p>
+              <p class="hero-subtitle">一个可审计的金融 NLP 流水线，用于检验 SEC 10-K 披露是否包含对未来 20 日实现波动率的样本外信息。</p>
               <div class="hero-cta" aria-label="主要项目入口">
                 <a class="btn btn-primary" href="results.zh-CN.html">查看结果</a>
                 <a class="btn btn-secondary" href="methods.zh-CN.html">阅读方法</a>
@@ -191,9 +196,9 @@ def home(zh: bool) -> str:
         <div class="container">
           <div class="section-header"><p class="eyebrow">我的贡献</p><h2>我设计和实现了什么</h2><p>我从 SEC 年报抓取到样本外证据审计，搭建了完整研究流程。</p></div>
           <div class="capability-card-grid contribution-cards">
-            <article class="capability-card"><strong>研究设计</strong><p>滚动训练 / 验证 / 测试切分、前瞻标签、预注册规格和 embargo 防泄漏控制。</p></article>
-            <article class="capability-card"><strong>金融 NLP 流水线</strong><p>年报 section 解析、Loughran-McDonald 词典特征、训练期内 TF-IDF/SVD 和模型清单。</p></article>
-            <article class="capability-card"><strong>评估与审计</strong><p>Rank IC、特征消融、行业中性诊断、cluster bootstrap、覆盖率检查和自动报告。</p></article>
+            <article class="capability-card"><strong>研究设计</strong><p>滚动训练 / 验证 / 测试切分、前瞻标签、预注册规格和 embargo 防泄漏控制。</p><div class="evidence-links"><a class="evidence-link" href="{CONFIG_URL}">查看配置 ↗</a><a class="evidence-link" href="{SPEC_REGISTRY_URL}">规格注册表 ↗</a></div></article>
+            <article class="capability-card"><strong>金融 NLP 流水线</strong><p>年报 section 解析、Loughran-McDonald 词典特征、训练期内 TF-IDF/SVD 和模型清单。</p><div class="evidence-links"><a class="evidence-link" href="{SOURCE_URL}">查看实现 ↗</a></div></article>
+            <article class="capability-card"><strong>评估与审计</strong><p>Rank IC、特征消融、行业中性诊断、cluster bootstrap、覆盖率检查和自动报告。</p><div class="evidence-links"><a class="evidence-link" href="{RESULT_DIR}">v4 结果包 ↗</a><a class="evidence-link" href="{TESTS_URL}">测试 ↗</a></div></article>
           </div>
           <p class="tech-stack">Python · scikit-learn · XGBoost · SEC EDGAR · pytest · Ruff · GitHub Actions</p>
         </div>
@@ -221,7 +226,7 @@ def home(zh: bool) -> str:
               <span class="badge">Applied financial NLP · v4 evidence</span>
               <h1>Financial 10-K Text Agent</h1>
               <p class="hero-hook">10-K text ranks future volatility — but does not prove tradable alpha.</p>
-              <p class="hero-subtitle">An auditable SEC 10-K text pipeline for out-of-sample volatility prediction and empirical research audit.</p>
+              <p class="hero-subtitle">An auditable financial NLP pipeline for testing whether SEC 10-K disclosures contain out-of-sample information about future 20-day realized volatility.</p>
               <div class="hero-cta" aria-label="Primary project actions">
                 <a class="btn btn-primary" href="results.html">View Results</a>
                 <a class="btn btn-secondary" href="methods.html">Read Methods</a>
@@ -265,9 +270,9 @@ def home(zh: bool) -> str:
         <div class="container">
           <div class="section-header"><p class="eyebrow">My contribution</p><h2>What I Designed and Built</h2><p>I developed the workflow from SEC filing ingestion to audited out-of-sample evidence.</p></div>
           <div class="capability-card-grid contribution-cards">
-            <article class="capability-card"><strong>Research design</strong><p>Rolling train/validation/test splits, forward labels, preregistered specifications, and embargo-based leakage controls.</p></article>
-            <article class="capability-card"><strong>Financial NLP pipeline</strong><p>Section parsing, Loughran-McDonald tone features, train-window-only TF-IDF/SVD, and model manifests.</p></article>
-            <article class="capability-card"><strong>Evaluation and audit</strong><p>Rank IC, feature ablation, industry-neutral diagnostics, clustered bootstrap, coverage checks, and automated reports.</p></article>
+            <article class="capability-card"><strong>Research design</strong><p>Rolling train/validation/test splits, forward labels, preregistered specifications, and embargo-based leakage controls.</p><div class="evidence-links"><a class="evidence-link" href="{CONFIG_URL}">Inspect config ↗</a><a class="evidence-link" href="{SPEC_REGISTRY_URL}">Specification registry ↗</a></div></article>
+            <article class="capability-card"><strong>Financial NLP pipeline</strong><p>Section parsing, Loughran-McDonald tone features, train-window-only TF-IDF/SVD, and model manifests.</p><div class="evidence-links"><a class="evidence-link" href="{SOURCE_URL}">Inspect implementation ↗</a></div></article>
+            <article class="capability-card"><strong>Evaluation and audit</strong><p>Rank IC, feature ablation, industry-neutral diagnostics, clustered bootstrap, coverage checks, and automated reports.</p><div class="evidence-links"><a class="evidence-link" href="{RESULT_DIR}">v4 result package ↗</a><a class="evidence-link" href="{TESTS_URL}">Test suite ↗</a></div></article>
           </div>
           <p class="tech-stack">Python · scikit-learn · XGBoost · SEC EDGAR · pytest · Ruff · GitHub Actions</p>
         </div>
@@ -341,6 +346,7 @@ def pipeline(zh: bool) -> str:
 
 def evidence_links(zh: bool) -> str:
     links = [
+        ("阅读 Working Paper", "40 页研究论文 PDF", PAPER_URL) if zh else ("Read Working Paper", "40-page research paper", PAPER_URL),
         ("v4 结果包", "所有公开文件", RESULT_DIR) if zh else ("v4 Result Package", "all public artifacts", RESULT_DIR),
         ("因子卡片", "最快结果摘要", f"{RESULT_BLOB}/factor_card.md") if zh else ("Factor Card", "fastest result summary", f"{RESULT_BLOB}/factor_card.md"),
         ("特征消融", "文本与行业对比", f"{RESULT_BLOB}/feature_ablation_summary.json") if zh else ("Feature Ablation", "text versus industry", f"{RESULT_BLOB}/feature_ablation_summary.json"),

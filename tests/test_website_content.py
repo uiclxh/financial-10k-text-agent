@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 WEBSITE_DIR = Path("website")
+WORKING_PAPER = Path("docs/working_paper/auditing_predictive_information_in_sec_10k_text.pdf")
 
 OBSOLETE_VALUES = {
     "4,716",
@@ -41,3 +42,15 @@ def test_chinese_pages_are_utf8_and_translated() -> None:
         assert any(term in text for term in ("预注册", "样本外", "方法与审计"))
         assert "鐢" not in text
         assert "涓" not in text
+
+
+def test_homepages_link_public_working_paper_and_contribution_evidence() -> None:
+    assert WORKING_PAPER.is_file()
+    assert WORKING_PAPER.stat().st_size > 100_000
+    for page in (WEBSITE_DIR / "index.html", WEBSITE_DIR / "index.zh-CN.html"):
+        text = page.read_text(encoding="utf-8")
+        assert "auditing_predictive_information_in_sec_10k_text.pdf" in text
+        assert "50_company_public_fmp_alpha_v4.yaml" in text
+        assert "specification_registry.json" in text
+        assert "/tree/main/src/text_factor_lab" in text
+        assert "/tree/main/tests" in text

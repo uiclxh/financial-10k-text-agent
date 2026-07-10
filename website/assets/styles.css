@@ -1014,6 +1014,11 @@ tr:last-child td {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.contribution-cards .capability-card {
+  display: flex;
+  flex-direction: column;
+}
+
 .capability-card {
   min-height: 150px;
   border: 1px solid var(--border);
@@ -1034,6 +1039,26 @@ tr:last-child td {
   margin-top: 12px;
   color: var(--text-muted);
   line-height: 1.6;
+}
+
+.evidence-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.evidence-link {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.evidence-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .tech-stack {
