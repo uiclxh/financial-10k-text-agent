@@ -4,243 +4,70 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Methods and Audit | Financial 10-K Text Agent</title>
-    <meta
-      name="description"
-      content="Leakage controls, feature ablation, bootstrap inference, parser review, and audit boundaries for the v4 result package."
-    >
+    <meta name="description" content="Leakage controls, rolling OOS design, parser review, bootstrap inference, and audit boundaries for the v4 package.">
+    <meta name="author" content="Xihang Lin">
+    <link rel="canonical" href="https://www.filingfactor.tech/methods.html">
+    <link rel="alternate" hreflang="en" href="https://www.filingfactor.tech/methods.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://www.filingfactor.tech/methods.zh-CN.html">
+    <link rel="alternate" hreflang="x-default" href="https://www.filingfactor.tech/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Methods and Audit | Financial 10-K Text Agent">
+    <meta property="og:description" content="Leakage controls, rolling OOS design, parser review, bootstrap inference, and audit boundaries for the v4 package.">
+    <meta property="og:url" content="https://www.filingfactor.tech/methods.html">
+    <meta property="og:image" content="https://www.filingfactor.tech/assets/og-card.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Methods and Audit | Financial 10-K Text Agent">
+    <meta name="twitter:description" content="Leakage controls, rolling OOS design, parser review, bootstrap inference, and audit boundaries for the v4 package.">
+    <meta name="twitter:image" content="https://www.filingfactor.tech/assets/og-card.png">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/styles.css">
+    <script defer src="assets/site.js"></script>
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Financial 10-K Text Agent","author":{"@type":"Person","name":"Xihang Lin"},"codeRepository":"https://github.com/uiclxh/financial-10k-text-agent","license":"https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE","programmingLanguage":"Python"}
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
       <div class="container header-inner">
         <a class="brand" href="index.html">Financial 10-K Text Agent</a>
-        <nav class="nav-links" aria-label="Primary navigation">
-          <div class="language-switch" aria-label="Language switch">
-            <a class="switch-option is-active" href="methods.html" lang="en">English</a>
-            <a class="switch-option" href="methods.zh-CN.html" lang="zh-CN">Chinese</a>
-          </div>
+        <nav class="primary-nav" aria-label="Primary navigation">
+          <a href="index.html">Overview</a>
+          <a href="results.html">Results</a>
+          <a href="methods.html" aria-current="page">Methods & Audit</a>
+          <a href="results.html#reproducibility">Run Locally</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub ↗</a>
         </nav>
+        <div class="language-switch" aria-label="Language switch">
+          <a class="switch-option is-active" href="methods.html" lang="en">English</a>
+          <a class="switch-option" href="methods.zh-CN.html" lang="zh-CN">Chinese</a>
+        </div>
       </div>
     </header>
 
     <main id="main">
-      <section class="page-hero">
-        <div class="container narrow">
-          <span class="badge">Methods / Audit · v4</span>
-          <h1>Methods and Audit</h1>
-          <p class="hero-hook">Every claim must be linked to a timestamped, testable artifact.</p>
-          <p class="hero-subtitle">
-            Filings, labels, splits, features, models, predictions, inference,
-            portfolio diagnostics, and audit checks form one evidence chain.
-          </p>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">Leakage-safe research design</p>
-            <h2>Only Past Information Enters the Forecast</h2>
-            <p>Every text feature and model decision must be available before the prediction timestamp.</p>
-          </div>
-          <div class="leakage-flow-card" aria-label="Leakage-safe research flow">
-            <div class="leakage-step"><span>1</span><strong>Filing timestamp</strong><small>SEC acceptance time defines information availability.</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>2</span><strong>Section parsing</strong><small>Business, Risk Factors, Legal Proceedings, and MD&A are extracted.</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>3</span><strong>Forward labels</strong><small>Volatility and CAR targets begin only after filing availability.</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>4</span><strong>Rolling splits</strong><small>Train, validation, and test windows move through time with embargo purges.</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>5</span><strong>Train-window features</strong><small>TF-IDF/SVD vocabularies are fit inside training windows only.</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>6</span><strong>Validation-only tuning</strong><small>Hyperparameters are selected using validation Rank IC only.</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>7</span><strong>Tie-aware test Rank IC</strong><small>Test ranking uses average ranks; constant predictions return zero Rank IC.</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>8</span><strong>Evidence hierarchy</strong><small>Primary, robustness, and exploratory specifications remain separate.</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>9</span><strong>Audit boundary</strong><small>Coverage, parser quality, data limitations, and claim strength are disclosed.</small></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">Key controls</p>
-            <h2>Research Controls at a Glance</h2>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Control</th><th>Implementation</th></tr></thead>
-              <tbody>
-                <tr><td>Event-time alignment</td><td>Filing timestamps define information availability.</td></tr>
-                <tr><td>Rolling OOS design</td><td>Train / validation / test windows roll through time.</td></tr>
-                <tr><td>Leakage control</td><td>Embargo purge and split-leakage logs.</td></tr>
-                <tr><td>Model selection</td><td>Validation-only Rank IC.</td></tr>
-                <tr><td>TF-IDF control</td><td>Train-window-only vocabulary fitting.</td></tr>
-                <tr><td>Tie handling</td><td>Average-rank Rank IC; constant predictions map to zero.</td></tr>
-                <tr><td>Incremental text diagnostic</td><td>Industry-neutral Rank IC.</td></tr>
-                <tr><td>Feature contribution</td><td>Controlled feature ablation.</td></tr>
-                <tr><td>Statistical uncertainty</td><td>Newey-West and clustered bootstrap confidence intervals.</td></tr>
-                <tr><td>Data snooping</td><td>Specification registry and multiple-testing report.</td></tr>
-                <tr><td>Parser quality</td><td>Manual review appendix for short or malformed sections.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">Feature construction</p>
-            <h2>Financial Text Representations</h2>
-            <p>
-              Loughran-McDonald dictionary tone and TF-IDF/SVD are built over the
-              full filing, Business, Risk Factors, Legal Proceedings, and MD&A scopes.
-            </p>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Feature set</th><th>Meaning</th></tr></thead>
-              <tbody>
-                <tr><td><code>industry_only</code></td><td>Training-window industry-mean baseline.</td></tr>
-                <tr><td><code>dictionary_only</code></td><td>Dictionary-tone text features.</td></tr>
-                <tr><td><code>tfidf_svd_only</code></td><td>TF-IDF/SVD text representations.</td></tr>
-                <tr><td><code>combined_text</code></td><td>Combined dictionary and text representation.</td></tr>
-                <tr><td><code>industry_plus_text</code></td><td>Industry features plus text features.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">Industry-neutral diagnostic</p>
-            <h2>Does Text Survive Industry Demeaning?</h2>
-            <p>
-              Predictions and realized targets are separately demeaned within each
-              OOS split-industry group before tie-aware rank correlation.
-            </p>
-            <p class="section-note">
-              This is descriptive, not causal. TF-IDF/SVD remains positive at
-              <code>0.3416</code>; the industry-only baseline falls to zero.
-            </p>
-          </div>
-          <div class="method-callout">
-            <span>Question</span>
-            <strong>Does the text model retain ranking information after removing within-split industry means?</strong>
-            <p>For 20-day realized volatility, the exploratory answer is yes.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">Bootstrap inference</p>
-            <h2>2,000 Deterministic Resamples</h2>
-            <p>Split, event-date, and ticker-cluster resampling preserve each selected cluster as a block.</p>
-          </div>
-          <div class="control-grid">
-            <div class="control-card"><span class="control-marker"></span><h3>Event date</h3><p>Raw primary CI <code>[0.0719, 0.3743]</code>; p-value <code>0.005</code>.</p></div>
-            <div class="control-card"><span class="control-marker"></span><h3>Ticker cluster</h3><p>Raw primary CI <code>[0.1091, 0.3522]</code>; p-value <code>0.001</code>.</p></div>
-            <div class="control-card"><span class="control-marker"></span><h3>Split</h3><p>CI crosses zero because only four OOS split clusters are available.</p></div>
-            <div class="control-card"><span class="control-marker"></span><h3>Neutral estimate</h3><p>Positive point estimate, but all three neutral bootstrap intervals include zero.</p></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">Parser quality review</p>
-            <h2>Short Sections Are Flagged, Not Hidden</h2>
-          </div>
-          <div class="metric-grid compact">
-            <div class="metric-card"><div class="metric-number">2,000</div><div class="metric-label">Parsed section records</div></div>
+      <section class="page-hero"><div class="container narrow"><span class="badge">Methods / Audit · v4</span><h1>Methods and Audit</h1><p class="hero-hook">Every claim must be linked to a timestamped, testable artifact.</p><p class="hero-subtitle">Filings, labels, splits, features, models, predictions, inference, portfolio diagnostics, and audit checks form one evidence chain.</p><p><code>50_company_public_fmp_alpha_2016_2025_v4</code></p><nav class="page-toc" aria-label="On this page"><a href="#research-flow">Research flow</a><a href="#controls">Controls</a><a href="#features">Features</a><a href="#parser-review">Parser review</a><a href="#claim-boundary">Claim boundary</a><a href="#boundary">Data boundary</a></nav></div></section>
+      <section class="section" id="research-flow"><div class="container"><div class="section-header"><p class="eyebrow">Leakage-safe research design</p><h2>Only Past Information Enters the Forecast</h2><p>Every text feature and model decision must be available before the prediction timestamp.</p></div><div class="leakage-flow-card" aria-label="Leakage-safe research flow"><div class="leakage-step"><span>1</span><strong>Filing timestamp</strong><small>SEC acceptance time defines information availability.</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>2</span><strong>Section parsing</strong><small>Business, Risk Factors, Legal Proceedings, and MD&A are extracted.</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>3</span><strong>Forward labels</strong><small>Volatility and CAR targets begin only after filing availability.</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>4</span><strong>Rolling splits</strong><small>Train, validation, and test windows move through time with embargo purges.</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>5</span><strong>Train-window features</strong><small>TF-IDF/SVD vocabularies are fit inside training windows only.</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>6</span><strong>Validation-only tuning</strong><small>Hyperparameters are selected using validation Rank IC only.</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>7</span><strong>Tie-aware test Rank IC</strong><small>Test ranking uses average ranks; constant predictions return zero Rank IC.</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>8</span><strong>Evidence hierarchy</strong><small>Primary, robustness, and exploratory specifications remain separate.</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>9</span><strong>Audit boundary</strong><small>Coverage, parser quality, data limitations, and claim strength are disclosed.</small></div></div></div></section>
+      <section class="section muted" id="controls"><div class="container"><div class="section-header"><p class="eyebrow">Key controls</p><h2>Research Controls at a Glance</h2></div><div class="table-wrap"><table><thead><tr><th>Control</th><th>Implementation</th></tr></thead><tbody><tr><td>Event-time alignment</td><td>Filing timestamps define information availability.</td></tr><tr><td>Rolling OOS design</td><td>Train / validation / test windows roll through time.</td></tr><tr><td>Leakage control</td><td>Embargo purge and split-leakage logs.</td></tr><tr><td>Model selection</td><td>Validation-only Rank IC.</td></tr><tr><td>TF-IDF control</td><td>Train-window-only vocabulary fitting.</td></tr><tr><td>Incremental text diagnostic</td><td>Industry-neutral Rank IC and feature ablation.</td></tr><tr><td>Statistical uncertainty</td><td>Newey-West and clustered bootstrap confidence intervals.</td></tr><tr><td>Data snooping</td><td>Specification registry and multiple-testing report.</td></tr><tr><td>Parser quality</td><td>Manual review appendix for short or malformed sections.</td></tr></tbody></table></div></div></section>
+      <section class="section" id="features"><div class="container split-section"><div><p class="eyebrow">Feature construction</p><h2>Financial Text Representations</h2><p>Loughran-McDonald dictionary tone and TF-IDF/SVD are built over full filing, Business, Risk Factors, Legal Proceedings, and MD&A scopes.</p></div><div class="table-wrap"><table><thead><tr><th>Feature set</th><th>Meaning</th></tr></thead><tbody><tr><td><code>industry_only</code></td><td>Training-window industry-mean baseline.</td></tr><tr><td><code>dictionary_only</code></td><td>Dictionary-tone text features.</td></tr><tr><td><code>tfidf_svd_only</code></td><td>TF-IDF/SVD text representations.</td></tr><tr><td><code>combined_text</code></td><td>Combined dictionary and text representation.</td></tr><tr><td><code>industry_plus_text</code></td><td>Industry features plus text features.</td></tr></tbody></table></div></div></section>
+      <section class="section muted"><div class="container"><div class="method-callout"><span>Industry-neutral diagnostic</span><strong>Does text retain information after removing split-industry means?</strong><p>Industry-neutral Rank IC is a descriptive diagnostic, not a causal decomposition.</p></div></div></section>
+      <section class="section"><div class="container"><div class="section-header"><p class="eyebrow">Bootstrap inference</p><h2>How Uncertainty Is Reported</h2></div><div class="policy-grid"><div><strong>Split bootstrap</strong><p>Inconclusive for v4 because there are only four OOS split clusters.</p></div><div><strong>Event-date bootstrap</strong><p>Supports a positive raw primary Rank IC interval.</p></div><div><strong>Ticker-cluster bootstrap</strong><p>Supports a positive raw primary Rank IC interval.</p></div><div><strong>Industry-neutral bootstrap</strong><p>Positive point estimate, but not bootstrap-robust.</p></div></div></div></section>
+      <section class="section muted" id="parser-review"><div class="container"><div class="section-header"><p class="eyebrow">Parser quality review</p><h2>Section Extraction Is Audited, Not Assumed</h2></div><div class="metric-grid compact">            <div class="metric-card"><div class="metric-number">2,000</div><div class="metric-label">Parsed section records</div></div>
             <div class="metric-card"><div class="metric-number">144</div><div class="metric-label">Manual-review records</div></div>
-            <div class="metric-card"><div class="metric-number">144</div><div class="metric-label">Excluded section-scope records</div></div>
-            <div class="metric-card"><div class="metric-number">494</div><div class="metric-label">Short but included records</div></div>
-          </div>
-          <div class="policy-grid">
-            <div><strong>Below 100 words</strong><p><code>item_1a</code> and <code>item_7</code> are excluded from their section-level feature scopes.</p></div>
-            <div><strong>100–499 words</strong><p>Core sections remain included with a warning.</p></div>
-            <div><strong>Short non-core sections</strong><p>Remain included and are disclosed.</p></div>
-            <div><strong>Filing-level policy</strong><p>The filing remains; combined scope is rebuilt from accepted sections.</p></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">Coverage waterfall</p>
-            <h2>Prediction Completeness</h2>
-            <p>
-              Raw label coverage includes training-window labels that should not
-              receive OOS predictions. Eligible OOS coverage is the relevant metric.
-            </p>
-          </div>
-          <div class="waterfall-card">
-            <div class="waterfall-row"><span>Raw labels</span><span class="waterfall-track"><span style="--bar-width: 49.6%"></span></span><strong>49.6%</strong></div>
-            <div class="waterfall-row"><span>Eligible OOS</span><span class="waterfall-track"><span style="--bar-width: 100%"></span></span><strong>100%</strong></div>
-            <div class="waterfall-row"><span>Model expected</span><span class="waterfall-track"><span style="--bar-width: 98.546%"></span></span><strong>98.546%</strong></div>
-            <div class="waterfall-row"><span>Primary prediction</span><span class="waterfall-track"><span style="--bar-width: 100%"></span></span><strong>100%</strong></div>
-            <div class="waterfall-row"><span>Primary portfolio</span><span class="waterfall-track"><span style="--bar-width: 100%"></span></span><strong>100%</strong></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">Claim boundaries</p>
-            <h2>Prediction and Trading Are Separate Tests</h2>
-          </div>
-          <div class="claim-pair">
-            <article class="claim-card claim-positive">
-              <span>Prediction boundary</span>
-              <strong>Rank IC 0.2395 · p 0.00067</strong>
-              <p>A ranking result, not a minimum-RMSE point-forecasting claim.</p>
-            </article>
-            <article class="claim-card claim-negative">
-              <span>Trading boundary</span>
-              <strong>Sharpe -0.8539 · p 0.1147</strong>
-              <p>Portfolio outputs are diagnostic only and do not provide investment advice.</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <div class="boundary-box">
-            <h2>Formal Result Boundary</h2>
-            <p>
-              Formal claims are blocked by data boundaries, not pipeline failures:
-              mixed FMP/Yahoo market data, applied-grade market-cap estimates,
-              a fixed 50-company panel rather than a CRSP/WRDS survivorship-free
-              universe, parser limitations in some section-level records, and
-              partial missing predictions in expanded diagnostic pairs.
-            </p>
-          </div>
-        </div>
-      </section>
+            <div class="metric-card"><div class="metric-number">144</div><div class="metric-label">Excluded section-level records</div></div>
+            <div class="metric-card"><div class="metric-number">494</div><div class="metric-label">Short but included records</div></div></div><p class="section-note">Item 1A and Item 7 below 100 words are excluded from section-level features. Core sections from 100 to 499 words remain included but carry a warning.</p></div></section>
+      <section class="section" id="claim-boundary"><div class="container"><div class="section-header"><p class="eyebrow">Evidence boundary</p><h2>Prediction and Trading Evidence Are Judged Separately</h2></div><div class="result-pair"><article class="result-card primary"><p class="eyebrow">Preregistered primary prediction</p><h3>Ridge · <code>realized_volatility_1_20</code></h3><div class="result-stat"><span>Rank IC</span><strong>0.2395</strong></div><p>Raw p-value 0.00067; supports exploratory volatility-ranking evidence.</p></article><article class="result-card diagnostic"><p class="eyebrow">Preregistered primary portfolio</p><h3>Monthly sector-neutral equal-weight</h3><div class="result-stat"><span>Sharpe</span><strong>-0.8539</strong></div><p>Raw p-value 0.1147; does not establish tradable alpha.</p></article></div></div></section>
+      <section class="section" id="boundary"><div class="container"><div class="boundary-box"><h2>Formal Result Boundary</h2><p>Formal empirical-finance claims are blocked by data-boundary issues, not pipeline failures: mixed FMP/Yahoo data, applied-grade market-cap estimates, fixed 50-company panel, parser-quality limitations, and a small number of missing diagnostic model-label pairs.</p><p>The project should be interpreted as an applied-grade, auditable financial NLP workflow for exploratory volatility ranking.</p></div></div></section>
     </main>
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <p>Methods describe the applied-grade v4 public result package.</p>
+        <p>Built by Xihang Lin · Financial Mathematics · Public result summaries are for research demonstration only.</p>
         <nav class="footer-links" aria-label="Footer navigation">
           <a href="index.html">Home</a>
           <a href="results.html">Results</a>
-          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <a href="methods.html">Methods</a>
+          <a href="https://github.com/uiclxh">GitHub profile</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT License</a>
         </nav>
       </div>

@@ -4,24 +4,44 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>结果 | Financial 10-K Text Agent</title>
-    <meta
-      name="description"
-      content="Financial 10-K Text Agent v4 结果、特征消融、bootstrap 推断与审计 artifacts。"
-    >
+    <meta name="description" content="Financial 10-K Text Agent 的 v4 结果、特征消融、bootstrap 推断与审计文件。">
+    <meta name="author" content="Xihang Lin">
+    <link rel="canonical" href="https://www.filingfactor.tech/results.zh-CN.html">
+    <link rel="alternate" hreflang="en" href="https://www.filingfactor.tech/results.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://www.filingfactor.tech/results.zh-CN.html">
+    <link rel="alternate" hreflang="x-default" href="https://www.filingfactor.tech/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="结果 | Financial 10-K Text Agent">
+    <meta property="og:description" content="Financial 10-K Text Agent 的 v4 结果、特征消融、bootstrap 推断与审计文件。">
+    <meta property="og:url" content="https://www.filingfactor.tech/results.zh-CN.html">
+    <meta property="og:image" content="https://www.filingfactor.tech/assets/og-card.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="结果 | Financial 10-K Text Agent">
+    <meta name="twitter:description" content="Financial 10-K Text Agent 的 v4 结果、特征消融、bootstrap 推断与审计文件。">
+    <meta name="twitter:image" content="https://www.filingfactor.tech/assets/og-card.png">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/styles.css">
     <script defer src="assets/site.js"></script>
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Financial 10-K Text Agent","author":{"@type":"Person","name":"Xihang Lin"},"codeRepository":"https://github.com/uiclxh/financial-10k-text-agent","license":"https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE","programmingLanguage":"Python"}
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">跳到正文</a>
     <header class="site-header">
       <div class="container header-inner">
         <a class="brand" href="index.zh-CN.html">Financial 10-K Text Agent</a>
-        <nav class="nav-links" aria-label="主导航">
-          <div class="language-switch" aria-label="语言切换">
-            <a class="switch-option" href="results.html" lang="en">English</a>
-            <a class="switch-option is-active" href="results.zh-CN.html" lang="zh-CN">Chinese</a>
-          </div>
+        <nav class="primary-nav" aria-label="主导航">
+          <a href="index.zh-CN.html">概览</a>
+          <a href="results.zh-CN.html" aria-current="page">结果</a>
+          <a href="methods.zh-CN.html">方法与审计</a>
+          <a href="results.zh-CN.html#reproducibility">本地运行</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub ↗</a>
         </nav>
+        <div class="language-switch" aria-label="语言切换">
+          <a class="switch-option" href="results.html" lang="en">English</a>
+          <a class="switch-option is-active" href="results.zh-CN.html" lang="zh-CN">Chinese</a>
+        </div>
       </div>
     </header>
 
@@ -29,264 +49,49 @@
       <section class="page-hero">
         <div class="container narrow">
           <span class="badge">50 家公司 v4 公开结果包</span>
-          <h1>结果与证据文件</h1>
-          <p class="hero-hook">最强证据来自波动率排序，而不是股票收益 alpha。</p>
-          <p class="hero-subtitle">
-            <code>50_company_public_fmp_alpha_2016_2025_v4</code>
-            的精简公开摘要。
-          </p>
+          <h1>结果与文件</h1>
+          <p class="hero-hook">最强证据是波动率排序，而不是股票收益 alpha。</p>
+          <p class="hero-subtitle">公开精简摘要： <code>50_company_public_fmp_alpha_2016_2025_v4</code>.</p>
+          <nav class="page-toc" aria-label="本页导航"><a href="#primary-result">主结果</a><a href="#ablation">特征消融</a><a href="#bootstrap">Bootstrap</a><a href="#coverage">覆盖率</a><a href="#reproducibility">复现</a></nav>
         </div>
       </section>
 
-      <section class="section muted">
+      <section class="section muted" id="primary-result">
         <div class="container">
-          <div class="result-summary-card">
-            <div>
-              <p class="eyebrow">预注册主预测</p>
-              <h2>Ridge Rank IC = 0.2395</h2>
-              <p>
-                对未来 20 个交易日实现波动率具有正向样本外排序信息；
-                原始 p 值为 <code>0.00067</code>。
-              </p>
-            </div>
-            <div class="result-claim-box">
-              <span>结论边界</span>
-              <strong>这是探索性波动率预测证据，不是可交易 alpha。</strong>
-            </div>
-          </div>
-          <div class="claim-pair result-claim-pair">
-            <article class="claim-card claim-positive">
-              <span>主预测</span>
-              <strong>Rank IC 0.2395</strong>
-              <p>预注册主预测规格保持正向且获得完整覆盖。</p>
-            </article>
-            <article class="claim-card claim-negative">
-              <span>主组合</span>
-              <strong>Sharpe -0.8539</strong>
-              <p>原始 p 值 <code>0.1147</code>，未建立正式可交易 alpha。</p>
-            </article>
-          </div>
+          <div class="result-summary-card"><div><p class="eyebrow">预注册主预测</p><h2>Ridge Rank IC = 0.2395</h2><p>对未来 20 日实现波动率有正向样本外排序信息；原始 p 值 <code>0.00067</code>.</p></div><div class="result-claim-box"><span>结论边界</span><strong>探索性波动率预测证据，不是可交易 alpha。</strong></div></div>
+          <div class="claim-pair result-claim-pair"><article class="claim-card claim-positive"><span>主预测</span><strong>Rank IC 0.2395</strong><p>预注册主预测规格完全覆盖，且方向为正。</p></article><article class="claim-card claim-negative"><span>主组合</span><strong>Sharpe -0.8539</strong><p>原始 p 值 <code>0.1147</code>; 尚未建立正式可交易 alpha。</p></article></div>
         </div>
       </section>
 
-      <section class="section">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">运行摘要</p>
-            <h2>应用级公开证据</h2>
-          </div>
-          <div class="metric-grid">
-            <div class="metric-card"><div class="metric-number">500</div><div class="metric-label">SEC 10-K 年报</div></div>
+      <section class="section"><div class="container"><div class="section-header"><p class="eyebrow">运行摘要</p><h2>应用级公开证据</h2></div><div class="metric-grid">            <div class="metric-card"><div class="metric-number">500</div><div class="metric-label">SEC 10-K 年报</div></div>
             <div class="metric-card"><div class="metric-number">1,500</div><div class="metric-label">标签</div></div>
             <div class="metric-card"><div class="metric-number">8,133</div><div class="metric-label">样本外预测</div></div>
             <div class="metric-card"><div class="metric-number">520,465</div><div class="metric-label">特征记录</div></div>
             <div class="metric-card"><div class="metric-number">594</div><div class="metric-label">测试规格</div></div>
-            <div class="metric-card"><div class="metric-number">26</div><div class="metric-label">多重检验家族</div></div>
-            <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">合格 OOS 覆盖率</div></div>
-            <div class="metric-card"><div class="metric-number">0 / 2</div><div class="metric-label">审计失败 / 警告</div></div>
-          </div>
-        </div>
-      </section>
+            <div class="metric-card"><div class="metric-number">26</div><div class="metric-label">检验族</div></div>
+            <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">合格样本外覆盖率</div></div>
+            <div class="metric-card"><div class="metric-number">0 / 2</div><div class="metric-label">审计失败 / 警告</div></div></div></div></section>
 
-      <section class="section muted">
-        <div class="container split-section equal-cards">
-          <article class="finding-card">
-            <p class="eyebrow">预注册主结果</p>
-            <h2>组合文本 Ridge</h2>
-            <p><code>realized_volatility_1_20</code>，使用 ALL_SPLITS Rank IC 评价。</p>
-            <div class="result-grid">
-              <div><span class="result-label">Rank IC</span><strong class="result-number">0.2395</strong></div>
-              <div><span class="result-label">原始 p 值</span><strong class="result-number">0.00067</strong></div>
-            </div>
-            <p>支持正向探索性波动率排序证据。</p>
-          </article>
-          <article class="exploratory-card">
-            <p class="eyebrow">最佳探索性结果</p>
-            <h2>仅 TF-IDF/SVD 的 Ridge</h2>
-            <p>这是最强观察到的模型比较结果，不是预注册主结论。</p>
-            <div class="result-grid">
-              <div><span class="result-label">Rank IC</span><strong class="result-number">0.3668</strong></div>
-              <div><span class="result-label">NW t 统计量</span><strong class="result-number">5.4055</strong></div>
-            </div>
-            <p>RMSE <code>0.00992</code>。</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">特征消融</p>
-            <h2>原始与行业中性 Rank IC</h2>
-            <p>在每个 split 内按行业去均值后，文本表示仍保留正向排序诊断。</p>
-          </div>
-          <div class="ablation-chart" aria-label="特征消融 Rank IC 图">
-            <div class="chart-legend"><span class="legend-raw">原始 Rank IC</span><span class="legend-neutral">行业中性 Rank IC</span></div>
-            <div class="ablation-row">
-              <strong>仅 TF-IDF/SVD</strong>
-              <div class="paired-bars"><span class="bar-raw" style="--bar-width: 100%"></span><span class="bar-neutral" style="--bar-width: 93%"></span></div>
-              <code>0.3668 / 0.3416</code>
-            </div>
-            <div class="ablation-row">
-              <strong>行业 + 文本</strong>
-              <div class="paired-bars"><span class="bar-raw" style="--bar-width: 90%"></span><span class="bar-neutral" style="--bar-width: 89%"></span></div>
-              <code>0.3296 / 0.3251</code>
-            </div>
-            <div class="ablation-row">
-              <strong>仅行业</strong>
-              <div class="paired-bars"><span class="bar-raw" style="--bar-width: 80%"></span><span class="bar-neutral" style="--bar-width: 0%"></span></div>
-              <code>0.2924 / 0.0000</code>
-            </div>
-            <div class="ablation-row">
-              <strong>仅词典</strong>
-              <div class="paired-bars"><span class="bar-raw" style="--bar-width: 61%"></span><span class="bar-neutral" style="--bar-width: 67%"></span></div>
-              <code>0.2244 / 0.2465</code>
-            </div>
-            <div class="ablation-row is-primary">
-              <strong>组合文本</strong>
-              <div class="paired-bars"><span class="bar-raw" style="--bar-width: 65%"></span><span class="bar-neutral" style="--bar-width: 55%"></span></div>
-              <code>0.2395 / 0.2023</code>
-            </div>
-          </div>
-          <div class="table-wrap chart-fallback">
-            <table>
-              <thead><tr><th>特征集</th><th>估计器</th><th>Rank IC</th><th>行业中性 Rank IC</th><th>RMSE</th></tr></thead>
-              <tbody>
-                <tr><td>仅 TF-IDF/SVD</td><td>Ridge</td><td class="numeric">0.3668</td><td class="numeric">0.3416</td><td class="numeric">0.00992</td></tr>
-                <tr><td>行业 + 文本</td><td>Ridge</td><td class="numeric">0.3296</td><td class="numeric">0.3251</td><td class="numeric">0.01076</td></tr>
-                <tr><td>仅行业</td><td>Industry mean</td><td class="numeric">0.2924</td><td class="numeric">0.0000</td><td class="numeric">0.00913</td></tr>
-                <tr><td>仅词典</td><td>Ridge</td><td class="numeric">0.2244</td><td class="numeric">0.2465</td><td class="numeric">0.00984</td></tr>
-                <tr><td>组合文本</td><td>Ridge</td><td class="numeric">0.2395</td><td class="numeric">0.2023</td><td class="numeric">0.01932</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">Bootstrap 推断</p>
-            <h2>原始主 Rank IC 置信区间</h2>
-            <p>使用 2,000 次确定性重采样；竖线表示零。</p>
-          </div>
-          <div class="ci-chart" aria-label="Bootstrap 置信区间图">
-            <div class="ci-row">
-              <div><strong>Split</strong><span>4 个 clusters</span></div>
-              <div class="ci-track"><i class="zero-line"></i><span class="ci-interval" style="--ci-left: 26%; --ci-width: 65.2%"></span><b class="ci-point" style="--point-left: 58.6%"></b></div>
-              <code>[-0.0050, 0.4841]</code>
-            </div>
-            <div class="ci-row">
-              <div><strong>事件日</strong><span>104 个 clusters</span></div>
-              <div class="ci-track"><i class="zero-line"></i><span class="ci-interval" style="--ci-left: 36.3%; --ci-width: 40.3%"></span><b class="ci-point" style="--point-left: 58.6%"></b></div>
-              <code>[0.0719, 0.3743]</code>
-            </div>
-            <div class="ci-row">
-              <div><strong>Ticker</strong><span>49 个 clusters</span></div>
-              <div class="ci-track"><i class="zero-line"></i><span class="ci-interval" style="--ci-left: 41.2%; --ci-width: 32.4%"></span><b class="ci-point" style="--point-left: 58.6%"></b></div>
-              <code>[0.1091, 0.3522]</code>
-            </div>
-          </div>
-          <div class="table-wrap chart-fallback">
-            <table>
-              <thead><tr><th>估计量</th><th>方法</th><th>点估计</th><th>95% CI</th><th>p 值</th></tr></thead>
-              <tbody>
-                <tr><td>原始 Rank IC</td><td>Split bootstrap</td><td class="numeric">0.2395</td><td class="numeric">[-0.0050, 0.4841]</td><td class="numeric">0.111</td></tr>
-                <tr><td>原始 Rank IC</td><td>事件日 bootstrap</td><td class="numeric">0.2395</td><td class="numeric">[0.0719, 0.3743]</td><td class="numeric">0.005</td></tr>
-                <tr><td>原始 Rank IC</td><td>Ticker-cluster bootstrap</td><td class="numeric">0.2395</td><td class="numeric">[0.1091, 0.3522]</td><td class="numeric">0.001</td></tr>
-                <tr><td>中性 Rank IC</td><td>Split bootstrap</td><td class="numeric">0.2023</td><td class="numeric">[-0.1157, 0.5202]</td><td class="numeric">0.117</td></tr>
-                <tr><td>中性 Rank IC</td><td>事件日 bootstrap</td><td class="numeric">0.2023</td><td class="numeric">[-0.1546, 0.4273]</td><td class="numeric">0.366</td></tr>
-                <tr><td>中性 Rank IC</td><td>Ticker-cluster bootstrap</td><td class="numeric">0.2023</td><td class="numeric">[-0.1787, 0.4181]</td><td class="numeric">0.357</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">覆盖率与控制</p>
-            <h2>主结论获得完整覆盖</h2>
-            <p>
-              扩展诊断规格有 120 个 model-label pair 因 malformed section
-              缺少可用数值向量而未预测，但主规格保持完整覆盖。
-            </p>
-            <div class="audit-summary">
-              <span>0 个审计失败</span><span>2 个边界警告</span><span>2 / 2 主规格</span>
-            </div>
-          </div>
-          <div class="waterfall-card">
-            <div class="waterfall-row"><span>原始标签</span><span class="waterfall-track"><span style="--bar-width: 49.6%"></span></span><strong>49.6%</strong></div>
-            <div class="waterfall-row"><span>合格 OOS</span><span class="waterfall-track"><span style="--bar-width: 100%"></span></span><strong>100%</strong></div>
-            <div class="waterfall-row"><span>模型期望</span><span class="waterfall-track"><span style="--bar-width: 98.546%"></span></span><strong>98.546%</strong></div>
-            <div class="waterfall-row"><span>主规格</span><span class="waterfall-track"><span style="--bar-width: 100%"></span></span><strong>100%</strong></div>
-            <div class="waterfall-row"><span>主组合</span><span class="waterfall-track"><span style="--bar-width: 100%"></span></span><strong>100%</strong></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">证据文件</p>
-            <h2>代表性公开 Artifacts</h2>
-            <p>v4 结果包中的精简公开文件可追溯每个核心结论。</p>
-          </div>
-          <div class="artifact-list">
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4"><span>结果包</span><span>v4 公开索引</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/factor_card.md"><span>因子卡片</span><span>结论与边界摘要</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/empirical_report.md"><span>实证报告</span><span>论文式解释</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/audit_report.json"><span>审计报告</span><span>覆盖率与边界检查</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/multiple_testing_report.json"><span>多重检验</span><span>594 个规格</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/parser_manual_review_appendix.md"><span>Parser 审查</span><span>人工质量附录</span></a>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <div class="boundary-box">
-            <h2>数据与解释边界</h2>
-            <p>
-              本应用级实验使用混合 FMP/Yahoo 市场数据和估算的 selection-date market cap，
-              不等同于 CRSP/WRDS 无幸存者偏差复制。它证明的是可审计金融 NLP
-              研究能力，而不是交易 alpha。
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted" id="reproducibility">
-        <div class="container narrow">
-          <div class="section-header">
-            <p class="eyebrow">可复现性</p>
-            <h2>在本地运行公开代码</h2>
-          </div>
-          <div class="code-card">
-            <div class="code-toolbar">
-              <span>Shell</span>
-              <button class="copy-button" type="button" data-copy-target="run-code">复制</button>
-            </div>
-            <pre id="run-code"><code>git clone https://github.com/uiclxh/financial-10k-text-agent.git
+      <section class="section muted"><div class="container split-section equal-cards"><article class="finding-card"><p class="eyebrow">预注册主结果</p><h2>综合文本 Ridge</h2><p><code>realized_volatility_1_20</code>, 用 ALL_SPLITS Rank IC 评价。</p><div class="result-grid"><div><span class="result-label">Rank IC</span><strong class="result-number">0.2395</strong></div><div><span class="result-label">原始 p 值</span><strong class="result-number">0.00067</strong></div></div><p>支持正向探索性波动率排序证据。</p></article><article class="exploratory-card"><p class="eyebrow">最佳探索性观察结果</p><h2>仅 TF-IDF/SVD 的 Ridge</h2><p>最强的模型比较观察结果，不是预注册主结论。</p><div class="result-grid"><div><span class="result-label">Rank IC</span><strong class="result-number">0.3668</strong></div><div><span class="result-label">NW t-stat</span><strong class="result-number">5.4055</strong></div></div><p>RMSE <code>0.00992</code>.</p></article></div></section>
+      <section class="section" id="ablation"><div class="container"><div class="section-header"><p class="eyebrow">特征消融</p><h2>原始与行业中性 Rank IC</h2><p>在 split 内行业去均值后，文本表示仍保留正向排序诊断。</p></div><div class="ablation-chart" aria-label="Feature ablation Rank IC chart"><div class="chart-legend"><span class="legend-raw">原始 Rank IC</span><span class="legend-neutral">行业中性 Rank IC</span></div><div class="ablation-row"><strong>仅 TF-IDF/SVD</strong><div class="paired-bars"><span class="bar-raw" style="--bar-width: 100%"></span><span class="bar-neutral" style="--bar-width: 93%"></span></div><code>0.3668 / 0.3416</code></div><div class="ablation-row"><strong>行业 + 文本</strong><div class="paired-bars"><span class="bar-raw" style="--bar-width: 90%"></span><span class="bar-neutral" style="--bar-width: 89%"></span></div><code>0.3296 / 0.3251</code></div><div class="ablation-row"><strong>仅行业</strong><div class="paired-bars"><span class="bar-raw" style="--bar-width: 80%"></span><span class="bar-neutral" style="--bar-width: 0%"></span></div><code>0.2924 / 0.0000</code></div><div class="ablation-row"><strong>仅词典</strong><div class="paired-bars"><span class="bar-raw" style="--bar-width: 61%"></span><span class="bar-neutral" style="--bar-width: 67%"></span></div><code>0.2244 / 0.2465</code></div><div class="ablation-row"><strong>综合文本</strong><div class="paired-bars"><span class="bar-raw" style="--bar-width: 65%"></span><span class="bar-neutral" style="--bar-width: 55%"></span></div><code>0.2395 / 0.2023</code></div></div><div class="table-wrap chart-fallback"><table><thead><tr><th>特征集</th><th>估计器</th><th>Rank IC</th><th>行业中性 Rank IC</th><th>RMSE</th></tr></thead><tbody><tr><td>仅 TF-IDF/SVD</td><td>Ridge</td><td class="numeric">0.3668</td><td class="numeric">0.3416</td><td class="numeric">0.00992</td></tr><tr><td>行业 + 文本</td><td>Ridge</td><td class="numeric">0.3296</td><td class="numeric">0.3251</td><td class="numeric">0.01076</td></tr><tr><td>仅行业</td><td>Industry mean</td><td class="numeric">0.2924</td><td class="numeric">0.0000</td><td class="numeric">0.00913</td></tr><tr><td>仅词典</td><td>Ridge</td><td class="numeric">0.2244</td><td class="numeric">0.2465</td><td class="numeric">0.00984</td></tr><tr><td>综合文本</td><td>Ridge</td><td class="numeric">0.2395</td><td class="numeric">0.2023</td><td class="numeric">0.01932</td></tr></tbody></table></div></div></section>
+      <section class="section muted" id="bootstrap"><div class="container"><div class="section-header"><p class="eyebrow">Bootstrap inference</p><h2>主 Rank IC 置信区间</h2><p>使用 2,000 次确定性重抽样；由于只有四个样本外 split 簇，split bootstrap 结论不充分。</p></div><div class="table-wrap"><table><thead><tr><th>估计量</th><th>方法</th><th>点估计</th><th>95% CI</th><th>p-value</th></tr></thead><tbody><tr><td>原始 Rank IC</td><td>Split bootstrap</td><td class="numeric">0.2395</td><td>[-0.0050, 0.4841]</td><td class="numeric">0.111</td></tr><tr><td>原始 Rank IC</td><td>事件日 bootstrap</td><td class="numeric">0.2395</td><td>[0.0719, 0.3743]</td><td class="numeric">0.005</td></tr><tr><td>原始 Rank IC</td><td>Ticker 聚类 bootstrap</td><td class="numeric">0.2395</td><td>[0.1091, 0.3522]</td><td class="numeric">0.001</td></tr><tr><td>行业中性 Rank IC</td><td>Split bootstrap</td><td class="numeric">0.2023</td><td>[-0.1157, 0.5202]</td><td class="numeric">0.117</td></tr><tr><td>行业中性 Rank IC</td><td>事件日 bootstrap</td><td class="numeric">0.2023</td><td>[-0.1546, 0.4273]</td><td class="numeric">0.366</td></tr><tr><td>行业中性 Rank IC</td><td>Ticker 聚类 bootstrap</td><td class="numeric">0.2023</td><td>[-0.1787, 0.4181]</td><td class="numeric">0.357</td></tr></tbody></table></div></div></section>
+      <section class="section" id="coverage"><div class="container split-section equal-cards"><div class="boundary-box"><h2>覆盖率与控制</h2><p>原始标签覆盖率为 49.6%，合格样本外覆盖率为 100%，模型预期预测覆盖率为 98.546%，主预测 / 主组合覆盖率为 100%。</p></div><div class="boundary-box"><h2>数据边界</h2><p>本公开数据实验使用 FMP/Yahoo 混合市场数据和应用级市值估计，不是 CRSP/WRDS 等价的无幸存者偏差复现。</p></div></div></section><section class="section muted"><div class="container"><div class="section-header"><p class="eyebrow">代表性证据文件</p><h2>查看公开文件</h2></div><div class="artifact-grid"><a class="artifact-card" aria-label="因子卡片 - 最快结果摘要" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/factor_card.md"><span>因子卡片</span><span>最快结果摘要</span></a><a class="artifact-card" aria-label="实证报告 - 完整文字报告" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/empirical_report.md"><span>实证报告</span><span>完整文字报告</span></a><a class="artifact-card" aria-label="特征消融 - 文本与行业对比" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/feature_ablation_summary.json"><span>特征消融</span><span>文本与行业对比</span></a><a class="artifact-card" aria-label="审计报告 - 覆盖率与警告" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/audit_report.json"><span>审计报告</span><span>覆盖率与警告</span></a><a class="artifact-card" aria-label="多重检验 - 规格族" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/multiple_testing_report.json"><span>多重检验</span><span>规格族</span></a><a class="artifact-card" aria-label="Parser 复核 - section 质量附录" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/parser_manual_review_appendix.md"><span>Parser 复核</span><span>section 质量附录</span></a></div></div></section>
+      <section class="section muted" id="reproducibility"><div class="container narrow"><div class="section-header"><p class="eyebrow">可复现性</p><h2>在本地运行公开代码</h2></div><div class="code-card"><div class="code-toolbar"><span>Shell</span><button class="copy-button" type="button" data-copy-target="run-code">复制</button></div><pre id="run-code"><code>git clone https://github.com/uiclxh/financial-10k-text-agent.git
 cd financial-10k-text-agent
 python -m pip install -e ".[dev]"
 python -m ruff check .
-python -m pytest</code></pre>
-            <p class="small-note">公开仓库不包含原始许可数据输入。</p>
-          </div>
-        </div>
-      </section>
+python -m pytest</code></pre><p class="small-note">公开仓库不包含原始授权输入数据。</p></div></div></section>
     </main>
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <p>公开结果摘要仅用于研究展示。</p>
+        <p>由 Xihang Lin 构建 · 金融数学 · 公开结果仅用于研究展示。</p>
         <nav class="footer-links" aria-label="页脚导航">
           <a href="index.zh-CN.html">主页</a>
+          <a href="results.zh-CN.html">结果</a>
           <a href="methods.zh-CN.html">方法</a>
-          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
-          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT 许可</a>
+          <a href="https://github.com/uiclxh">GitHub 主页</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT License</a>
         </nav>
       </div>
     </footer>

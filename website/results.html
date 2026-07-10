@@ -4,24 +4,44 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Results | Financial 10-K Text Agent</title>
-    <meta
-      name="description"
-      content="V4 results, feature ablation, bootstrap inference, and audit artifacts for the Financial 10-K Text Agent."
-    >
+    <meta name="description" content="V4 results, feature ablation, bootstrap inference, and audit artifacts for the Financial 10-K Text Agent.">
+    <meta name="author" content="Xihang Lin">
+    <link rel="canonical" href="https://www.filingfactor.tech/results.html">
+    <link rel="alternate" hreflang="en" href="https://www.filingfactor.tech/results.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://www.filingfactor.tech/results.zh-CN.html">
+    <link rel="alternate" hreflang="x-default" href="https://www.filingfactor.tech/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Results | Financial 10-K Text Agent">
+    <meta property="og:description" content="V4 results, feature ablation, bootstrap inference, and audit artifacts for the Financial 10-K Text Agent.">
+    <meta property="og:url" content="https://www.filingfactor.tech/results.html">
+    <meta property="og:image" content="https://www.filingfactor.tech/assets/og-card.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Results | Financial 10-K Text Agent">
+    <meta name="twitter:description" content="V4 results, feature ablation, bootstrap inference, and audit artifacts for the Financial 10-K Text Agent.">
+    <meta name="twitter:image" content="https://www.filingfactor.tech/assets/og-card.png">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/styles.css">
     <script defer src="assets/site.js"></script>
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Financial 10-K Text Agent","author":{"@type":"Person","name":"Xihang Lin"},"codeRepository":"https://github.com/uiclxh/financial-10k-text-agent","license":"https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE","programmingLanguage":"Python"}
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
       <div class="container header-inner">
         <a class="brand" href="index.html">Financial 10-K Text Agent</a>
-        <nav class="nav-links" aria-label="Primary navigation">
-          <div class="language-switch" aria-label="Language switch">
-            <a class="switch-option is-active" href="results.html" lang="en">English</a>
-            <a class="switch-option" href="results.zh-CN.html" lang="zh-CN">Chinese</a>
-          </div>
+        <nav class="primary-nav" aria-label="Primary navigation">
+          <a href="index.html">Overview</a>
+          <a href="results.html" aria-current="page">Results</a>
+          <a href="methods.html">Methods & Audit</a>
+          <a href="results.html#reproducibility">Run Locally</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub ↗</a>
         </nav>
+        <div class="language-switch" aria-label="Language switch">
+          <a class="switch-option is-active" href="results.html" lang="en">English</a>
+          <a class="switch-option" href="results.zh-CN.html" lang="zh-CN">Chinese</a>
+        </div>
       </div>
     </header>
 
@@ -31,263 +51,46 @@
           <span class="badge">50-company v4 public package</span>
           <h1>Results and Artifacts</h1>
           <p class="hero-hook">The strongest evidence is volatility ranking, not stock-return alpha.</p>
-          <p class="hero-subtitle">
-            Compact public summary of
-            <code>50_company_public_fmp_alpha_2016_2025_v4</code>.
-          </p>
+          <p class="hero-subtitle">Compact public summary of <code>50_company_public_fmp_alpha_2016_2025_v4</code>.</p>
+          <nav class="page-toc" aria-label="On this page"><a href="#primary-result">Primary result</a><a href="#ablation">Feature ablation</a><a href="#bootstrap">Bootstrap</a><a href="#coverage">Coverage</a><a href="#reproducibility">Reproduce</a></nav>
         </div>
       </section>
 
-      <section class="section muted">
+      <section class="section muted" id="primary-result">
         <div class="container">
-          <div class="result-summary-card">
-            <div>
-              <p class="eyebrow">Preregistered primary prediction</p>
-              <h2>Ridge Rank IC = 0.2395</h2>
-              <p>
-                Positive out-of-sample ranking information for future 20-day
-                realized volatility; raw p-value <code>0.00067</code>.
-              </p>
-            </div>
-            <div class="result-claim-box">
-              <span>Claim boundary</span>
-              <strong>Exploratory volatility-prediction evidence, not tradable alpha.</strong>
-            </div>
-          </div>
-          <div class="claim-pair result-claim-pair">
-            <article class="claim-card claim-positive">
-              <span>Primary prediction</span>
-              <strong>Rank IC 0.2395</strong>
-              <p>Positive and fully covered across the preregistered prediction specification.</p>
-            </article>
-            <article class="claim-card claim-negative">
-              <span>Primary portfolio</span>
-              <strong>Sharpe -0.8539</strong>
-              <p>Raw p-value <code>0.1147</code>; formal tradable alpha is not established.</p>
-            </article>
-          </div>
+          <div class="result-summary-card"><div><p class="eyebrow">Preregistered primary prediction</p><h2>Ridge Rank IC = 0.2395</h2><p>Positive out-of-sample ranking information for future 20-day realized volatility; raw p-value <code>0.00067</code>.</p></div><div class="result-claim-box"><span>Claim boundary</span><strong>Exploratory volatility-prediction evidence, not tradable alpha.</strong></div></div>
+          <div class="claim-pair result-claim-pair"><article class="claim-card claim-positive"><span>Primary prediction</span><strong>Rank IC 0.2395</strong><p>Positive and fully covered across the preregistered prediction specification.</p></article><article class="claim-card claim-negative"><span>Primary portfolio</span><strong>Sharpe -0.8539</strong><p>Raw p-value <code>0.1147</code>; formal tradable alpha is not established.</p></article></div>
         </div>
       </section>
 
-      <section class="section">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">Run summary</p>
-            <h2>Applied-Grade Public Evidence</h2>
-          </div>
-          <div class="metric-grid">
-            <div class="metric-card"><div class="metric-number">500</div><div class="metric-label">SEC 10-K filings</div></div>
+      <section class="section"><div class="container"><div class="section-header"><p class="eyebrow">Run summary</p><h2>Applied-Grade Public Evidence</h2></div><div class="metric-grid">            <div class="metric-card"><div class="metric-number">500</div><div class="metric-label">SEC 10-K filings</div></div>
             <div class="metric-card"><div class="metric-number">1,500</div><div class="metric-label">Labels</div></div>
             <div class="metric-card"><div class="metric-number">8,133</div><div class="metric-label">OOS predictions</div></div>
             <div class="metric-card"><div class="metric-number">520,465</div><div class="metric-label">Feature records</div></div>
             <div class="metric-card"><div class="metric-number">594</div><div class="metric-label">Tested specifications</div></div>
             <div class="metric-card"><div class="metric-number">26</div><div class="metric-label">Testing families</div></div>
             <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">Eligible OOS coverage</div></div>
-            <div class="metric-card"><div class="metric-number">0 / 2</div><div class="metric-label">Audit failures / warnings</div></div>
-          </div>
-        </div>
-      </section>
+            <div class="metric-card"><div class="metric-number">0 / 2</div><div class="metric-label">Audit failures / warnings</div></div></div></div></section>
 
-      <section class="section muted">
-        <div class="container split-section equal-cards">
-          <article class="finding-card">
-            <p class="eyebrow">Preregistered primary</p>
-            <h2>Combined-Text Ridge</h2>
-            <p><code>realized_volatility_1_20</code>, evaluated by ALL_SPLITS Rank IC.</p>
-            <div class="result-grid">
-              <div><span class="result-label">Rank IC</span><strong class="result-number">0.2395</strong></div>
-              <div><span class="result-label">Raw p-value</span><strong class="result-number">0.00067</strong></div>
-            </div>
-            <p>Supports positive exploratory volatility-ranking evidence.</p>
-          </article>
-          <article class="exploratory-card">
-            <p class="eyebrow">Best observed exploratory result</p>
-            <h2>TF-IDF/SVD-Only Ridge</h2>
-            <p>The strongest observed model-comparison result, not the preregistered primary claim.</p>
-            <div class="result-grid">
-              <div><span class="result-label">Rank IC</span><strong class="result-number">0.3668</strong></div>
-              <div><span class="result-label">NW t-stat</span><strong class="result-number">5.4055</strong></div>
-            </div>
-            <p>RMSE <code>0.00992</code>.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">Feature ablation</p>
-            <h2>Raw vs Industry-Neutral Rank IC</h2>
-            <p>Text representations retain positive ranking diagnostics after within-split industry demeaning.</p>
-          </div>
-          <div class="ablation-chart" aria-label="Feature ablation Rank IC chart">
-            <div class="chart-legend"><span class="legend-raw">Raw Rank IC</span><span class="legend-neutral">Industry-neutral Rank IC</span></div>
-            <div class="ablation-row">
-              <strong>TF-IDF/SVD only</strong>
-              <div class="paired-bars"><span class="bar-raw" style="--bar-width: 100%"></span><span class="bar-neutral" style="--bar-width: 93%"></span></div>
-              <code>0.3668 / 0.3416</code>
-            </div>
-            <div class="ablation-row">
-              <strong>Industry + text</strong>
-              <div class="paired-bars"><span class="bar-raw" style="--bar-width: 90%"></span><span class="bar-neutral" style="--bar-width: 89%"></span></div>
-              <code>0.3296 / 0.3251</code>
-            </div>
-            <div class="ablation-row">
-              <strong>Industry only</strong>
-              <div class="paired-bars"><span class="bar-raw" style="--bar-width: 80%"></span><span class="bar-neutral" style="--bar-width: 0%"></span></div>
-              <code>0.2924 / 0.0000</code>
-            </div>
-            <div class="ablation-row">
-              <strong>Dictionary only</strong>
-              <div class="paired-bars"><span class="bar-raw" style="--bar-width: 61%"></span><span class="bar-neutral" style="--bar-width: 67%"></span></div>
-              <code>0.2244 / 0.2465</code>
-            </div>
-            <div class="ablation-row is-primary">
-              <strong>Combined text</strong>
-              <div class="paired-bars"><span class="bar-raw" style="--bar-width: 65%"></span><span class="bar-neutral" style="--bar-width: 55%"></span></div>
-              <code>0.2395 / 0.2023</code>
-            </div>
-          </div>
-          <div class="table-wrap chart-fallback">
-            <table>
-              <thead><tr><th>Feature set</th><th>Estimator</th><th>Rank IC</th><th>Industry-neutral Rank IC</th><th>RMSE</th></tr></thead>
-              <tbody>
-                <tr><td>TF-IDF/SVD only</td><td>Ridge</td><td class="numeric">0.3668</td><td class="numeric">0.3416</td><td class="numeric">0.00992</td></tr>
-                <tr><td>Industry + text</td><td>Ridge</td><td class="numeric">0.3296</td><td class="numeric">0.3251</td><td class="numeric">0.01076</td></tr>
-                <tr><td>Industry only</td><td>Industry mean</td><td class="numeric">0.2924</td><td class="numeric">0.0000</td><td class="numeric">0.00913</td></tr>
-                <tr><td>Dictionary only</td><td>Ridge</td><td class="numeric">0.2244</td><td class="numeric">0.2465</td><td class="numeric">0.00984</td></tr>
-                <tr><td>Combined text</td><td>Ridge</td><td class="numeric">0.2395</td><td class="numeric">0.2023</td><td class="numeric">0.01932</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">Bootstrap inference</p>
-            <h2>Raw Primary Rank IC Confidence Intervals</h2>
-            <p>Two thousand deterministic resamples; the vertical marker represents zero.</p>
-          </div>
-          <div class="ci-chart" aria-label="Bootstrap confidence interval chart">
-            <div class="ci-row">
-              <div><strong>Split</strong><span>4 clusters</span></div>
-              <div class="ci-track"><i class="zero-line"></i><span class="ci-interval" style="--ci-left: 26%; --ci-width: 65.2%"></span><b class="ci-point" style="--point-left: 58.6%"></b></div>
-              <code>[-0.0050, 0.4841]</code>
-            </div>
-            <div class="ci-row">
-              <div><strong>Event date</strong><span>104 clusters</span></div>
-              <div class="ci-track"><i class="zero-line"></i><span class="ci-interval" style="--ci-left: 36.3%; --ci-width: 40.3%"></span><b class="ci-point" style="--point-left: 58.6%"></b></div>
-              <code>[0.0719, 0.3743]</code>
-            </div>
-            <div class="ci-row">
-              <div><strong>Ticker</strong><span>49 clusters</span></div>
-              <div class="ci-track"><i class="zero-line"></i><span class="ci-interval" style="--ci-left: 41.2%; --ci-width: 32.4%"></span><b class="ci-point" style="--point-left: 58.6%"></b></div>
-              <code>[0.1091, 0.3522]</code>
-            </div>
-          </div>
-          <div class="table-wrap chart-fallback">
-            <table>
-              <thead><tr><th>Estimand</th><th>Method</th><th>Point</th><th>95% CI</th><th>p-value</th></tr></thead>
-              <tbody>
-                <tr><td>Raw Rank IC</td><td>Split bootstrap</td><td class="numeric">0.2395</td><td class="numeric">[-0.0050, 0.4841]</td><td class="numeric">0.111</td></tr>
-                <tr><td>Raw Rank IC</td><td>Event-date bootstrap</td><td class="numeric">0.2395</td><td class="numeric">[0.0719, 0.3743]</td><td class="numeric">0.005</td></tr>
-                <tr><td>Raw Rank IC</td><td>Ticker-cluster bootstrap</td><td class="numeric">0.2395</td><td class="numeric">[0.1091, 0.3522]</td><td class="numeric">0.001</td></tr>
-                <tr><td>Neutral Rank IC</td><td>Split bootstrap</td><td class="numeric">0.2023</td><td class="numeric">[-0.1157, 0.5202]</td><td class="numeric">0.117</td></tr>
-                <tr><td>Neutral Rank IC</td><td>Event-date bootstrap</td><td class="numeric">0.2023</td><td class="numeric">[-0.1546, 0.4273]</td><td class="numeric">0.366</td></tr>
-                <tr><td>Neutral Rank IC</td><td>Ticker-cluster bootstrap</td><td class="numeric">0.2023</td><td class="numeric">[-0.1787, 0.4181]</td><td class="numeric">0.357</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">Coverage and controls</p>
-            <h2>Primary Claims Are Fully Covered</h2>
-            <p>
-              Expanded diagnostic specifications include 120 missing model-label
-              pairs caused by unavailable numeric vectors in malformed parsed sections.
-              Primary specifications remain fully covered.
-            </p>
-            <div class="audit-summary">
-              <span>0 audit failures</span><span>2 boundary warnings</span><span>2 / 2 primary specs</span>
-            </div>
-          </div>
-          <div class="waterfall-card">
-            <div class="waterfall-row"><span>Raw labels</span><span class="waterfall-track"><span style="--bar-width: 49.6%"></span></span><strong>49.6%</strong></div>
-            <div class="waterfall-row"><span>Eligible OOS</span><span class="waterfall-track"><span style="--bar-width: 100%"></span></span><strong>100%</strong></div>
-            <div class="waterfall-row"><span>Model expected</span><span class="waterfall-track"><span style="--bar-width: 98.546%"></span></span><strong>98.546%</strong></div>
-            <div class="waterfall-row"><span>Primary specs</span><span class="waterfall-track"><span style="--bar-width: 100%"></span></span><strong>100%</strong></div>
-            <div class="waterfall-row"><span>Primary portfolio</span><span class="waterfall-track"><span style="--bar-width: 100%"></span></span><strong>100%</strong></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">Artifacts</p>
-            <h2>Representative Evidence Files</h2>
-            <p>Every major claim can be traced to a compact public artifact in the v4 package.</p>
-          </div>
-          <div class="artifact-list">
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4"><span>Result Package</span><span>v4 public index</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/factor_card.md"><span>Factor Card</span><span>claim and boundary summary</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/empirical_report.md"><span>Empirical Report</span><span>paper-style interpretation</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/audit_report.json"><span>Audit Report</span><span>coverage and boundary checks</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/multiple_testing_report.json"><span>Multiple Testing</span><span>594 specifications</span></a>
-            <a class="artifact-card" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/parser_manual_review_appendix.md"><span>Parser Review</span><span>manual quality appendix</span></a>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <div class="boundary-box">
-            <h2>Data and Interpretation Boundary</h2>
-            <p>
-              This applied-grade experiment uses mixed FMP/Yahoo market data and
-              estimated market-cap-at-selection values. It is not a CRSP/WRDS-equivalent
-              survivorship-free replication. Use it as evidence of an auditable
-              financial NLP workflow, not a trading-alpha claim.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted" id="reproducibility">
-        <div class="container narrow">
-          <div class="section-header">
-            <p class="eyebrow">Reproducibility</p>
-            <h2>Run the Public Code Locally</h2>
-          </div>
-          <div class="code-card">
-            <div class="code-toolbar">
-              <span>Shell</span>
-              <button class="copy-button" type="button" data-copy-target="run-code">Copy</button>
-            </div>
-            <pre id="run-code"><code>git clone https://github.com/uiclxh/financial-10k-text-agent.git
+      <section class="section muted"><div class="container split-section equal-cards"><article class="finding-card"><p class="eyebrow">Preregistered primary</p><h2>Combined-Text Ridge</h2><p><code>realized_volatility_1_20</code>, evaluated by ALL_SPLITS Rank IC.</p><div class="result-grid"><div><span class="result-label">Rank IC</span><strong class="result-number">0.2395</strong></div><div><span class="result-label">Raw p-value</span><strong class="result-number">0.00067</strong></div></div><p>Supports positive exploratory volatility-ranking evidence.</p></article><article class="exploratory-card"><p class="eyebrow">Best observed exploratory result</p><h2>TF-IDF/SVD-Only Ridge</h2><p>The strongest observed model-comparison result, not the preregistered primary claim.</p><div class="result-grid"><div><span class="result-label">Rank IC</span><strong class="result-number">0.3668</strong></div><div><span class="result-label">NW t-stat</span><strong class="result-number">5.4055</strong></div></div><p>RMSE <code>0.00992</code>.</p></article></div></section>
+      <section class="section" id="ablation"><div class="container"><div class="section-header"><p class="eyebrow">Feature ablation</p><h2>Raw vs Industry-Neutral Rank IC</h2><p>Text representations retain positive ranking diagnostics after within-split industry demeaning.</p></div><div class="ablation-chart" aria-label="Feature ablation Rank IC chart"><div class="chart-legend"><span class="legend-raw">Raw Rank IC</span><span class="legend-neutral">Industry-neutral Rank IC</span></div><div class="ablation-row"><strong>TF-IDF/SVD only</strong><div class="paired-bars"><span class="bar-raw" style="--bar-width: 100%"></span><span class="bar-neutral" style="--bar-width: 93%"></span></div><code>0.3668 / 0.3416</code></div><div class="ablation-row"><strong>Industry + text</strong><div class="paired-bars"><span class="bar-raw" style="--bar-width: 90%"></span><span class="bar-neutral" style="--bar-width: 89%"></span></div><code>0.3296 / 0.3251</code></div><div class="ablation-row"><strong>Industry only</strong><div class="paired-bars"><span class="bar-raw" style="--bar-width: 80%"></span><span class="bar-neutral" style="--bar-width: 0%"></span></div><code>0.2924 / 0.0000</code></div><div class="ablation-row"><strong>Dictionary only</strong><div class="paired-bars"><span class="bar-raw" style="--bar-width: 61%"></span><span class="bar-neutral" style="--bar-width: 67%"></span></div><code>0.2244 / 0.2465</code></div><div class="ablation-row"><strong>Combined text</strong><div class="paired-bars"><span class="bar-raw" style="--bar-width: 65%"></span><span class="bar-neutral" style="--bar-width: 55%"></span></div><code>0.2395 / 0.2023</code></div></div><div class="table-wrap chart-fallback"><table><thead><tr><th>Feature set</th><th>Estimator</th><th>Rank IC</th><th>Industry-neutral Rank IC</th><th>RMSE</th></tr></thead><tbody><tr><td>TF-IDF/SVD only</td><td>Ridge</td><td class="numeric">0.3668</td><td class="numeric">0.3416</td><td class="numeric">0.00992</td></tr><tr><td>Industry + text</td><td>Ridge</td><td class="numeric">0.3296</td><td class="numeric">0.3251</td><td class="numeric">0.01076</td></tr><tr><td>Industry only</td><td>Industry mean</td><td class="numeric">0.2924</td><td class="numeric">0.0000</td><td class="numeric">0.00913</td></tr><tr><td>Dictionary only</td><td>Ridge</td><td class="numeric">0.2244</td><td class="numeric">0.2465</td><td class="numeric">0.00984</td></tr><tr><td>Combined text</td><td>Ridge</td><td class="numeric">0.2395</td><td class="numeric">0.2023</td><td class="numeric">0.01932</td></tr></tbody></table></div></div></section>
+      <section class="section muted" id="bootstrap"><div class="container"><div class="section-header"><p class="eyebrow">Bootstrap inference</p><h2>Primary Rank IC Confidence Intervals</h2><p>Two thousand deterministic resamples. Split bootstrap is inconclusive because there are only four OOS split clusters.</p></div><div class="table-wrap"><table><thead><tr><th>Estimand</th><th>Method</th><th>Point</th><th>95% CI</th><th>p-value</th></tr></thead><tbody><tr><td>Raw Rank IC</td><td>Split bootstrap</td><td class="numeric">0.2395</td><td>[-0.0050, 0.4841]</td><td class="numeric">0.111</td></tr><tr><td>Raw Rank IC</td><td>Event-date bootstrap</td><td class="numeric">0.2395</td><td>[0.0719, 0.3743]</td><td class="numeric">0.005</td></tr><tr><td>Raw Rank IC</td><td>Ticker-cluster bootstrap</td><td class="numeric">0.2395</td><td>[0.1091, 0.3522]</td><td class="numeric">0.001</td></tr><tr><td>Industry-neutral Rank IC</td><td>Split bootstrap</td><td class="numeric">0.2023</td><td>[-0.1157, 0.5202]</td><td class="numeric">0.117</td></tr><tr><td>Industry-neutral Rank IC</td><td>Event-date bootstrap</td><td class="numeric">0.2023</td><td>[-0.1546, 0.4273]</td><td class="numeric">0.366</td></tr><tr><td>Industry-neutral Rank IC</td><td>Ticker-cluster bootstrap</td><td class="numeric">0.2023</td><td>[-0.1787, 0.4181]</td><td class="numeric">0.357</td></tr></tbody></table></div></div></section>
+      <section class="section" id="coverage"><div class="container split-section equal-cards"><div class="boundary-box"><h2>Coverage and Controls</h2><p>Raw label coverage is 49.6%, eligible OOS coverage is 100%, model-expected prediction coverage is 98.546%, and primary prediction / portfolio coverage is 100%.</p></div><div class="boundary-box"><h2>Data Boundary</h2><p>This public-source experiment uses mixed FMP/Yahoo market data and applied-grade market-cap estimates. It is not a CRSP/WRDS-equivalent survivorship-free replication.</p></div></div></section><section class="section muted"><div class="container"><div class="section-header"><p class="eyebrow">Representative evidence files</p><h2>Inspect the Public Artifacts</h2></div><div class="artifact-grid"><a class="artifact-card" aria-label="Factor Card - fastest result summary" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/factor_card.md"><span>Factor Card</span><span>fastest result summary</span></a><a class="artifact-card" aria-label="Empirical Report - full narrative report" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/empirical_report.md"><span>Empirical Report</span><span>full narrative report</span></a><a class="artifact-card" aria-label="Feature Ablation - text versus industry" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/feature_ablation_summary.json"><span>Feature Ablation</span><span>text versus industry</span></a><a class="artifact-card" aria-label="Audit Report - coverage and warnings" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/audit_report.json"><span>Audit Report</span><span>coverage and warnings</span></a><a class="artifact-card" aria-label="Multiple Testing - specification families" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/multiple_testing_report.json"><span>Multiple Testing</span><span>specification families</span></a><a class="artifact-card" aria-label="Parser Review - section quality appendix" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/parser_manual_review_appendix.md"><span>Parser Review</span><span>section quality appendix</span></a></div></div></section>
+      <section class="section muted" id="reproducibility"><div class="container narrow"><div class="section-header"><p class="eyebrow">Reproducibility</p><h2>Run the Public Code Locally</h2></div><div class="code-card"><div class="code-toolbar"><span>Shell</span><button class="copy-button" type="button" data-copy-target="run-code">Copy</button></div><pre id="run-code"><code>git clone https://github.com/uiclxh/financial-10k-text-agent.git
 cd financial-10k-text-agent
 python -m pip install -e ".[dev]"
 python -m ruff check .
-python -m pytest</code></pre>
-            <p class="small-note">Raw licensed inputs are not included in the public repository.</p>
-          </div>
-        </div>
-      </section>
+python -m pytest</code></pre><p class="small-note">Raw licensed inputs are not included in the public repository.</p></div></div></section>
     </main>
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <p>Public result summaries are provided for research demonstration only.</p>
+        <p>Built by Xihang Lin · Financial Mathematics · Public result summaries are for research demonstration only.</p>
         <nav class="footer-links" aria-label="Footer navigation">
           <a href="index.html">Home</a>
+          <a href="results.html">Results</a>
           <a href="methods.html">Methods</a>
-          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
+          <a href="https://github.com/uiclxh">GitHub profile</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT License</a>
         </nav>
       </div>

@@ -4,242 +4,71 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>方法与审计 | Financial 10-K Text Agent</title>
-    <meta
-      name="description"
-      content="v4 结果包的防泄漏控制、特征消融、bootstrap 推断、parser 审查与研究边界。"
-    >
+    <meta name="description" content="v4 结果包的方法、审计、防泄漏、parser 复核、bootstrap 和数据边界说明。">
+    <meta name="author" content="Xihang Lin">
+    <link rel="canonical" href="https://www.filingfactor.tech/methods.zh-CN.html">
+    <link rel="alternate" hreflang="en" href="https://www.filingfactor.tech/methods.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://www.filingfactor.tech/methods.zh-CN.html">
+    <link rel="alternate" hreflang="x-default" href="https://www.filingfactor.tech/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="方法与审计 | Financial 10-K Text Agent">
+    <meta property="og:description" content="v4 结果包的方法、审计、防泄漏、parser 复核、bootstrap 和数据边界说明。">
+    <meta property="og:url" content="https://www.filingfactor.tech/methods.zh-CN.html">
+    <meta property="og:image" content="https://www.filingfactor.tech/assets/og-card.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="方法与审计 | Financial 10-K Text Agent">
+    <meta name="twitter:description" content="v4 结果包的方法、审计、防泄漏、parser 复核、bootstrap 和数据边界说明。">
+    <meta name="twitter:image" content="https://www.filingfactor.tech/assets/og-card.png">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/styles.css">
+    <script defer src="assets/site.js"></script>
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Financial 10-K Text Agent","author":{"@type":"Person","name":"Xihang Lin"},"codeRepository":"https://github.com/uiclxh/financial-10k-text-agent","license":"https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE","programmingLanguage":"Python"}
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">跳到正文</a>
     <header class="site-header">
       <div class="container header-inner">
         <a class="brand" href="index.zh-CN.html">Financial 10-K Text Agent</a>
-        <nav class="nav-links" aria-label="主导航">
-          <div class="language-switch" aria-label="语言切换">
-            <a class="switch-option" href="methods.html" lang="en">English</a>
-            <a class="switch-option is-active" href="methods.zh-CN.html" lang="zh-CN">Chinese</a>
-          </div>
+        <nav class="primary-nav" aria-label="主导航">
+          <a href="index.zh-CN.html">概览</a>
+          <a href="results.zh-CN.html">结果</a>
+          <a href="methods.zh-CN.html" aria-current="page">方法与审计</a>
+          <a href="results.zh-CN.html#reproducibility">本地运行</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub ↗</a>
         </nav>
+        <div class="language-switch" aria-label="语言切换">
+          <a class="switch-option" href="methods.html" lang="en">English</a>
+          <a class="switch-option is-active" href="methods.zh-CN.html" lang="zh-CN">Chinese</a>
+        </div>
       </div>
     </header>
 
     <main id="main">
-      <section class="page-hero">
-        <div class="container narrow">
-          <span class="badge">方法 / 审计 · v4</span>
-          <h1>方法与审计</h1>
-          <p class="hero-hook">每一条结论都必须连接到带时间戳、可检验的 artifact。</p>
-          <p class="hero-subtitle">
-            年报、标签、切分、特征、模型、预测、推断、组合诊断和审计检查
-            共同构成一条完整证据链。
-          </p>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">防泄漏研究设计</p>
-            <h2>只有当时可得的信息能够进入预测</h2>
-            <p>所有文本特征和模型决策必须在 prediction timestamp 之前可得。</p>
-          </div>
-          <div class="leakage-flow-card" aria-label="防泄漏研究流程">
-            <div class="leakage-step"><span>1</span><strong>提交时间戳</strong><small>SEC acceptance time 定义信息可得时间。</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>2</span><strong>章节解析</strong><small>抽取 Business、Risk Factors、Legal Proceedings 和 MD&A。</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>3</span><strong>前瞻标签</strong><small>波动率和 CAR 标签只能在年报可得之后开始。</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>4</span><strong>滚动切分</strong><small>训练、验证和测试窗口随时间滚动，并执行 embargo purge。</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>5</span><strong>仅训练期特征</strong><small>TF-IDF/SVD 词表只在训练窗口内拟合。</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>6</span><strong>仅验证期调参</strong><small>超参数只依据 validation Rank IC 选择。</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>7</span><strong>Tie-aware Test Rank IC</strong><small>使用平均秩；常数预测的 Rank IC 记为零。</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>8</span><strong>证据层级</strong><small>主规格、稳健性规格和探索性规格保持分离。</small></div>
-            <div class="leakage-arrow" aria-hidden="true">↓</div>
-            <div class="leakage-step"><span>9</span><strong>审计边界</strong><small>披露覆盖率、parser 质量、数据限制和结论强度。</small></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">关键控制</p>
-            <h2>研究控制总览</h2>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>控制项</th><th>实现方式</th></tr></thead>
-              <tbody>
-                <tr><td>事件时间对齐</td><td>年报时间戳定义信息可得性。</td></tr>
-                <tr><td>滚动 OOS 设计</td><td>训练 / 验证 / 测试窗口按时间滚动。</td></tr>
-                <tr><td>防泄漏控制</td><td>Embargo purge 与 split-leakage 日志。</td></tr>
-                <tr><td>模型选择</td><td>仅使用 validation Rank IC。</td></tr>
-                <tr><td>TF-IDF 控制</td><td>仅训练窗口拟合词表。</td></tr>
-                <tr><td>Tie 处理</td><td>平均秩 Rank IC；常数预测归零。</td></tr>
-                <tr><td>文本增量诊断</td><td>行业中性 Rank IC。</td></tr>
-                <tr><td>特征贡献</td><td>受控特征消融。</td></tr>
-                <tr><td>统计不确定性</td><td>Newey-West 与聚类 bootstrap 置信区间。</td></tr>
-                <tr><td>数据窥探披露</td><td>规格注册表和多重检验报告。</td></tr>
-                <tr><td>Parser 质量</td><td>短章节或 malformed sections 的人工审查附录。</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">特征构建</p>
-            <h2>金融文本表示</h2>
-            <p>
-              Loughran-McDonald 词典语调和 TF-IDF/SVD 覆盖全文、Business、
-              Risk Factors、Legal Proceedings 与 MD&A。
-            </p>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>特征集</th><th>含义</th></tr></thead>
-              <tbody>
-                <tr><td><code>industry_only</code></td><td>训练窗口行业均值基准。</td></tr>
-                <tr><td><code>dictionary_only</code></td><td>词典语调文本特征。</td></tr>
-                <tr><td><code>tfidf_svd_only</code></td><td>TF-IDF/SVD 文本表示。</td></tr>
-                <tr><td><code>combined_text</code></td><td>组合词典与文本表示。</td></tr>
-                <tr><td><code>industry_plus_text</code></td><td>行业特征加文本特征。</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">行业中性诊断</p>
-            <h2>去除行业均值后，文本是否仍有效？</h2>
-            <p>
-              在每个 OOS split-industry 组内分别对预测和实现目标去均值，
-              再计算 tie-aware rank correlation。
-            </p>
-            <p class="section-note">
-              这是描述性诊断，不是因果分解。TF-IDF/SVD 中性 Rank IC 为
-              <code>0.3416</code>，行业基准中性化后为零。
-            </p>
-          </div>
-          <div class="method-callout">
-            <span>研究问题</span>
-            <strong>移除 split 内行业均值后，文本模型是否仍保留排序信息？</strong>
-            <p>对未来 20 日实现波动率，探索性答案为“是”。</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">Bootstrap 推断</p>
-            <h2>2,000 次确定性重采样</h2>
-            <p>Split、事件日和 ticker-cluster 重采样都保留被选 cluster 的完整区块。</p>
-          </div>
-          <div class="control-grid">
-            <div class="control-card"><span class="control-marker"></span><h3>事件日</h3><p>原始主结果 CI <code>[0.0719, 0.3743]</code>；p 值 <code>0.005</code>。</p></div>
-            <div class="control-card"><span class="control-marker"></span><h3>Ticker cluster</h3><p>原始主结果 CI <code>[0.1091, 0.3522]</code>；p 值 <code>0.001</code>。</p></div>
-            <div class="control-card"><span class="control-marker"></span><h3>Split</h3><p>只有 4 个 OOS split clusters，因此置信区间跨过零。</p></div>
-            <div class="control-card"><span class="control-marker"></span><h3>中性估计</h3><p>点估计为正，但三个中性 bootstrap 置信区间均包含零。</p></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">Parser 质量审查</p>
-            <h2>短章节会被标记，而不是被隐藏</h2>
-          </div>
-          <div class="metric-grid compact">
-            <div class="metric-card"><div class="metric-number">2,000</div><div class="metric-label">解析章节记录</div></div>
-            <div class="metric-card"><div class="metric-number">144</div><div class="metric-label">人工审查记录</div></div>
-            <div class="metric-card"><div class="metric-number">144</div><div class="metric-label">排除的章节级记录</div></div>
-            <div class="metric-card"><div class="metric-number">494</div><div class="metric-label">短但保留的记录</div></div>
-          </div>
-          <div class="policy-grid">
-            <div><strong>少于 100 词</strong><p><code>item_1a</code> 和 <code>item_7</code> 从对应章节级特征范围中排除。</p></div>
-            <div><strong>100–499 词</strong><p>核心章节保留，但附带警告。</p></div>
-            <div><strong>短非核心章节</strong><p>继续保留并公开披露。</p></div>
-            <div><strong>年报级政策</strong><p>年报本身不删除；组合范围由通过检查的章节重建。</p></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container split-section">
-          <div>
-            <p class="eyebrow">覆盖率瀑布</p>
-            <h2>预测完整性</h2>
-            <p>
-              原始覆盖率分母包含不应获得 OOS 预测的训练期标签。
-              合格 OOS 覆盖率才是相关完整性指标。
-            </p>
-          </div>
-          <div class="waterfall-card">
-            <div class="waterfall-row"><span>原始标签</span><span class="waterfall-track"><span style="--bar-width: 49.6%"></span></span><strong>49.6%</strong></div>
-            <div class="waterfall-row"><span>合格 OOS</span><span class="waterfall-track"><span style="--bar-width: 100%"></span></span><strong>100%</strong></div>
-            <div class="waterfall-row"><span>模型期望</span><span class="waterfall-track"><span style="--bar-width: 98.546%"></span></span><strong>98.546%</strong></div>
-            <div class="waterfall-row"><span>主预测</span><span class="waterfall-track"><span style="--bar-width: 100%"></span></span><strong>100%</strong></div>
-            <div class="waterfall-row"><span>主组合</span><span class="waterfall-track"><span style="--bar-width: 100%"></span></span><strong>100%</strong></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section muted">
-        <div class="container">
-          <div class="section-header">
-            <p class="eyebrow">结论边界</p>
-            <h2>预测与交易是两项不同检验</h2>
-          </div>
-          <div class="claim-pair">
-            <article class="claim-card claim-positive">
-              <span>预测边界</span>
-              <strong>Rank IC 0.2395 · p 0.00067</strong>
-              <p>这是排序结果，不是最小 RMSE 的点预测结论。</p>
-            </article>
-            <article class="claim-card claim-negative">
-              <span>交易边界</span>
-              <strong>Sharpe -0.8539 · p 0.1147</strong>
-              <p>组合输出仅作诊断，不构成投资建议。</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <div class="boundary-box">
-            <h2>正式结果边界</h2>
-            <p>
-              正式结论受数据边界限制，而不是 pipeline 失败：混合 FMP/Yahoo 市场数据、
-              应用级市值估算、固定 50 家公司面板而非 CRSP/WRDS 无幸存者偏差股票池、
-              少量章节级 parser 限制，以及扩展诊断 pair 中的部分缺失预测。
-            </p>
-          </div>
-        </div>
-      </section>
+      <section class="page-hero"><div class="container narrow"><span class="badge">方法 / 审计 · v4</span><h1>方法与审计</h1><p class="hero-hook">每个结论都必须连接到带时间戳、可检验的证据文件。</p><p class="hero-subtitle">年报、标签、切分、特征、模型、预测、推断、组合诊断和审计检查共同构成证据链。</p><p><code>50_company_public_fmp_alpha_2016_2025_v4</code></p><nav class="page-toc" aria-label="本页导航"><a href="#research-flow">研究流程</a><a href="#controls">控制项</a><a href="#features">特征</a><a href="#parser-review">Parser 复核</a><a href="#claim-boundary">证据边界</a><a href="#boundary">数据边界</a></nav></div></section>
+      <section class="section" id="research-flow"><div class="container"><div class="section-header"><p class="eyebrow">防泄漏研究设计</p><h2>只有过去可得信息进入预测</h2><p>每个文本特征和模型决策都必须在预测时间点之前可得。</p></div><div class="leakage-flow-card" aria-label="Leakage-safe research flow"><div class="leakage-step"><span>1</span><strong>Filing 时间戳</strong><small>SEC acceptance time 定义信息可得时间。</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>2</span><strong>Section 解析</strong><small>抽取 Business、Risk Factors、Legal Proceedings 和 MD&A。</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>3</span><strong>前瞻标签</strong><small>波动率和 CAR 目标只在 filing 可得后开始计算。</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>4</span><strong>滚动切分</strong><small>训练、验证和测试窗口随时间滚动，并执行 embargo purge。</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>5</span><strong>训练窗口特征</strong><small>TF-IDF/SVD 词表只在训练窗口内拟合。</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>6</span><strong>仅验证集调参</strong><small>超参数只用 validation Rank IC 选择。</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>7</span><strong>考虑并列值的测试 Rank IC</strong><small>测试排序使用平均秩；常数预测返回零 Rank IC。</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>8</span><strong>证据层级</strong><small>主规格、稳健性规格和探索性规格保持分离。</small></div><div class="leakage-arrow" aria-hidden="true">↓</div><div class="leakage-step"><span>9</span><strong>审计边界</strong><small>披露覆盖率、parser 质量、数据限制和结论强度。</small></div></div></div></section>
+      <section class="section muted" id="controls"><div class="container"><div class="section-header"><p class="eyebrow">关键控制项</p><h2>研究控制概览</h2></div><div class="table-wrap"><table><thead><tr><th>控制项</th><th>实现方式</th></tr></thead><tbody><tr><td>事件时间对齐</td><td>Filing 时间戳定义信息可得性。</td></tr><tr><td>滚动样本外设计</td><td>训练 / 验证 / 测试窗口随时间滚动。</td></tr><tr><td>防泄漏控制</td><td>Embargo purge 和 split-leakage logs。</td></tr><tr><td>模型选择</td><td>仅使用 validation Rank IC。</td></tr><tr><td>TF-IDF 控制</td><td>训练窗口内词表拟合。</td></tr><tr><td>文本增量诊断</td><td>行业中性 Rank IC 和特征消融。</td></tr><tr><td>统计不确定性</td><td>Newey-West 和聚类 bootstrap 置信区间。</td></tr><tr><td>数据挖掘风险</td><td>规格注册表和多重检验报告。</td></tr><tr><td>Parser 质量</td><td>对较短或异常 section 建立人工复核附录。</td></tr></tbody></table></div></div></section>
+      <section class="section" id="features"><div class="container split-section"><div><p class="eyebrow">特征构造</p><h2>金融文本表示</h2><p>Loughran-McDonald 词典语调和 TF-IDF/SVD 覆盖全文、Business、Risk Factors、Legal Proceedings 和 MD&A 范围。</p></div><div class="table-wrap"><table><thead><tr><th>特征集</th><th>含义</th></tr></thead><tbody><tr><td><code>industry_only</code></td><td>训练窗口行业均值基准。</td></tr><tr><td><code>dictionary_only</code></td><td>词典语调文本特征。</td></tr><tr><td><code>tfidf_svd_only</code></td><td>TF-IDF/SVD 文本表示。</td></tr><tr><td><code>combined_text</code></td><td>词典与文本表示的组合。</td></tr><tr><td><code>industry_plus_text</code></td><td>行业特征加文本特征。</td></tr></tbody></table></div></div></section>
+      <section class="section muted"><div class="container"><div class="method-callout"><span>行业中性诊断</span><strong>移除 split-行业均值后，文本是否仍保留信息？</strong><p>行业中性 Rank IC 是描述性诊断，不是因果分解。</p></div></div></section>
+      <section class="section"><div class="container"><div class="section-header"><p class="eyebrow">Bootstrap inference</p><h2>如何报告不确定性</h2></div><div class="policy-grid"><div><strong>Split bootstrap</strong><p>v4 只有四个 OOS split 簇，因此结论不充分。</p></div><div><strong>事件日 bootstrap</strong><p>支持正向原始主 Rank IC 区间。</p></div><div><strong>Ticker 聚类 bootstrap</strong><p>支持正向原始主 Rank IC 区间。</p></div><div><strong>行业中性 bootstrap</strong><p>点估计为正，但 bootstrap 稳健性不足。</p></div></div></div></section>
+      <section class="section muted" id="parser-review"><div class="container"><div class="section-header"><p class="eyebrow">Parser 质量复核</p><h2>Section 抽取经过审计，而不是默认可信</h2></div><div class="metric-grid compact">            <div class="metric-card"><div class="metric-number">2,000</div><div class="metric-label">解析 section 记录</div></div>
+            <div class="metric-card"><div class="metric-number">144</div><div class="metric-label">人工复核记录</div></div>
+            <div class="metric-card"><div class="metric-number">144</div><div class="metric-label">被排除 section 记录</div></div>
+            <div class="metric-card"><div class="metric-number">494</div><div class="metric-label">较短但保留记录</div></div></div><p class="section-note">Item 1A 和 Item 7 少于 100 词时从 section 级特征中排除；100 到 499 词的核心 section 保留但带 warning。</p></div></section>
+      <section class="section" id="claim-boundary"><div class="container"><div class="section-header"><p class="eyebrow">证据边界</p><h2>预测证据与交易证据分别判断</h2></div><div class="result-pair"><article class="result-card primary"><p class="eyebrow">预注册主预测</p><h3>Ridge · <code>realized_volatility_1_20</code></h3><div class="result-stat"><span>Rank IC</span><strong>0.2395</strong></div><p>原始 p 值为 0.00067，支持探索性波动率排序证据。</p></article><article class="result-card diagnostic"><p class="eyebrow">预注册主组合</p><h3>月度行业中性等权组合</h3><div class="result-stat"><span>Sharpe</span><strong>-0.8539</strong></div><p>原始 p 值为 0.1147；未建立可交易 alpha。</p></article></div></div></section>
+      <section class="section" id="boundary"><div class="container"><div class="boundary-box"><h2>正式结论边界</h2><p>正式实证金融结论受数据边界限制，而不是 pipeline 失败：FMP/Yahoo 混合数据、应用级市值估计、固定 50 公司样本、parser 质量限制，以及少量诊断模型-标签对缺失。</p><p>该项目应理解为用于探索性波动率排序的应用级、可审计金融 NLP 工作流。</p></div></div></section>
     </main>
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <p>本页方法对应应用级 v4 公开结果包。</p>
+        <p>由 Xihang Lin 构建 · 金融数学 · 公开结果仅用于研究展示。</p>
         <nav class="footer-links" aria-label="页脚导航">
           <a href="index.zh-CN.html">主页</a>
           <a href="results.zh-CN.html">结果</a>
-          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub</a>
-          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT 许可</a>
+          <a href="methods.zh-CN.html">方法</a>
+          <a href="https://github.com/uiclxh">GitHub 主页</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT License</a>
         </nav>
       </div>
     </footer>
