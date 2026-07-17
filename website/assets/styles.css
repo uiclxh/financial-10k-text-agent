@@ -1122,14 +1122,17 @@ tr:last-child td {
 
 .artifact-list {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
 .artifact-card {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
+  min-height: 108px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 7px;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--surface);
@@ -1150,7 +1153,7 @@ tr:last-child td {
 .artifact-card span:last-child {
   color: var(--text-muted);
   font-size: 14px;
-  text-align: right;
+  text-align: left;
 }
 
 .code-card {
@@ -1715,6 +1718,10 @@ tr:last-child td {
 }
 
 @media (max-width: 720px) {
+  .artifact-list {
+    grid-template-columns: 1fr;
+  }
+
   h1 {
     font-size: 38px;
   }
