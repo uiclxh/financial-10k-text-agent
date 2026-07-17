@@ -40,9 +40,9 @@ def test_chinese_pages_are_utf8_and_translated() -> None:
     for page in WEBSITE_DIR.glob("*.zh-CN.html"):
         text = page.read_text(encoding="utf-8")
         assert "Financial 10-K Text Agent" in text
-        assert any(term in text for term in ("???", "???", "?????"))
-        assert "?" not in text
-        assert "?" not in text
+        assert any(term in text for term in ("预注册", "样本外", "方法与审计"))
+        assert "鐢" not in text
+        assert "涓" not in text
 
 
 def test_homepages_link_public_working_paper_and_contribution_evidence() -> None:
@@ -51,7 +51,7 @@ def test_homepages_link_public_working_paper_and_contribution_evidence() -> None
     for page in (WEBSITE_DIR / "index.html", WEBSITE_DIR / "index.zh-CN.html"):
         text = page.read_text(encoding="utf-8")
         assert WORKING_PAPER_SSRN_URL in text
-        assert "Read Working Paper" in text or "?? Working Paper" in text
+        assert "Read Working Paper" in text or "阅读 Working Paper" in text
         assert "50_company_public_fmp_alpha_v4.yaml" in text
         assert "specification_registry.json" in text
         assert "/tree/main/src/text_factor_lab" in text

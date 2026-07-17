@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Financial 10-K Text Agent</title>
-    <meta name="description" content="?????? SEC 10-K ????????????????????????">
+    <meta name="description" content="一个可审计的 SEC 10-K 金融文本研究流水线，用于检验未来波动率排序信号。">
     <meta name="author" content="Xihang Lin">
     <link rel="canonical" href="https://www.filingfactor.tech/index.zh-CN.html">
     <link rel="alternate" hreflang="en" href="https://www.filingfactor.tech/index.html">
@@ -12,12 +12,12 @@
     <link rel="alternate" hreflang="x-default" href="https://www.filingfactor.tech/">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Financial 10-K Text Agent">
-    <meta property="og:description" content="?????? SEC 10-K ????????????????????????">
+    <meta property="og:description" content="一个可审计的 SEC 10-K 金融文本研究流水线，用于检验未来波动率排序信号。">
     <meta property="og:url" content="https://www.filingfactor.tech/index.zh-CN.html">
     <meta property="og:image" content="https://www.filingfactor.tech/assets/og-card.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Financial 10-K Text Agent">
-    <meta name="twitter:description" content="?????? SEC 10-K ????????????????????????">
+    <meta name="twitter:description" content="一个可审计的 SEC 10-K 金融文本研究流水线，用于检验未来波动率排序信号。">
     <meta name="twitter:image" content="https://www.filingfactor.tech/assets/og-card.png">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/styles.css">
@@ -27,18 +27,18 @@
     </script>
   </head>
   <body>
-    <a class="skip-link" href="#main">????</a>
+    <a class="skip-link" href="#main">跳到正文</a>
     <header class="site-header">
       <div class="container header-inner">
         <a class="brand" href="index.zh-CN.html">Financial 10-K Text Agent</a>
-        <nav class="primary-nav" aria-label="???">
-          <a href="index.zh-CN.html" aria-current="page">??</a>
-          <a href="results.zh-CN.html">??</a>
-          <a href="methods.zh-CN.html">?????</a>
-          <a href="results.zh-CN.html#reproducibility">????</a>
-          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub ?</a>
+        <nav class="primary-nav" aria-label="主导航">
+          <a href="index.zh-CN.html" aria-current="page">概览</a>
+          <a href="results.zh-CN.html">结果</a>
+          <a href="methods.zh-CN.html">方法与审计</a>
+          <a href="results.zh-CN.html#reproducibility">本地运行</a>
+          <a href="https://github.com/uiclxh/financial-10k-text-agent">GitHub ↗</a>
         </nav>
-        <div class="language-switch" aria-label="????">
+        <div class="language-switch" aria-label="语言切换">
           <a class="switch-option" href="index.html" lang="en">English</a>
           <a class="switch-option is-active" href="index.zh-CN.html" lang="zh-CN">Chinese</a>
         </div>
@@ -50,58 +50,58 @@
         <div class="container">
           <div class="hero-grid">
             <div class="hero-copy">
-              <span class="badge">????? NLP ? v4 ??</span>
+              <span class="badge">应用型金融 NLP · v4 证据</span>
               <h1>Financial 10-K Text Agent</h1>
-              <p class="hero-hook">10-K ???????????????????? alpha?</p>
-              <p class="hero-subtitle">???????? NLP ???????? SEC 10-K ????????? 20 ?????????????</p>
-              <div class="hero-cta" aria-label="??????">
-                <a class="btn btn-primary" href="results.zh-CN.html">????</a>
-                <a class="btn btn-secondary" href="methods.zh-CN.html">????</a>
-                <a class="btn btn-secondary" href="https://github.com/uiclxh/financial-10k-text-agent">?? GitHub</a>
+              <p class="hero-hook">10-K 文本能够排序未来波动率，但并不证明可交易 alpha。</p>
+              <p class="hero-subtitle">一个可审计的金融 NLP 流水线，用于检验 SEC 10-K 披露是否包含对未来 20 日实现波动率的样本外信息。</p>
+              <div class="hero-cta" aria-label="主要项目入口">
+                <a class="btn btn-primary" href="results.zh-CN.html">查看结果</a>
+                <a class="btn btn-secondary" href="methods.zh-CN.html">阅读方法</a>
+                <a class="btn btn-secondary" href="https://github.com/uiclxh/financial-10k-text-agent">打开 GitHub</a>
               </div>
             </div>
-            <aside class="claim-boundary-card" aria-label="????">
-              <p class="eyebrow">30 ???</p>
-              <h2>?????????????</h2>
-              <p>v4 ????? 500 ? SEC 10-K ???????? 20 ??????????????????????????????</p>
-              <strong>??????????? RAG ???</strong>
+            <aside class="claim-boundary-card" aria-label="核心结论">
+              <p class="eyebrow">30 秒摘要</p>
+              <h2>有预测证据，但不是交易结论</h2>
+              <p>v4 结果包检验 500 份 SEC 10-K 年报是否包含未来 20 日实现波动率排序信息。主预测结果为正；预注册组合检验不成立。</p>
+              <strong>不是交易机器人，也不是 RAG 演示。</strong>
             </aside>
           </div>
-          <div class="hero-kpi-grid" aria-label="v4 ????">
-            <div class="proof-card"><strong>500</strong><span>SEC 10-K ??</span></div>
-            <div class="proof-card"><strong>8,133</strong><span>?????</span></div>
-            <div class="proof-card"><strong>0.2395</strong><span>?????? Rank IC</span></div>
-            <div class="proof-card"><strong>0 / 2</strong><span>???? / ??</span></div>
+          <div class="hero-kpi-grid" aria-label="v4 核心指标">
+            <div class="proof-card"><strong>500</strong><span>SEC 10-K 年报</span></div>
+            <div class="proof-card"><strong>8,133</strong><span>样本外预测</span></div>
+            <div class="proof-card"><strong>0.2395</strong><span>预注册主结果 Rank IC</span></div>
+            <div class="proof-card"><strong>0 / 2</strong><span>审计失败 / 警告</span></div>
           </div>
-          <p class="metric-note">????? Rank IC?<code>0.3668</code>?????????????</p>
+          <p class="metric-note">最佳探索性 Rank IC：<code>0.3668</code>，与预注册主结果分开报告。</p>
         </div>
       </section>
 
       <section class="section">
         <div class="container">
-          <div class="section-header"><p class="eyebrow">????</p><h2>50 ????????? v4</h2><p><code>50_company_public_fmp_alpha_2016_2025_v4</code></p></div>
+          <div class="section-header"><p class="eyebrow">当前版本</p><h2>50 家公司应用级结果包 v4</h2><p><code>50_company_public_fmp_alpha_2016_2025_v4</code></p></div>
           <div class="metric-grid compact">
-            <div class="metric-card"><div class="metric-number">1,500</div><div class="metric-label">??</div></div>
-            <div class="metric-card"><div class="metric-number">520k+</div><div class="metric-label">????</div></div>
-            <div class="metric-card"><div class="metric-number">594</div><div class="metric-label">????</div></div>
-            <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">??????</div></div>
+            <div class="metric-card"><div class="metric-number">1,500</div><div class="metric-label">标签</div></div>
+            <div class="metric-card"><div class="metric-number">520k+</div><div class="metric-label">特征记录</div></div>
+            <div class="metric-card"><div class="metric-number">594</div><div class="metric-label">测试规格</div></div>
+            <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">主预测覆盖率</div></div>
           </div>
         </div>
       </section>
 
       <section class="section muted">
         <div class="container">
-          <div class="section-header"><p class="eyebrow">????</p><h2>???????</h2><p>????????????????? Ridge ???????</p></div>
+          <div class="section-header"><p class="eyebrow">结果快照</p><h2>波动率排序证据</h2><p>最强观察结果属于探索性比较；预注册 Ridge 主结果仍为正。</p></div>
           <div class="home-result-layout">
             <div class="model-chart-card" aria-label="Rank IC comparison chart">
-              <div class="rank-chart-row is-exploratory"><div><strong>? TF-IDF/SVD</strong><span>?????</span></div><span class="rank-track"><span style="--bar-width: 100%"></span></span><code>0.3668</code></div>
-              <div class="rank-chart-row"><div><strong>?? + ??</strong><span>????</span></div><span class="rank-track"><span style="--bar-width: 90%"></span></span><code>0.3296</code></div>
-              <div class="rank-chart-row"><div><strong>????</strong><span>????</span></div><span class="rank-track"><span style="--bar-width: 80%"></span></span><code>0.2924</code></div>
-              <div class="rank-chart-row is-primary"><div><strong>???? Ridge</strong><span>??????</span></div><span class="rank-track"><span style="--bar-width: 65%"></span></span><code>0.2395</code></div>
+              <div class="rank-chart-row is-exploratory"><div><strong>仅 TF-IDF/SVD</strong><span>探索性最佳</span></div><span class="rank-track"><span style="--bar-width: 100%"></span></span><code>0.3668</code></div>
+              <div class="rank-chart-row"><div><strong>行业 + 文本</strong><span>增量诊断</span></div><span class="rank-track"><span style="--bar-width: 90%"></span></span><code>0.3296</code></div>
+              <div class="rank-chart-row"><div><strong>行业均值</strong><span>经济基准</span></div><span class="rank-track"><span style="--bar-width: 80%"></span></span><code>0.2924</code></div>
+              <div class="rank-chart-row is-primary"><div><strong>综合文本 Ridge</strong><span>预注册主结果</span></div><span class="rank-track"><span style="--bar-width: 65%"></span></span><code>0.2395</code></div>
             </div>
             <div class="claim-pair">
-              <article class="claim-card claim-positive"><span>???</span><strong>Rank IC 0.2395</strong><p>?? p ? <code>0.00067</code>. ?????????????</p></article>
-              <article class="claim-card claim-negative"><span>???</span><strong>Sharpe -0.8539</strong><p>?? p ? <code>0.1147</code>. ??????? alpha?</p></article>
+              <article class="claim-card claim-positive"><span>主预测</span><strong>Rank IC 0.2395</strong><p>原始 p 值 <code>0.00067</code>. 支持探索性波动率排序证据。</p></article>
+              <article class="claim-card claim-negative"><span>主组合</span><strong>Sharpe -0.8539</strong><p>原始 p 值 <code>0.1147</code>. 尚未建立可交易 alpha。</p></article>
             </div>
           </div>
         </div>
@@ -109,53 +109,53 @@
 
       <section class="section" id="contribution">
         <div class="container">
-          <div class="section-header"><p class="eyebrow">????</p><h2>?????????</h2><p>?? SEC ???????????????????????</p></div>
+          <div class="section-header"><p class="eyebrow">我的贡献</p><h2>我设计和实现了什么</h2><p>我从 SEC 年报抓取到样本外证据审计，搭建了完整研究流程。</p></div>
           <div class="capability-card-grid contribution-cards">
-            <article class="capability-card"><strong>????</strong><p>???? / ?? / ???????????????? embargo ??????</p><div class="evidence-links"><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/configs/text_factor_lab/50_company_public_fmp_alpha_v4.yaml">???? ?</a><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/specification_registry.json">????? ?</a></div></article>
-            <article class="capability-card"><strong>?? NLP ???</strong><p>?? section ???Loughran-McDonald ????????? TF-IDF/SVD ??????</p><div class="evidence-links"><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/src/text_factor_lab">???? ?</a></div></article>
-            <article class="capability-card"><strong>?????</strong><p>Rank IC?????????????cluster bootstrap????????????</p><div class="evidence-links"><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4">v4 ??? ?</a><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/tests">?? ?</a></div></article>
+            <article class="capability-card"><strong>研究设计</strong><p>滚动训练 / 验证 / 测试切分、前瞻标签、预注册规格和 embargo 防泄漏控制。</p><div class="evidence-links"><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/configs/text_factor_lab/50_company_public_fmp_alpha_v4.yaml">查看配置 ↗</a><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/specification_registry.json">规格注册表 ↗</a></div></article>
+            <article class="capability-card"><strong>金融 NLP 流水线</strong><p>年报 section 解析、Loughran-McDonald 词典特征、训练期内 TF-IDF/SVD 和模型清单。</p><div class="evidence-links"><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/src/text_factor_lab">查看实现 ↗</a></div></article>
+            <article class="capability-card"><strong>评估与审计</strong><p>Rank IC、特征消融、行业中性诊断、cluster bootstrap、覆盖率检查和自动报告。</p><div class="evidence-links"><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4">v4 结果包 ↗</a><a class="evidence-link" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/tests">测试 ↗</a></div></article>
           </div>
-          <p class="tech-stack">Python ? scikit-learn ? XGBoost ? SEC EDGAR ? pytest ? Ruff ? GitHub Actions</p>
+          <p class="tech-stack">Python · scikit-learn · XGBoost · SEC EDGAR · pytest · Ruff · GitHub Actions</p>
         </div>
       </section>
 
       <section class="section muted">
         <div class="container">
-          <div class="section-header"><p class="eyebrow">?????</p><h2>????????????</h2></div>
+          <div class="section-header"><p class="eyebrow">为什么重要</p><h2>不只是情绪分数或文档检索</h2></div>
           <div class="capability-card-grid">
-            <div class="capability-card"><strong>????</strong><p>?????????????????????</p></div>
-            <div class="capability-card"><strong>???????</strong><p>????????????????</p></div>
-            <div class="capability-card"><strong>?????</strong><p>?? split ? TF-IDF/SVD ???????????</p></div>
-            <div class="capability-card"><strong>????</strong><p>????????????????????</p></div>
-            <div class="capability-card"><strong>????</strong><p>?? parser ???bootstrap ??????????????</p></div>
+            <div class="capability-card"><strong>前瞻标签</strong><p>把年报文本连接到未来波动率和异常收益目标。</p></div>
+            <div class="capability-card"><strong>滚动样本外设计</strong><p>按时间区分训练、验证和测试窗口。</p></div>
+            <div class="capability-card"><strong>训练期特征</strong><p>每个 split 的 TF-IDF/SVD 词表只在训练窗口拟合。</p></div>
+            <div class="capability-card"><strong>证据层级</strong><p>把预注册主结论和探索性模型比较分开报告。</p></div>
+            <div class="capability-card"><strong>研究审计</strong><p>披露 parser 问题、bootstrap 不确定性、覆盖率和多重检验。</p></div>
           </div>
         </div>
       </section>
       <section class="section">
         <div class="container">
-          <div class="section-header"><p class="eyebrow">??</p><h2>? SEC ????????</h2></div>
-          <div class="pipeline-flow" aria-label="????">
-            <div class="pipeline-node"><strong>SEC ??</strong><span>acceptance ???</span></div><div class="pipeline-arrow" aria-hidden="true">?</div><div class="pipeline-node"><strong>Parser ??</strong><span>section ????</span></div><div class="pipeline-arrow" aria-hidden="true">?</div><div class="pipeline-node"><strong>??</strong><span>????</span></div><div class="pipeline-arrow" aria-hidden="true">?</div><div class="pipeline-node"><strong>????</strong><span>embargo + OOS</span></div><div class="pipeline-arrow" aria-hidden="true">?</div><div class="pipeline-node"><strong>????</strong><span>?????</span></div><div class="pipeline-arrow" aria-hidden="true">?</div><div class="pipeline-node"><strong>??</strong><span>?? + bootstrap</span></div><div class="pipeline-arrow" aria-hidden="true">?</div><div class="pipeline-node"><strong>??</strong><span>?????</span></div>
+          <div class="section-header"><p class="eyebrow">流程</p><h2>从 SEC 年报到可审计证据</h2></div>
+          <div class="pipeline-flow" aria-label="研究流程">
+            <div class="pipeline-node"><strong>SEC 年报</strong><span>acceptance 时间戳</span></div><div class="pipeline-arrow" aria-hidden="true">→</div><div class="pipeline-node"><strong>Parser 复核</strong><span>section 质量标记</span></div><div class="pipeline-arrow" aria-hidden="true">→</div><div class="pipeline-node"><strong>标签</strong><span>未来目标</span></div><div class="pipeline-arrow" aria-hidden="true">→</div><div class="pipeline-node"><strong>滚动切分</strong><span>embargo + OOS</span></div><div class="pipeline-arrow" aria-hidden="true">→</div><div class="pipeline-node"><strong>文本特征</strong><span>仅训练窗口</span></div><div class="pipeline-arrow" aria-hidden="true">→</div><div class="pipeline-node"><strong>诊断</strong><span>消融 + bootstrap</span></div><div class="pipeline-arrow" aria-hidden="true">→</div><div class="pipeline-node"><strong>审计</strong><span>结论与边界</span></div>
           </div>
         </div>
       </section>
       <section class="section muted">
         <div class="container split-section">
-          <div><p class="eyebrow">????</p><h2>?????????</h2><p>??????????????????????????</p></div>
-          <div class="artifact-list"><a class="artifact-card" aria-label="?? Working Paper - SSRN ??????" href="https://ssrn.com/abstract=6974978"><span>?? Working Paper</span><span>SSRN ??????</span></a><a class="artifact-card" aria-label="v4 ??? - ??????" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4"><span>v4 ???</span><span>??????</span></a><a class="artifact-card" aria-label="???? - ??????" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/factor_card.md"><span>????</span><span>??????</span></a><a class="artifact-card" aria-label="???? - ???????" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/feature_ablation_summary.json"><span>????</span><span>???????</span></a><a class="artifact-card" aria-label="Bootstrap ?? - ??????" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/primary_rank_ic_bootstrap_report.json"><span>Bootstrap ??</span><span>??????</span></a><a class="artifact-card" aria-label="Parser ?? - ??????" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/parser_manual_review_appendix.md"><span>Parser ??</span><span>??????</span></a></div>
+          <div><p class="eyebrow">查看证据</p><h2>沿着公开审计链检查</h2><p>精简、合规的公开文件把每个核心数字连接到可复核证据。</p></div>
+          <div class="artifact-list"><a class="artifact-card" aria-label="阅读 Working Paper - SSRN 稳定公开页面" href="https://ssrn.com/abstract=6974978"><span>阅读 Working Paper</span><span>SSRN 稳定公开页面</span></a><a class="artifact-card" aria-label="v4 结果包 - 所有公开文件" href="https://github.com/uiclxh/financial-10k-text-agent/tree/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4"><span>v4 结果包</span><span>所有公开文件</span></a><a class="artifact-card" aria-label="因子卡片 - 最快结果摘要" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/factor_card.md"><span>因子卡片</span><span>最快结果摘要</span></a><a class="artifact-card" aria-label="特征消融 - 文本与行业对比" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/feature_ablation_summary.json"><span>特征消融</span><span>文本与行业对比</span></a><a class="artifact-card" aria-label="Bootstrap 报告 - 聚类置信区间" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/primary_rank_ic_bootstrap_report.json"><span>Bootstrap 报告</span><span>聚类置信区间</span></a><a class="artifact-card" aria-label="Parser 复核 - 人工质量附录" href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/docs/results/50_company_public_fmp_alpha_2016_2025_v4/parser_manual_review_appendix.md"><span>Parser 复核</span><span>人工质量附录</span></a></div>
         </div>
       </section>
-      <section class="section"><div class="container"><div class="boundary-box"><h2>????</h2><p>????????????? CRSP/WRDS ????????????????????????????????????????</p></div></div></section>
+      <section class="section"><div class="container"><div class="boundary-box"><h2>使用边界</h2><p>这是应用级探索性运行，不是 CRSP/WRDS 等价的正式资产定价证据，不是无幸存者偏差复现，不是生产交易系统，也不是投资建议。</p></div></div></section>
     </main>
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <p>? Xihang Lin ?? ? ???? ? ????????????</p>
-        <nav class="footer-links" aria-label="????">
-          <a href="index.zh-CN.html">??</a>
-          <a href="results.zh-CN.html">??</a>
-          <a href="methods.zh-CN.html">??</a>
-          <a href="https://github.com/uiclxh">GitHub ??</a>
+        <p>由 Xihang Lin 构建 · 金融数学 · 公开结果仅用于研究展示。</p>
+        <nav class="footer-links" aria-label="页脚导航">
+          <a href="index.zh-CN.html">主页</a>
+          <a href="results.zh-CN.html">结果</a>
+          <a href="methods.zh-CN.html">方法</a>
+          <a href="https://github.com/uiclxh">GitHub 主页</a>
           <a href="https://github.com/uiclxh/financial-10k-text-agent/blob/main/LICENSE">MIT License</a>
         </nav>
       </div>
